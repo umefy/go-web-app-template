@@ -52,7 +52,6 @@ runs:
       with:
         distribution: 'oracle'
         java-version: '17'
-        cache: 'maven'  # ✅ Caches Maven dependencies
 
     # Cache OpenAPI Generator CLI
     - name: Cache OpenAPI Generator CLI
