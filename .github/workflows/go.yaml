@@ -40,7 +40,7 @@ jobs:
         shell: bash
 
       - name: generate the required files
-        run: source .envrc.test && make generate
+        run: make generate ENVRC_FILE=.envrc.test
         shell: bash
 
       - name: Run tests
