@@ -1,9 +1,9 @@
 pre-push:
   commands:
     check:
-      run: make -j check
+      run: make check
 
 post-merge:
   commands:
     check:
-      run: make -j check
+      run: make check
