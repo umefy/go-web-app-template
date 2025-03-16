@@ -72,10 +72,10 @@ runs:
         wget "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/${OPENAPI_VERSION}/openapi-generator-cli-${OPENAPI_VERSION}.jar" -O /usr/local/bin/openapi-generator-cli.jar
       shell: bash
     
-    # Create alias for OpenAPI Generator
-    - name: Create OpenAPI Generator Alias
+    - name: Create OpenAPI Generator Symlink
       run: |
-        echo 'alias openapi-generator="java -jar /usr/local/bin/openapi-generator-cli.jar"' >> ~/.bashrc
-        source ~/.bashrc
-        java -jar /usr/local/bin/openapi-generator-cli.jar version
+        echo '#!/bin/bash' | sudo tee /usr/local/bin/openapi-generator > /dev/null
+        echo 'exec java -jar /usr/local/bin/openapi-generator-cli.jar "$@"' | sudo tee -a /usr/local/bin/openapi-generator > /dev/null
+        sudo chmod +x /usr/local/bin/openapi-generator
+        openapi-generator version
       shell: bash
