@@ -1,0 +1,39 @@
+name: golangci-lint
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  merge_group:
+    types:
+      - checks_requested # when use merge group
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Database
+        uses: ./.github/workflows/setup-db.yml
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+
+      - name: Setup dependency
+        run: go mod tidy -e
+
+      - name: generate the required files
+        run: source .envrc.test && make generate
+        shell: bash
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6

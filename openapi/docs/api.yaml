@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: Web apps API
+  version: '0.1'
+  description: |
+    API Description
+  termsOfService: https://api.server.test/terms/
+  contact:
+    name: API Support
+    email: support@api.server.com
+  license:
+    name: MIT License
+servers:
+  - url: https://api.server.test
+    description: Production server
+  - url: https://api.server.test
+    description: Production server
+
+
+paths:
+  /users:
+    post:
+      operationId: createUser
+      tags:
+        - users
+      summary: Create a new user
+      description: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserInput'
+      responses:
+        '200':
+          description: A user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    get:
+      operationId: getUsers
+      tags:
+        - users
+      summary: Get all users
+      description: Get all users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags:
+        - users
+      summary: Get a user by ID
+      description: Get a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+components:
+  schemas:
+    CreateUserInput:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        age:
+          type: integer
+          x-protobuf-data-type: google.protobuf.Int32Value
+          example: 30
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 1
+        name:
+          type: string
+          example: "John Doe"
+        age:
+          type: integer
+          example: 30
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2021-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2021-01-01T00:00:00Z"
+      required:
+        - name
+        - age

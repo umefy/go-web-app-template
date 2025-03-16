@@ -1,0 +1,9 @@
+server:
+  port: 8082
+
+logging:
+  level: debug
+
+database:
+  url: "" # load from env
+  enable_log: true

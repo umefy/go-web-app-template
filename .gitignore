@@ -1,0 +1,68 @@
+node_modules
+__MACOSX
+.DS_Store
+dist
+target
+.nyc_output
+lib
+bin
+tmp
+coverage
+*-error.log
+*-debug.log
+.idea
+*-local.*
+log
+logs
+vendor
+
+# env file
+.env.*
+!.env.example
+
+/.next/
+/out/
+/.pnp
+.pnp.js
+*.pem
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# python
+.venv
+__pycache__
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# swift
+/.build
+# /Packages
+xcuserdata/
+DerivedData/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.netrc
+
+# microsoft api-extractor
+temp
+
+mocks
+
+# wire
+wire_gen.go
+
+# google
+google
+
+protogen
+
+generated
+
+.envrc
