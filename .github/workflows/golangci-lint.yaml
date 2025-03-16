@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Database
-        uses: ./.github/workflows/setup-db.yml
+        uses: umefy/go-web-app-template/.github/workflows/setup-db.yml@main
 
       - name: Setup Environment
         uses: ./.github/actions/setup
