@@ -14,12 +14,23 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: goWebapp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test_user"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Database
-        uses: ./.github/workflows/setup-db.yml
 
       - name: Setup Environment
         uses: ./.github/actions/setup
@@ -28,8 +39,7 @@ jobs:
         run: go mod tidy -e
 
       - name: generate the required files
-        run: source .envrc.test && make generate
-        shell: bash
+        run: make generate ENVRC_FILE=.envrc.test
 
       - name: Run tests
         run: make test ARGS="-v"

@@ -16,28 +16,86 @@ runs:
       run: go version
       shell: bash 
 
-    - name: Install protoc
+    - name: Cache Protobuf Compiler
+      id: cache-protoc
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/local/bin/protoc
+          /usr/local/include/google
+        key: protoc-${{ runner.os }}-v30.1
+        restore-keys: |
+          protoc-${{ runner.os }}-
+    
+    - name: Install Protobuf Compiler (if not cached)
+      if: steps.cache-protoc.outputs.cache-hit != 'true'
       run: |
-        sudo apt-get update
-        sudo apt-get install -y protobuf-compiler
+        PROTOC_VERSION=30.1
+        PROTOC_ZIP=protoc-${PROTOC_VERSION}-linux-x86_64.zip
+        wget -q https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${PROTOC_ZIP}
+        sudo unzip -o ${PROTOC_ZIP} -d /usr/local
+        sudo chmod +x /usr/local/bin/protoc
+        rm ${PROTOC_ZIP}
+      shell: bash
+    
+
+    - name: Verify `protoc` Installation
+      run: protoc --version
       shell: bash
     
     - name: Install protogen plugins
-      id: protogen-cache
+      id: go-bin-cache
       uses: actions/cache@v4
       with:
         path: |
           ~/go/bin/protoc-gen-go
           ~/go/bin/protoc-gen-go-grpc
-        key: ${{ runner.os }}-protocgen-${{ hashFiles('**/go.sum') }}
+          ~/go/bin/wire
+          ~/go/bin/mockery
+          ~/go/bin/goose
+        key: ${{ runner.os }}-go-bin-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-bin-
 
     - name: Install project required tools
-      if: steps.protogen-cache.outputs.cache-hit != 'true'
+      if: steps.go-bin-cache.outputs.cache-hit != 'true'
       run: |
         go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
         go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
         go install github.com/google/wire/cmd/wire@latest
-        go install github.com/vektra/mockery/v2@v2.46.0
+        go install github.com/vektra/mockery/v2@v2.53.2
         go install github.com/pressly/goose/v3/cmd/goose@latest
       shell: bash
+    
+    # Install Java (Required for OpenAPI Generator)
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'oracle'
+        java-version: '17'
 
+    # Cache OpenAPI Generator CLI
+    - name: Cache OpenAPI Generator CLI
+      id: cache-openapi
+      uses: actions/cache@v4
+      with:
+        path: /usr/local/bin/openapi-generator-cli.jar
+        key: openapi-generator-${{ runner.os }}-7.12.0
+        restore-keys: |
+          openapi-generator-${{ runner.os }}-
+
+    # Install OpenAPI Generator CLI if not cached
+    - name: Install OpenAPI Generator CLI
+      if: steps.cache-openapi.outputs.cache-hit != 'true'
+      run: |
+        OPENAPI_VERSION="7.12.0"
+        wget "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/${OPENAPI_VERSION}/openapi-generator-cli-${OPENAPI_VERSION}.jar" -O /usr/local/bin/openapi-generator-cli.jar
+      shell: bash
+    
+    - name: Create OpenAPI Generator Symlink
+      run: |
+        echo '#!/bin/bash' | sudo tee /usr/local/bin/openapi-generator > /dev/null
+        echo 'exec java -jar /usr/local/bin/openapi-generator-cli.jar "$@"' | sudo tee -a /usr/local/bin/openapi-generator > /dev/null
+        sudo chmod +x /usr/local/bin/openapi-generator
+        openapi-generator version
+      shell: bash

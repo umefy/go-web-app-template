@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 .PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset
 
 APP_NAME=webapp
@@ -40,9 +41,9 @@ clean:
 	@rm -rf $(AIR_TMP_FOLDER)
 	@echo "✅ cleaning finish"
 
-check: generate tidy fmt lint test
+check: tidy fmt lint test
 
-generate: openapi_to_proto migration_up regen_gorm wire mockery
+generate: openapi_to_proto regen_proto migration_up regen_gorm wire mockery
 
 fmt:
 	@echo "⏱️ formatting code now..."
