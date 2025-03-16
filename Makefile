@@ -40,7 +40,7 @@ clean:
 	@rm -rf $(AIR_TMP_FOLDER)
 	@echo "✅ cleaning finish"
 
-check: generate tidy fmt lint test
+check: tidy fmt lint test
 
 generate: openapi_to_proto migration_up regen_gorm wire mockery
 

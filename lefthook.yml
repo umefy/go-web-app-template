@@ -6,4 +6,4 @@ pre-push:
 post-merge:
   commands:
     check:
-      run: make check
+      run: make generate && make check
