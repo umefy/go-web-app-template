@@ -1,0 +1,49 @@
+{{>partial_header}}
+syntax = "proto3";
+
+// Always import Google Well-Known Types for compatibility
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/empty.proto";
+
+package {{#lambda.lowercase}}{{{packageName}}};{{/lambda.lowercase}}
+
+option go_package = "{{goPackagePath}}"; // specify go package, passed from --additional-properties when generate.
+
+{{#imports}}
+{{#import}}
+import public "{{{modelPackage}}}/{{{import}}}.proto";
+{{/import}}
+{{/imports}}
+
+{{#models}}
+{{#model}}
+{{#isEnum}}{{>enum}}{{/isEnum}}{{^isEnum}}message {{classname}} {
+
+  {{#vars}}
+  {{#description}}
+  // {{{.}}}
+  {{/description}}
+  {{^isEnum}}
+  {{#vendorExtensions.x-protobuf-type}}{{{.}}} {{/vendorExtensions.x-protobuf-type}}{{{vendorExtensions.x-protobuf-data-type}}} {{{name}}} = {{vendorExtensions.x-protobuf-index}}{{#vendorExtensions.x-protobuf-packed}} [packed=true]{{/vendorExtensions.x-protobuf-packed}};
+  {{/isEnum}}
+  {{#isEnum}}
+  enum {{enumName}} {
+    {{#allowableValues}}
+    {{#enumVars}}
+    {{{name}}} = {{{protobuf-enum-index}}};
+    {{/enumVars}}
+    {{/allowableValues}}
+  }
+
+  {{enumName}} {{name}} = {{vendorExtensions.x-protobuf-index}};
+  {{/isEnum}}
+
+  {{/vars}}
+}
+{{/isEnum}}
+{{/model}}
+{{/models}}
