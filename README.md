@@ -7,7 +7,7 @@
 - running `make regen_proto` to **regenerate** all the golang code from `proto` files.
 - running `go mod tidy` to get all the dependency.
 - Check `configs` folder and `.envrc` file, especially `.envrc` file, it contains several env var, you will need modify it such as `DATABASE_URL` to your own config.
-- running `make migration_create migration_name="MigrationName"` to create migration
+- running `make migration_create migration_name=[MigrationName]` to create migration
 - running `make migration_up` to do all the migrations for the database.
 - running `make regen_gorm` to **generate** all the database models and query.
 - running `make wire` to **generate** all the required dependency injection files.
