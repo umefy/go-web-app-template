@@ -36,18 +36,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Setup Database
-      #   uses: .github/workflows/setup-db.yaml
-
       - name: Setup Environment
         uses: ./.github/actions/setup
-
-      - name: Setup dependency
-        run: go mod tidy -e
-
-      - name: generate the required files
-        run: source .envrc.test && make generate
-        shell: bash
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6

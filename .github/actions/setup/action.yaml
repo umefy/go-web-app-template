@@ -41,3 +41,10 @@ runs:
         go install github.com/pressly/goose/v3/cmd/goose@latest
       shell: bash
 
+    - name: Setup dependency
+      run: go mod tidy -e
+      shell: bash
+
+    - name: generate the required files
+      run: source .envrc.test && make generate
+      shell: bash
