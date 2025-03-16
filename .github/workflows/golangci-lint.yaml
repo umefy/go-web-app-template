@@ -41,11 +41,9 @@ jobs:
 
       - name: Setup dependency
         run: go mod tidy -e
-        shell: bash
 
       - name: generate the required files
-        run: make generate ENVRC_FILE=.envrc.test
-        shell: bash
+        run: bash -c "make generate ENVRC_FILE=.envrc.test"
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
