@@ -23,16 +23,21 @@ runs:
       shell: bash
     
     - name: Install protogen plugins
-      id: protogen-cache
+      id: go-bin-cache
       uses: actions/cache@v4
       with:
         path: |
           ~/go/bin/protoc-gen-go
           ~/go/bin/protoc-gen-go-grpc
-        key: ${{ runner.os }}-protocgen-${{ hashFiles('**/go.sum') }}
+          ~/go/bin/wire
+          ~/go/bin/mockery
+          ~/go/bin/goose
+        key: ${{ runner.os }}-go-bin-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-bin-
 
     - name: Install project required tools
-      if: steps.protogen-cache.outputs.cache-hit != 'true'
+      if: steps.go-bin-cache.outputs.cache-hit != 'true'
       run: |
         go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
         go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
@@ -72,5 +77,5 @@ runs:
       run: |
         echo 'alias openapi-generator="java -jar /usr/local/bin/openapi-generator-cli.jar"' >> ~/.bashrc
         source ~/.bashrc
-        openapi-generator version
+        java -jar /usr/local/bin/openapi-generator-cli.jar version
       shell: bash
