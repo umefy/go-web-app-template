@@ -40,7 +40,6 @@ jobs:
 
       - name: generate the required files
         run: make generate ENVRC_FILE=.envrc.test
-        shell: bash
 
       - name: Run tests
         run: make test ARGS="-v"

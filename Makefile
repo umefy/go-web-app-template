@@ -43,7 +43,7 @@ clean:
 
 check: tidy fmt lint test
 
-generate: openapi_to_proto migration_up regen_gorm wire mockery
+generate: openapi_to_proto regen_proto migration_up regen_gorm wire mockery
 
 fmt:
 	@echo "⏱️ formatting code now..."
