@@ -20,8 +20,10 @@ runs:
       id: cache-protoc
       uses: actions/cache@v4
       with:
-        path: /usr/local/bin/protoc  # ✅ Cache the `protoc` binary
-        key: protoc-${{ runner.os }}-v30.1  # ✅ Change this if updating protoc version
+        path: |
+          /usr/local/bin/protoc
+          /usr/local/include/google
+        key: protoc-${{ runner.os }}-v30.1
         restore-keys: |
           protoc-${{ runner.os }}-
     
