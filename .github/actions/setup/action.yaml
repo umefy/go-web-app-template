@@ -47,12 +47,12 @@ runs:
       shell: bash
     
     # Install Java (Required for OpenAPI Generator)
-    - name: Install Java
-      run: |
-        sudo apt update
-        sudo apt install -y openjdk-17-jdk
-        java -version
-      shell: bash
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'oracle'
+        java-version: '17'
+        cache: 'maven'  # ✅ Caches Maven dependencies
 
     # Cache OpenAPI Generator CLI
     - name: Cache OpenAPI Generator CLI
