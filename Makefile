@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset
+.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate
 
 APP_NAME=webapp
 MAIN_PATH=cmd/httpserver/main.go
@@ -108,6 +108,7 @@ help:
 	@echo "make start - running production build"
 	@echo "make clean - clean old binary build"
 	@echo "make check - generate required files, formatting, testing and running lint"
+	@echo "make generate - generate all required files"
 	@echo "make test - running go test"
 	@echo "make fmt - formatting go code"
 	@echo "make lint - running golangci lint"
