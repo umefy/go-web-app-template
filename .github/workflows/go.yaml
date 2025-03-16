@@ -35,5 +35,13 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup
 
+      - name: Setup dependency
+        run: go mod tidy -e
+        shell: bash
+
+      - name: generate the required files
+        run: source .envrc.test && make generate
+        shell: bash
+
       - name: Run tests
         run: make test ARGS="-v"

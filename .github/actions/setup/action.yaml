@@ -64,7 +64,7 @@ runs:
       if: steps.cache-openapi.outputs.cache-hit != 'true'
       run: |
         OPENAPI_VERSION="7.12.0"
-        wget "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/${OPENAPI_VERSION}/openapi-generator-cli.jar" -O /usr/local/bin/openapi-generator-cli.jar
+        wget "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/${OPENAPI_VERSION}/openapi-generator-cli-${OPENAPI_VERSION}.jar" -O /usr/local/bin/openapi-generator-cli.jar
       shell: bash
     
     # Create alias for OpenAPI Generator
@@ -73,12 +73,4 @@ runs:
         echo 'alias openapi-generator="java -jar /usr/local/bin/openapi-generator-cli.jar"' >> ~/.bashrc
         source ~/.bashrc
         openapi-generator version
-      shell: bash
-
-    - name: Setup dependency
-      run: go mod tidy -e
-      shell: bash
-
-    - name: generate the required files
-      run: source .envrc.test && make generate
       shell: bash
