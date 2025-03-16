@@ -2,7 +2,7 @@
 
 ## 1. quick start
 
-- running `./scripts/setup.sh` to setup the tools required by the project.
+- running `./scripts/setup.sh` to setup the tools required by the project. After setup, please update `.envrc` and `.envrc.test` based on your own needed.
 - running `make openapi_to_proto` to **generate** the api required proto file.
 - running `make regen_proto` to **regenerate** all the golang code from `proto` files.
 - running `go mod tidy` to get all the dependency.
@@ -12,6 +12,8 @@
 - running `make regen_gorm` to **generate** all the database models and query.
 - running `make wire` to **generate** all the required dependency injection files.
 - running `make mockery` to **generate** all the testing required mockery package.
+- All above generated command can be combined with `make generate`.
+- For testing, can running `make generate ENVRC_FILE=.envrc.test` to specify we use `.envrc.test` instead of `.envrc`.
 - running `make` to start the project in dev env. 🚀
 
 ## 2. Project structure
