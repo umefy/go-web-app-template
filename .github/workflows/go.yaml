@@ -39,7 +39,7 @@ jobs:
         run: go mod tidy -e
 
       - name: generate the required files
-        run: bash -c "make generate ENVRC_FILE=.envrc.test"
+        run: make generate ENVRC_FILE=.envrc.test
 
       - name: Run tests
         run: make test ARGS="-v"

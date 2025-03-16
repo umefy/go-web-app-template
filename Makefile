@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 .PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset
 
 APP_NAME=webapp
