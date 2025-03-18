@@ -2,7 +2,7 @@
 
 ## 1. quick start
 
-- running `./scripts/setup.sh` to setup the tools required by the project. After setup, please update `.envrc` and `.envrc.test` based on your own needed.
+- running `./scripts/local_setup.sh` to setup the tools required by the project. After setup, please update `.envrc` and `.envrc.test` based on your own needed.
 - running `make openapi_to_proto` to **generate** the api required proto file.
 - running `make regen_proto` to **regenerate** all the golang code from `proto` files.
 - running `go mod tidy` to get all the dependency.
