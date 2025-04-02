@@ -4,8 +4,8 @@ create table users (
     id serial primary key,
     name varchar(255),
     age int,
-    created_at timestamp default now(),
-    updated_at timestamp default now()
+    created_at timestamptz default now(),
+    updated_at timestamptz default now()
 );
 
 CREATE TRIGGER updated_at_trigger
