@@ -41,7 +41,7 @@ func main() {
 	g.UseDB(db)
 
 	err = os.Remove(getGeneratePath())
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		panic(err)
 	}
 
