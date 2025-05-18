@@ -38,7 +38,7 @@ func (h *userHandler) HandlerFunc(handle func(w http.ResponseWriter, r *http.Req
 		if err := handle(w, r); err != nil {
 			h.loggerService.ErrorContext(r.Context(), "UserHandler.HandleError", slog.String("error", err.Error()))
 
-			h.DefaultHandler.HandleError(w, r, err)
+			h.HandleError(w, r, err)
 		}
 	}
 }

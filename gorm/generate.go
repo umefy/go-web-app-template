@@ -40,7 +40,10 @@ func main() {
 	}
 	g.UseDB(db)
 
-	os.Remove(getGeneratePath())
+	err = os.Remove(getGeneratePath())
+	if err != nil {
+		panic(err)
+	}
 
 	generateModels(g)
 	g.Execute()
