@@ -62,3 +62,6 @@ lefthook install
 go mod tidy -e
 
 make generate
+
+echo "✅ Local setup complete."
+echo -e "🚀 start the project by running\033[32m make\033[0m."

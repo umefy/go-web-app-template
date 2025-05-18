@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/umefy/godash/logger"
+	"golang.org/x/sync/errgroup"
 )
 
 type Server struct {
@@ -32,28 +34,38 @@ func New(server *http.Server, logger *logger.Logger) *Server {
 }
 
 func (s *Server) Start(shutdownTimeout time.Duration) {
-	// Listen for syscall signals for process to interrupt/quit
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer cancel()
 
-	go func() {
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
 		s.logger.Info("Starting server", slog.String("address", s.server.Addr))
 
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			s.logger.Error("Server error", slog.String("error", err.Error()))
-			os.Exit(1)
+			return err
 		}
-	}()
+		return nil
+	})
 
-	<-stop
-	s.logger.Info("Graceful shutting down the server...", slog.String("timeout", shutdownTimeout.String()))
+	g.Go(func() error {
+		<-ctx.Done()
+		s.logger.Info("Graceful shutting down the server...", slog.String("timeout", shutdownTimeout.String()))
 
-	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-	defer cancel()
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
 
-	if err := s.server.Shutdown(ctx); err != nil {
-		s.logger.Error("Error shutting down server", slog.String("error", err.Error()))
-	} else {
+		if err := s.server.Shutdown(ctx); err != nil {
+			s.logger.Error("Error shutting down server", slog.String("error", err.Error()))
+			return err
+		}
 		s.logger.Info("Server gracefully stopped")
+		return nil
+	})
+
+	if err := g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+		s.logger.Error("Server error", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 }

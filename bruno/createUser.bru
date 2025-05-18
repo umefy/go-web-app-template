@@ -1,0 +1,19 @@
+meta {
+  name: createUser
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{Localhost}}:8082/users
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "John12",
+    "age": 12
+  }
+  
+}
