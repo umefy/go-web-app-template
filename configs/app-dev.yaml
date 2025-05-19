@@ -1,4 +1,4 @@
-httpServer:
+http_server:
   enabled: true
   port: 8082
 
@@ -9,6 +9,6 @@ database:
   url: "" # load from env
   enable_log: true
 
-grpcServer:
+grpc_server:
   enabled: false
   port: 30082

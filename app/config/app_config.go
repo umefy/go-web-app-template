@@ -5,10 +5,10 @@ import (
 )
 
 type AppConfig struct {
-	HttpServer *HttpServerConfig `mapstructure:"httpServer"`
+	HttpServer *HttpServerConfig `mapstructure:"http_server"`
 	Logging    *LoggingConfig    `mapstructure:"logging"`
 	DATABASE   *DBConfig         `mapstructure:"database"`
-	GrpcServer *GrpcServerConfig `mapstructure:"grpcServer"`
+	GrpcServer *GrpcServerConfig `mapstructure:"grpc_server"`
 }
 
 var _ validation.Validate = (*AppConfig)(nil)
