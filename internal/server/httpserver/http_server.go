@@ -16,8 +16,12 @@ func New(args app.Arguments) (*httpserver.Server, error) {
 		return nil, err
 	}
 
+	if !app.ConfigService.GetHttpServerConfig().Enabled {
+		return nil, nil
+	}
+
 	sever := &http.Server{
-		Addr:    fmt.Sprintf(":%d", app.ConfigService.GetServerConfig().Port),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", app.ConfigService.GetHttpServerConfig().Port),
 		Handler: newHttpHandler(app),
 	}
 

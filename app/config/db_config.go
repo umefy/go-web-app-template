@@ -19,5 +19,6 @@ var _ validation.Validate = (*DBConfig)(nil)
 func (c *DBConfig) Validate() error {
 	return validation.ValidateStruct(c,
 		validation.Field(&c.Url, validation.Required),
+		validation.Field(&c.EnableLog, validation.In(true, false).Error("can only be set to true or false")),
 	)
 }

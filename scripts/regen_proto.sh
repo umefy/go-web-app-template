@@ -2,19 +2,34 @@
 
 BASE_PATH="$(cd "$(dirname "$0")/.." && pwd)"
 
-# Define output directories for different languages
+# Function to generate protobuf files
+generate_proto() {
+    local proto_dir=$1
+    local output_dir=$2
+    local proto_files=$(find $proto_dir -name "*.proto")
+    
+    # Clean and create output directory
+    rm -rf $output_dir
+    mkdir -p $output_dir
+    
+    # Generate files
+    protoc -I $proto_dir \
+        --go_out=$output_dir --go_opt=paths=source_relative \
+        --go-grpc_out=$output_dir --go-grpc_opt=paths=source_relative \
+        $proto_files
+}
+
+# OPENAPI directories
+PROTO_DIR=$BASE_PATH/openapi/proto
 OPENAPI_GO_OUT_DIR=$BASE_PATH/openapi/protogen
-rm -rf $OPENAPI_GO_OUT_DIR
 
-# Create output directories if they don't exist
-mkdir -p $OPENAPI_GO_OUT_DIR
+# GRPC directories
+GRPC_PROTO_DIR=$BASE_PATH/proto/grpc
+GRPC_GO_OUT_DIR=$BASE_PATH/protogen/grpc
 
-# Find all .proto files
-PROTO_FILES=$(find $BASE_PATH/openapi/proto -name "*.proto")
-
+# Set protoc flags
 export PROTOC_FLAGS="--allow_unused_imports"
+
 # Generate Go files
-protoc -I $BASE_PATH/openapi/proto \
---go_out=$OPENAPI_GO_OUT_DIR --go_opt=paths=source_relative \
---go-grpc_out=$OPENAPI_GO_OUT_DIR --go-grpc_opt=paths=source_relative \
-$PROTO_FILES
+generate_proto $PROTO_DIR $OPENAPI_GO_OUT_DIR
+generate_proto $GRPC_PROTO_DIR $GRPC_GO_OUT_DIR

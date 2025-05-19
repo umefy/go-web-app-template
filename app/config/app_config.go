@@ -5,17 +5,19 @@ import (
 )
 
 type AppConfig struct {
-	Server   *ServerConfig
-	Logging  *LoggingConfig
-	DATABASE *DBConfig
+	HttpServer *HttpServerConfig `mapstructure:"http_server"`
+	Logging    *LoggingConfig    `mapstructure:"logging"`
+	DATABASE   *DBConfig         `mapstructure:"database"`
+	GrpcServer *GrpcServerConfig `mapstructure:"grpc_server"`
 }
 
 var _ validation.Validate = (*AppConfig)(nil)
 
 func (a *AppConfig) Validate() error {
 	return validation.ValidateStruct(a,
-		validation.Field(&a.Server, validation.Required),
+		validation.Field(&a.HttpServer, validation.Required),
 		validation.Field(&a.Logging, validation.Required),
 		validation.Field(&a.DATABASE, validation.Required),
+		validation.Field(&a.GrpcServer, validation.Required),
 	)
 }

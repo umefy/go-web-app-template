@@ -2,7 +2,7 @@ SHELL := /bin/bash
 .PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate
 
 APP_NAME=webapp
-MAIN_PATH=cmd/httpserver/main.go
+MAIN_PATH=cmd/server/main.go
 BUILD_FOLDER=./bin
 PRODUCTION_ENTRY=$(BUILD_FOLDER)/$(APP_NAME)
 AIR_TMP_FOLDER=./tmp

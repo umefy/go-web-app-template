@@ -9,6 +9,7 @@ import (
 	userSvc "github.com/umefy/go-web-app-template/app/user/service"
 	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
 	"github.com/umefy/go-web-app-template/pkg/validation"
+	pb "github.com/umefy/go-web-app-template/protogen/grpc/service"
 	"github.com/umefy/godash/logger"
 )
 
@@ -18,6 +19,7 @@ type App struct {
 	LoggerService  loggerSvc.Service
 	UserService    userSvc.Service
 	UserRepository userRepo.Repository
+	GreeterService pb.GreeterServer
 	ConfigService  configSvc.Service
 	DB             *db.DB
 }

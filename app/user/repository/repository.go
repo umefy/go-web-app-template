@@ -20,17 +20,18 @@ type Repository interface {
 
 type userRepository struct {
 	loggerService loggerSrv.Service
+	query         *query.Query
 }
 
 var _ Repository = (*userRepository)(nil)
 
-func NewUserRepository(loggerService loggerSrv.Service) *userRepository {
-	return &userRepository{loggerService: loggerService}
+func NewUserRepository(db *db.DB, loggerService loggerSrv.Service) *userRepository {
+	return &userRepository{loggerService: loggerService, query: query.Use(db)}
 }
 
 func (r *userRepository) GetUser(ctx context.Context, id int) (*model.User, error) {
-	userQuery := query.User.WithContext(ctx)
-	user, err := userQuery.Where(query.User.ID.Eq(id)).First()
+	userQuery := r.query.User.WithContext(ctx)
+	user, err := userQuery.Where(r.query.User.ID.Eq(id)).First()
 
 	if errors.Is(err, db.ErrRecordNotFound) {
 		r.loggerService.ErrorContext(ctx, "UserRepository.GetUser", slog.String("error", err.Error()))
@@ -45,7 +46,7 @@ func (r *userRepository) GetUser(ctx context.Context, id int) (*model.User, erro
 }
 
 func (r *userRepository) GetUsers(ctx context.Context) ([]*model.User, error) {
-	userQuery := query.User.WithContext(ctx)
+	userQuery := r.query.User.WithContext(ctx)
 	users, err := userQuery.Find()
 	if errors.Is(err, db.ErrRecordNotFound) {
 		r.loggerService.ErrorContext(ctx, "UserRepository.GetUsers", slog.String("error", err.Error()))
@@ -59,7 +60,7 @@ func (r *userRepository) GetUsers(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *userRepository) CreateUser(ctx context.Context, user *model.User) (*model.User, error) {
-	userQuery := query.User.WithContext(ctx)
+	userQuery := r.query.User.WithContext(ctx)
 	err := userQuery.Create(user)
 
 	if errors.Is(err, db.ErrRecordNotFound) {

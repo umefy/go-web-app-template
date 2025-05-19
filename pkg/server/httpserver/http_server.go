@@ -19,6 +19,10 @@ type Server struct {
 	logger *slog.Logger
 }
 
+// New creates a new http server.
+// It need pass the original http.Server and logger.Logger.
+// The original http.Server can be created by User requirement itself.
+// Our wrapper will help to start the server and graceful shutdown.
 func New(server *http.Server, logger *logger.Logger) *Server {
 
 	loggerHandler := logger.GetHandler()
@@ -40,10 +44,10 @@ func (s *Server) Start(shutdownTimeout time.Duration) {
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		s.logger.Info("Starting server", slog.String("address", s.server.Addr))
+		s.logger.Info("Starting HTTP server", slog.String("address", s.server.Addr))
 
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			s.logger.Error("Server error", slog.String("error", err.Error()))
+			s.logger.Error("HTTP server error", slog.String("error", err.Error()))
 			return err
 		}
 		return nil
@@ -51,16 +55,16 @@ func (s *Server) Start(shutdownTimeout time.Duration) {
 
 	g.Go(func() error {
 		<-ctx.Done()
-		s.logger.Info("Graceful shutting down the server...", slog.String("timeout", shutdownTimeout.String()))
+		s.logger.Info("Graceful shutting down the HTTP server...", slog.String("timeout", shutdownTimeout.String()))
 
 		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer cancel()
 
 		if err := s.server.Shutdown(ctx); err != nil {
-			s.logger.Error("Error shutting down server", slog.String("error", err.Error()))
+			s.logger.Error("Error shutting down HTTP server", slog.String("error", err.Error()))
 			return err
 		}
-		s.logger.Info("Server gracefully stopped")
+		s.logger.Info("HTTP server gracefully stopped")
 		return nil
 	})
 

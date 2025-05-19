@@ -6,6 +6,7 @@ package app
 import (
 	"github.com/google/wire"
 	configSvc "github.com/umefy/go-web-app-template/app/config/service"
+	greeterSvc "github.com/umefy/go-web-app-template/app/greeter/service"
 	loggerSvc "github.com/umefy/go-web-app-template/app/logger/service"
 	userRepo "github.com/umefy/go-web-app-template/app/user/repository"
 	userSvc "github.com/umefy/go-web-app-template/app/user/service"
@@ -19,6 +20,7 @@ var WireSet = wire.NewSet(
 	LoadConfig,
 	configSvc.WireSet,
 	userSvc.WireSet,
+	greeterSvc.WireSet,
 	loggerSvc.WireSet,
 	userRepo.WireSet,
 	wire.Struct(new(App), "*"),

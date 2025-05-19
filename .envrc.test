@@ -1,5 +1,5 @@
 #! /bin/bash
-# export SERVER_PORT=8084
+# export HTTP_SERVER_PORT=8084
 export DATABASE_URL="postgres://test_user:test_password@localhost:5432/goWebapp_test"
 
 export GOOSE_DRIVER=postgres
