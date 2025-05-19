@@ -31,6 +31,7 @@ func New(args app.Arguments) (*grpcserver.GrpcServer, error) {
 
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(unaryRecoveryInterceptor(app.Logger)),
+		grpc.StreamInterceptor(streamRecoveryInterceptor(app.Logger)),
 	)
 
 	registerServices(grpcServer, app)
