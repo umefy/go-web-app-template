@@ -6,9 +6,10 @@ import (
 
 type Service interface {
 	GetAppConfig() *config.AppConfig
-	GetServerConfig() *config.ServerConfig
+	GetHttpServerConfig() *config.HttpServerConfig
 	GetLoggingConfig() *config.LoggingConfig
 	GetDBConfig() *config.DBConfig
+	GetGrpcServerConfig() *config.GrpcServerConfig
 }
 
 type service struct {
@@ -27,8 +28,8 @@ func (s *service) GetAppConfig() *config.AppConfig {
 	return s.appConfig
 }
 
-func (s *service) GetServerConfig() *config.ServerConfig {
-	return s.appConfig.Server
+func (s *service) GetHttpServerConfig() *config.HttpServerConfig {
+	return s.appConfig.HttpServer
 }
 
 func (s *service) GetLoggingConfig() *config.LoggingConfig {
@@ -37,4 +38,8 @@ func (s *service) GetLoggingConfig() *config.LoggingConfig {
 
 func (s *service) GetDBConfig() *config.DBConfig {
 	return s.appConfig.DATABASE
+}
+
+func (s *service) GetGrpcServerConfig() *config.GrpcServerConfig {
+	return s.appConfig.GrpcServer
 }

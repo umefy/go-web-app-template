@@ -2,7 +2,6 @@ package app
 
 import (
 	configSvc "github.com/umefy/go-web-app-template/app/config/service"
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
 )
 
@@ -21,7 +20,7 @@ func newDB(configSvc configSvc.Service) (*db.DB, error) {
 		return nil, err
 	}
 
-	query.SetDefault(db)
+	// query.SetDefault(db)
 
 	return db, nil
 }
