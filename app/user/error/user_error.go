@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	bizError "github.com/umefy/go-web-app-template/app/error"
+	appError "github.com/umefy/go-web-app-template/app/error"
 )
 
 const (
@@ -12,5 +12,5 @@ const (
 )
 
 var (
-	UserNotFound = bizError.NewError(fmt.Sprintf("%s_1001", serviceName), "user not found", http.StatusNotFound)
+	UserNotFound = appError.NewError(fmt.Sprintf("%s_1001", serviceName), "user not found", http.StatusNotFound)
 )

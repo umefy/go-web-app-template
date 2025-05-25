@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	bizError "github.com/umefy/go-web-app-template/app/error"
+	appError "github.com/umefy/go-web-app-template/app/error"
 	loggerSrv "github.com/umefy/go-web-app-template/app/logger/service"
 	"github.com/umefy/godash/jsonkit"
 )
@@ -32,10 +32,10 @@ func (h *DefaultHandler) HandleError(w http.ResponseWriter, r *http.Request, err
 
 	h.loggerService.ErrorContext(r.Context(), "DefaultErrorHandler", slog.String("error", err.Error()))
 
-	var bizErr *bizError.Error
-	if errors.As(err, &bizErr) {
+	var appErr *appError.Error
+	if errors.As(err, &appErr) {
 		// nolint: errcheck
-		jsonkit.JSONResponse(w, bizErr.HTTPCode, map[string]string{"errorCode": bizErr.ErrorCode, "errorMsg": bizErr.ErrorMsg})
+		jsonkit.JSONResponse(w, appErr.HTTPCode, map[string]string{"errorCode": appErr.ErrorCode, "errorMsg": appErr.ErrorMsg})
 		return
 	}
 	// nolint: errcheck
