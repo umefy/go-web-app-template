@@ -80,14 +80,21 @@ func (r *userRepository) UpdateUser(ctx context.Context, id int, user *model.Use
 	userQuery := r.query.User.WithContext(ctx)
 	info, err := userQuery.Where(r.query.User.ID.Eq(id)).Updates(user)
 
+	if err != nil {
+		r.loggerService.ErrorContext(ctx, "User update error", slog.String("error", err.Error()))
+		return nil, err
+	}
+
 	if info.RowsAffected == 0 {
-		r.loggerService.ErrorContext(ctx, "UserRepository.UpdateUser", slog.String("error", "user not found"))
+		r.loggerService.ErrorContext(ctx, "User update error", slog.String("error", "user not found"))
 		return nil, userError.UserNotFound
 	}
 
+	user, err = r.GetUser(ctx, id)
 	if err != nil {
-		r.loggerService.ErrorContext(ctx, "UserRepository.UpdateUser", slog.String("error", err.Error()))
+		r.loggerService.ErrorContext(ctx, "Get User error", slog.String("error", err.Error()))
 		return nil, err
 	}
+
 	return user, nil
 }

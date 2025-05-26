@@ -74,10 +74,5 @@ func (u *userService) UpdateUser(ctx context.Context, id string, user *model.Use
 		return nil, err
 	}
 
-	user, err = u.userRepository.GetUser(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-
 	return user, nil
 }

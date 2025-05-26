@@ -1,6 +1,6 @@
 #! /bin/bash
 
-set -e
+set -euo pipefail
 
 # Function to handle errors
 error_handler() {
@@ -15,13 +15,13 @@ check_and_install() {
   local cmd="$1"
   local install_cmd="$2"
   local resolved_path
-  resolved_path=$(command -v "$cmd" 2>/dev/null)
-
+  resolved_path="$(command -v "$cmd" 2>/dev/null || true)"
   # Not found at all
   if [[ -z "$resolved_path" ]]; then
     echo "$cmd not found. Installing... ⏱️"
     eval "$install_cmd"
     echo "$cmd installed ✅"
+    asdf reshim golang
     return
   fi
 
@@ -49,6 +49,8 @@ check_and_install "wire" "go install github.com/google/wire/cmd/wire@latest"
 check_and_install "mockery" "go install github.com/vektra/mockery/v3@latest"
 check_and_install "goose" "go install github.com/pressly/goose/v3/cmd/goose@latest"
 check_and_install "openapi-generator" "brew install openapi-generator"
+check_and_install "golangci-lint" "brew install golangci-lint"
+check_and_install "air" "go install github.com/air-verse/air@latest"
 
 # setup tools
 if [ ! -d "google" ]; then
