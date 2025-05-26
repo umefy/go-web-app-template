@@ -20,8 +20,8 @@ func (u *CreateUserInput) Validate() error {
 		validation.Field(&u.Name, validation.Required),
 		validation.Field(&u.Age,
 			validation.Required.Error("must be provided"),
-			validation.MinWrapperspb(12),
-			validation.MaxWrapperspb(20),
+			validation.Min(12),
+			validation.Max(20),
 		),
 	)
 }

@@ -16,5 +16,6 @@ func NewRouter(app *app.App) http.Handler {
 	r.Get("/", h.HandlerFunc(h.GetUsers))
 	r.Get("/{id}", h.HandlerFunc(h.GetUser))
 	r.Post("/", h.HandlerFunc(h.CreateUser))
+	r.Patch("/{id}", h.HandlerFunc(h.UpdateUser))
 	return r
 }

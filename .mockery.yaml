@@ -1,7 +1,0 @@
-testonly: False
-with-expecter: True
-keeptree: True
-all: True
-exclude:
-  - "gorm/generated/query"
-

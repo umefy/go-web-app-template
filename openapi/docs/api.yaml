@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.1
 info:
   title: Web apps API
   version: '0.1'
@@ -10,12 +10,12 @@ info:
     email: support@api.server.com
   license:
     name: MIT License
+    identifier: MIT
 servers:
   - url: https://api.server.test
     description: Production server
   - url: https://api.server.test
     description: Production server
-
 
 paths:
   /users:
@@ -62,10 +62,35 @@ paths:
       description: Get a user by ID
       parameters:
         - name: id
-          in: path
           required: true
+          in: path
           schema:
             type: integer
+      responses:
+        '200':
+          description: A user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    patch:
+      operationId: updateUser
+      tags:
+        - users
+      summary: Update a user by ID
+      description: Update a user by ID
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserInput'
       responses:
         '200':
           description: A user
@@ -82,6 +107,16 @@ components:
         name:
           type: string
           example: "John Doe"
+        age:
+          type: integer
+          example: 30
+    UpdateUserInput:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+          x-protobuf-data-type: google.protobuf.StringValue
         age:
           type: integer
           x-protobuf-data-type: google.protobuf.Int32Value
