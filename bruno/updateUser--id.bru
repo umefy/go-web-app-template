@@ -1,0 +1,18 @@
+meta {
+  name: updateUser/:id
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{Localhost}}:8082/users/5
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Test23",
+    "age": 12
+  }
+}
