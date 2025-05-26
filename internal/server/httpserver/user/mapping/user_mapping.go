@@ -3,9 +3,9 @@ package mapping
 import (
 	"time"
 
-	"github.com/guregu/null/v6"
 	"github.com/umefy/go-web-app-template/gorm/generated/model"
 	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
+	"github.com/umefy/go-web-app-template/pkg/null"
 )
 
 func UserModelToApiUser(user *model.User) *api.User {
@@ -20,7 +20,14 @@ func UserModelToApiUser(user *model.User) *api.User {
 
 func ApiCreateUserInputToUserModel(input *api.CreateUserInput) *model.User {
 	return &model.User{
-		Name: null.StringFrom(input.Name),
-		Age:  null.IntFrom(int64(input.Age.GetValue())),
+		Name: null.ValueFrom(input.Name),
+		Age:  null.ValueFrom(int(input.Age)),
+	}
+}
+
+func ApiUpdateUserInputToUserModel(input *api.UpdateUserInput) *model.User {
+	return &model.User{
+		Name: null.ValueFromWrapperspbString(input.Name),
+		Age:  null.ValueFromWrapperspbInt32(input.Age),
 	}
 }

@@ -1,0 +1,20 @@
+all: false
+dir: 'mocks'
+filename: '{{.InterfaceDirRelative}}/{{.InterfaceName}}.go'
+force-file-write: true
+formatter: goimports
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}'
+recursive: true
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+packages:
+  github.com/umefy/go-web-app-template: 
+    config:
+      all: true
+      exclude-subpkg-regex:
+        - gorm/generated/query
+        - pkg
+        - protogen

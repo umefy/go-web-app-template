@@ -22,14 +22,14 @@ type GetUsersSuite struct {
 }
 
 func (s *GetUsersSuite) TestGetUsers() {
-	userService := userSrvMocks.NewService(s.T())
-	loggerService := loggerSrvMocks.NewService(s.T())
+	userService := userSrvMocks.NewMockService(s.T())
+	loggerService := loggerSrvMocks.NewMockService(s.T())
 
 	users := []*model.User{
 		{
 			ID:   1,
-			Name: null.StringFrom("John Doe"),
-			Age:  null.IntFrom(20),
+			Name: null.ValueFrom("John Doe"),
+			Age:  null.ValueFrom(20),
 		},
 	}
 

@@ -16,6 +16,7 @@ type Repository interface {
 	GetUser(ctx context.Context, id int) (*model.User, error)
 	CreateUser(ctx context.Context, user *model.User) (*model.User, error)
 	GetUsers(ctx context.Context) ([]*model.User, error)
+	UpdateUser(ctx context.Context, id int, user *model.User) (*model.User, error)
 }
 
 type userRepository struct {
@@ -72,5 +73,28 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) (*mod
 		r.loggerService.ErrorContext(ctx, "UserRepository.CreateUser", slog.String("error", err.Error()))
 		return nil, err
 	}
+	return user, nil
+}
+
+func (r *userRepository) UpdateUser(ctx context.Context, id int, user *model.User) (*model.User, error) {
+	userQuery := r.query.User.WithContext(ctx)
+	info, err := userQuery.Where(r.query.User.ID.Eq(id)).Updates(user)
+
+	if err != nil {
+		r.loggerService.ErrorContext(ctx, "User update error", slog.String("error", err.Error()))
+		return nil, err
+	}
+
+	if info.RowsAffected == 0 {
+		r.loggerService.ErrorContext(ctx, "User update error", slog.String("error", "user not found"))
+		return nil, userError.UserNotFound
+	}
+
+	user, err = r.GetUser(ctx, id)
+	if err != nil {
+		r.loggerService.ErrorContext(ctx, "Get User error", slog.String("error", err.Error()))
+		return nil, err
+	}
+
 	return user, nil
 }

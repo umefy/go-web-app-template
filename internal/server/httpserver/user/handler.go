@@ -14,6 +14,7 @@ type Handler interface {
 	GetUsers(w http.ResponseWriter, r *http.Request) error
 	GetUser(w http.ResponseWriter, r *http.Request) error
 	CreateUser(w http.ResponseWriter, r *http.Request) error
+	UpdateUser(w http.ResponseWriter, r *http.Request) error
 }
 
 type userHandler struct {

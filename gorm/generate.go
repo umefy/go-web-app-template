@@ -40,8 +40,8 @@ func main() {
 	}
 	g.UseDB(db)
 
-	err = os.Remove(getGeneratePath())
-	if err != nil && !os.IsNotExist(err) {
+	err = os.RemoveAll(getGeneratePath())
+	if err != nil {
 		panic(err)
 	}
 
@@ -65,22 +65,22 @@ func getDataTypeMap() map[string]func(detailType gorm.ColumnType) (dataType stri
 		"json":  func(detailType gorm.ColumnType) (dataType string) { return "datatypes.JSON" },
 		"jsonb": func(detailType gorm.ColumnType) (dataType string) { return "datatypes.JSON" },
 		"int2": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.Int"
+			return "null.Value[int]"
 		},
 		"int4": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.Int"
+			return "null.Value[int]"
 		},
 		"int8": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.Int"
+			return "null.Value[int]"
 		},
 		"varchar": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.String"
+			return "null.Value[string]"
 		},
 		"text": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.String"
+			return "null.Value[string]"
 		},
 		"tinyint": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.Bool"
+			return "null.Value[bool]"
 		},
 	}
 }
