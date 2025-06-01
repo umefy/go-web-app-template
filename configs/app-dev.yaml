@@ -10,5 +10,5 @@ database:
   enable_log: true
 
 grpc_server:
-  enabled: false
+  enabled: true
   port: 30082

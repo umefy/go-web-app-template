@@ -31,7 +31,7 @@ func NewUserRepository(db *db.DB, loggerService loggerSrv.Service) *userReposito
 }
 
 func (r *userRepository) GetUser(ctx context.Context, id int) (*model.User, error) {
-	userQuery := r.query.User.WithContext(ctx)
+	userQuery := r.query.User.WithContext(ctx).Preload(r.query.User.Orders)
 	user, err := userQuery.Where(r.query.User.ID.Eq(id)).First()
 
 	if errors.Is(err, db.ErrRecordNotFound) {
@@ -47,7 +47,7 @@ func (r *userRepository) GetUser(ctx context.Context, id int) (*model.User, erro
 }
 
 func (r *userRepository) GetUsers(ctx context.Context) ([]*model.User, error) {
-	userQuery := r.query.User.WithContext(ctx)
+	userQuery := r.query.User.WithContext(ctx).Preload(r.query.User.Orders)
 	users, err := userQuery.Find()
 	if errors.Is(err, db.ErrRecordNotFound) {
 		r.loggerService.ErrorContext(ctx, "UserRepository.GetUsers", slog.String("error", err.Error()))

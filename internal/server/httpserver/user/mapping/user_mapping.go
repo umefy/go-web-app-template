@@ -6,6 +6,7 @@ import (
 	"github.com/umefy/go-web-app-template/gorm/generated/model"
 	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
 	"github.com/umefy/go-web-app-template/pkg/null"
+	"github.com/umefy/godash/sliceskit"
 )
 
 func UserModelToApiUser(user *model.User) *api.User {
@@ -15,6 +16,9 @@ func UserModelToApiUser(user *model.User) *api.User {
 		Age:       int32(user.Age.ValueOrZero()),
 		CreatedAt: user.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
+		Orders: sliceskit.Map(user.Orders, func(order model.Order) *api.Order {
+			return OrderModelToApiOrder(&order)
+		}),
 	}
 }
 

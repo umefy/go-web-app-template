@@ -5,21 +5,24 @@ import (
 	"log/slog"
 
 	loggerSrv "github.com/umefy/go-web-app-template/app/logger/service"
-	pb "github.com/umefy/go-web-app-template/protogen/grpc/service"
 )
+
+type Service interface {
+	SayHello(ctx context.Context, name string) (string, error)
+}
 
 type greetService struct {
 	loggerService loggerSrv.Service
-	pb.UnimplementedGreeterServer
 }
 
-var _ pb.GreeterServer = (*greetService)(nil)
+var _ Service = (*greetService)(nil)
 
 func NewService(loggerService loggerSrv.Service) *greetService {
 	return &greetService{loggerService: loggerService}
 }
 
-func (s *greetService) SayHello(ctx context.Context, req *pb.HelloRequest) (*pb.HelloResponse, error) {
-	s.loggerService.Info("SayHello", slog.String("name", req.Name))
-	return &pb.HelloResponse{Message: "Hello, " + req.Name}, nil
+// SayHello implements Service.
+func (g *greetService) SayHello(ctx context.Context, name string) (string, error) {
+	g.loggerService.InfoContext(ctx, "SayHello", slog.String("name", name))
+	return "Hello, " + name, nil
 }

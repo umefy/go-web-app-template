@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Function to handle errors
 error_handler() {
-    echo "❌ Error occurred on line $1"
+  echo "❌ Error occurred on line $1"
 }
 
 # Trap errors and call error_handler
@@ -54,23 +54,23 @@ check_and_install "air" "go install github.com/air-verse/air@latest"
 
 # setup tools
 if [ ! -d "google" ]; then
-    ln -s "$(brew --prefix protobuf)/include/google" .
+  cp -r "$(brew --prefix protobuf)/include/google" .
 fi
 
 # setup envrc
 if [ ! -f ".envrc" ]; then
-    echo "Creating .envrc from example file ✅"
-    cp .envrc.example .envrc
+  echo "Creating .envrc from example file ✅"
+  cp .envrc.example .envrc
 else
-    echo ".envrc already exists, skipping ✅"
+  echo ".envrc already exists, skipping ✅"
 fi
 
 # Check if current directory is a git repository
 if [ ! -d ".git" ]; then
-    echo "Initializing git repository ✅"
-    git init
+  echo "Initializing git repository ✅"
+  git init
 else
-    echo "Git repository already exists ✅"
+  echo "Git repository already exists ✅"
 fi
 
 # lefthook
