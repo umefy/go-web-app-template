@@ -15,7 +15,7 @@ option go_package = "{{goPackagePath}}"; // specify go package, passed from --ad
 
 {{#imports}}
 {{#import}}
-import public "{{{import}}}.proto";
+import public "{{{modelPackage}}}/{{{import}}}.proto";
 {{/import}}
 {{/imports}}
 
