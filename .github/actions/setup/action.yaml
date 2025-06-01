@@ -77,7 +77,7 @@ runs:
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
-        distribution: 'oracle'
+        distribution: 'temurin'
         java-version: '17'
 
     # Cache OpenAPI Generator CLI
