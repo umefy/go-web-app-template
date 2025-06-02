@@ -94,7 +94,7 @@ runs:
     - name: Install OpenAPI Generator CLI
       if: steps.cache-openapi.outputs.cache-hit != 'true'
       run: |
-        OPENAPI_VERSION="7.12.0"
+        OPENAPI_VERSION="7.13.0"
         wget "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/${OPENAPI_VERSION}/openapi-generator-cli-${OPENAPI_VERSION}.jar" -O /usr/local/bin/openapi-generator-cli.jar
       shell: bash
     

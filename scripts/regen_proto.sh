@@ -7,16 +7,18 @@ generate_proto() {
     local proto_dir=$1
     local output_dir=$2
     local proto_files=$(find $proto_dir -name "*.proto")
-    
+
     # Clean and create output directory
     rm -rf $output_dir
     mkdir -p $output_dir
-    
+
     # Generate files
-    protoc -I $proto_dir \
-        --go_out=$output_dir --go_opt=paths=source_relative \
-        --go-grpc_out=$output_dir --go-grpc_opt=paths=source_relative \
-        $proto_files
+    {
+        protoc -I $proto_dir \
+            --go_out=$output_dir --go_opt=paths=source_relative \
+            --go-grpc_out=$output_dir --go-grpc_opt=paths=source_relative \
+            $proto_files
+    } 2>&1 | grep -v "warning: Import google/protobuf/.* is unused" || true
 }
 
 # OPENAPI directories

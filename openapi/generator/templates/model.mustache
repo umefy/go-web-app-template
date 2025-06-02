@@ -1,6 +1,8 @@
 {{>partial_header}}
 syntax = "proto3";
 
+package {{#lambda.lowercase}}{{{packageName}}};{{/lambda.lowercase}}
+
 // Always import Google Well-Known Types for compatibility
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
@@ -9,26 +11,37 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/struct.proto";
 import "google/protobuf/empty.proto";
 
-package {{#lambda.lowercase}}{{{packageName}}};{{/lambda.lowercase}}
-
-option go_package = "{{goPackagePath}}"; // specify go package, passed from --additional-properties when generate.
-
+{{#customOptionsModel}}
+{{{.}}}
+{{/customOptionsModel}}
 {{#imports}}
 {{#import}}
-import public "{{{modelPackage}}}/{{{import}}}.proto";
+import public "{{{.}}}.proto";
 {{/import}}
 {{/imports}}
-
 {{#models}}
 {{#model}}
 {{#isEnum}}{{>enum}}{{/isEnum}}{{^isEnum}}message {{classname}} {
 
+{{#oneOf}}
+{{#-first}}
+    oneof {{classVarName}} {
+        {{#vars}}
+        {{#description}}
+        // {{{.}}}
+        {{/description}}
+        {{#vendorExtensions.x-protobuf-type}}{{{.}}} {{/vendorExtensions.x-protobuf-type}}{{{vendorExtensions.x-protobuf-data-type}}} {{{name}}} = {{vendorExtensions.x-protobuf-index}}{{#vendorExtensions.x-protobuf-packed}} [packed=true]{{/vendorExtensions.x-protobuf-packed}};
+        {{/vars}}
+    }
+{{/-first}}
+{{/oneOf}}
+{{^oneOf}}
   {{#vars}}
   {{#description}}
   // {{{.}}}
   {{/description}}
   {{^isEnum}}
-  {{#vendorExtensions.x-protobuf-type}}{{{.}}} {{/vendorExtensions.x-protobuf-type}}{{{vendorExtensions.x-protobuf-data-type}}} {{{name}}} = {{vendorExtensions.x-protobuf-index}}{{#vendorExtensions.x-protobuf-packed}} [packed=true]{{/vendorExtensions.x-protobuf-packed}};
+  {{#vendorExtensions.x-protobuf-type}}{{{.}}} {{/vendorExtensions.x-protobuf-type}}{{{vendorExtensions.x-protobuf-data-type}}} {{{name}}} = {{vendorExtensions.x-protobuf-index}}{{#vendorExtensions.x-protobuf-packed}} [packed=true]{{/vendorExtensions.x-protobuf-packed}}{{#vendorExtensions.x-protobuf-json-name}} [json_name="{{vendorExtensions.x-protobuf-json-name}}"]{{/vendorExtensions.x-protobuf-json-name}};
   {{/isEnum}}
   {{#isEnum}}
   enum {{enumName}} {
@@ -43,7 +56,9 @@ import public "{{{modelPackage}}}/{{{import}}}.proto";
   {{/isEnum}}
 
   {{/vars}}
+{{/oneOf}}
 }
 {{/isEnum}}
 {{/model}}
+
 {{/models}}
