@@ -7,6 +7,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gen"
+	"gorm.io/gen/field"
 	"gorm.io/gorm"
 )
 
@@ -14,12 +15,6 @@ func getGeneratePath() string {
 	_, filePath, _, _ := runtime.Caller(1)
 	dirname := filepath.Dir(filePath)
 	return filepath.Join(dirname, "./generated/query")
-}
-
-func getTablesForModelGen() []string {
-	return []string{
-		"users",
-	}
 }
 
 func main() {
@@ -50,13 +45,21 @@ func main() {
 }
 
 func generateModels(g *gen.Generator) {
-	for _, tableName := range getTablesForModelGen() {
-		// override id as int as it's never going to be 0
-		g.ApplyBasic(g.GenerateModel(tableName,
-			gen.FieldType("id", "int"),
-		),
-		)
+	modelOps := []gen.ModelOpt{
+		gen.FieldType("id", "int"),
 	}
+
+	orders := g.GenerateModel("orders",
+		modelOps...,
+	)
+
+	users := g.GenerateModel("users",
+		append(modelOps,
+			gen.FieldRelate(field.HasMany, "Orders", orders, nil),
+		)...,
+	)
+
+	g.ApplyBasic(users, orders)
 }
 
 func getDataTypeMap() map[string]func(detailType gorm.ColumnType) (dataType string) {

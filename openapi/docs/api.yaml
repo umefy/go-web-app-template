@@ -144,6 +144,36 @@ components:
           format: date-time
           readOnly: true
           example: "2021-01-01T00:00:00Z"
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
       required:
         - name
         - age
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 1
+        userId:
+          type: integer
+          example: 1
+        amount:
+          type: number
+          example: 100
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2021-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: "2021-01-01T00:00:00Z"
+      required:
+        - userId
+        - amount
