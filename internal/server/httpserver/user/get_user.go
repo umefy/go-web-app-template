@@ -20,9 +20,9 @@ func (h *userHandler) GetUser(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	getUserResponse := api.GetUserResponse{
+	resp := api.UserGetResponse{
 		Data: mapping.UserModelToApiUser(user),
 	}
 
-	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &getUserResponse)
+	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &resp)
 }

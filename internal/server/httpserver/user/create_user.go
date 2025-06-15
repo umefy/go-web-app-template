@@ -10,7 +10,7 @@ import (
 )
 
 type CreateUserInput struct {
-	api.CreateUserInput
+	api.UserCreate
 }
 
 var _ validation.Validate = (*CreateUserInput)(nil)
@@ -40,13 +40,16 @@ func (h *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	user := mapping.ApiCreateUserInputToUserModel(&userInput.CreateUserInput)
+	user := mapping.ApiUserCreateToUserModel(&userInput.UserCreate)
 
 	user, err := h.userService.CreateUser(ctx, user)
 	if err != nil {
 		return err
 	}
 
-	userResponse := mapping.UserModelToApiUser(user)
-	return jsonkit.ProtoJSONResponse(w, http.StatusOK, userResponse)
+	resp := api.UserCreateResponse{
+		Data: mapping.UserModelToApiUser(user),
+	}
+
+	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &resp)
 }

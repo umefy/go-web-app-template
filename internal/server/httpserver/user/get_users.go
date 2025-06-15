@@ -19,9 +19,9 @@ func (h *userHandler) GetUsers(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	usersResponse := api.GetUsersResponse{
+	resp := api.UserGetAllResponse{
 		Data: sliceskit.Map(users, mapping.UserModelToApiUser),
 	}
 
-	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &usersResponse)
+	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &resp)
 }

@@ -30,14 +30,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateUserInput'
+              $ref: '#/components/schemas/UserCreate'
       responses:
         '200':
           description: A user
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserCreateResponse'
     get:
       operationId: getUsers
       tags:
@@ -52,7 +52,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: '#/components/schemas/UserGetAllResponse'
   /users/{id}:
     get:
       operationId: getUser
@@ -72,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserGetResponse'
     patch:
       operationId: updateUser
       tags:
@@ -90,18 +90,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserInput'
+              $ref: '#/components/schemas/UserUpdate'
       responses:
         '200':
           description: A user
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserUpdateResponse'
 
 components:
   schemas:
-    CreateUserInput:
+    UserCreate:
       type: object
       properties:
         name:
@@ -110,7 +110,7 @@ components:
         age:
           type: integer
           example: 30
-    UpdateUserInput:
+    UserUpdate:
       type: object
       properties:
         name:
@@ -151,18 +151,28 @@ components:
       required:
         - name
         - age
-    GetUserResponse:
+    UserCreateResponse:
       type: object
       properties:
         data:
           $ref: '#/components/schemas/User'
-    GetUsersResponse:
+    UserGetResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+    UserGetAllResponse:
       type: object
       properties:
         data: 
           type: array
           items:
             $ref: '#/components/schemas/User'
+    UserUpdateResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
     Order:
       type: object
       properties:

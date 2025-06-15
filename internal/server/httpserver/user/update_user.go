@@ -9,13 +9,13 @@ import (
 	"github.com/umefy/godash/jsonkit"
 )
 
-type UpdateUserInput struct {
-	api.UpdateUserInput
+type UserUpdate struct {
+	api.UserUpdate
 }
 
-var _ validation.Validate = (*UpdateUserInput)(nil)
+var _ validation.Validate = (*UserUpdate)(nil)
 
-func (u *UpdateUserInput) Validate() error {
+func (u *UserUpdate) Validate() error {
 	return validation.ValidateStruct(u,
 		validation.Field(&u.Age,
 			validation.MinWrapperspb(12),
@@ -29,7 +29,7 @@ func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) error {
 
 	h.loggerService.DebugContext(ctx, "UpdateUser")
 
-	var input UpdateUserInput
+	var input UserUpdate
 	if err := jsonkit.BindProtoRequestBody(r, &input); err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	user := mapping.ApiUpdateUserInputToUserModel(&input.UpdateUserInput)
+	user := mapping.ApiUserUpdateToUserModel(&input.UserUpdate)
 
 	userID := r.PathValue("id")
 	user, err := h.userService.UpdateUser(ctx, userID, user)
@@ -46,7 +46,9 @@ func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	userResponse := mapping.UserModelToApiUser(user)
+	userResponse := api.UserUpdateResponse{
+		Data: mapping.UserModelToApiUser(user),
+	}
 
-	return jsonkit.ProtoJSONResponse(w, http.StatusOK, userResponse)
+	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &userResponse)
 }

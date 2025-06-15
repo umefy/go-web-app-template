@@ -22,14 +22,14 @@ func UserModelToApiUser(user *model.User) *api.User {
 	}
 }
 
-func ApiCreateUserInputToUserModel(input *api.CreateUserInput) *model.User {
+func ApiUserCreateToUserModel(input *api.UserCreate) *model.User {
 	return &model.User{
 		Name: null.ValueFrom(input.Name),
 		Age:  null.ValueFrom(int(input.Age)),
 	}
 }
 
-func ApiUpdateUserInputToUserModel(input *api.UpdateUserInput) *model.User {
+func ApiUserUpdateToUserModel(input *api.UserUpdate) *model.User {
 	return &model.User{
 		Name: null.ValueFromWrapperspbString(input.Name),
 		Age:  null.ValueFromWrapperspbInt32(input.Age),

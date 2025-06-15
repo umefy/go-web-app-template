@@ -46,7 +46,7 @@ func (s *GetUsersSuite) TestGetUsers() {
 	s.NoError(err)
 
 	s.Equal(http.StatusOK, rec.Code)
-	expectedJSON, err := jsonkit.MarshalProto(&api.GetUsersResponse{
+	expectedJSON, err := jsonkit.MarshalProto(&api.UserGetAllResponse{
 		Data: sliceskit.Map(users, mapping.UserModelToApiUser),
 	})
 
