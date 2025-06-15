@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/server/httpserver/user/mapping"
+	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
 	"github.com/umefy/godash/jsonkit"
 	"github.com/umefy/godash/sliceskit"
 )
@@ -18,7 +19,9 @@ func (h *userHandler) GetUsers(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	usersResponse := sliceskit.Map(users, mapping.UserModelToApiUser)
+	usersResponse := api.GetUsersResponse{
+		Data: sliceskit.Map(users, mapping.UserModelToApiUser),
+	}
 
-	return jsonkit.JSONResponse(w, http.StatusOK, usersResponse)
+	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &usersResponse)
 }

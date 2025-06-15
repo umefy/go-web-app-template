@@ -151,6 +151,18 @@ components:
       required:
         - name
         - age
+    GetUserResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+    GetUsersResponse:
+      type: object
+      properties:
+        data: 
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
     Order:
       type: object
       properties:

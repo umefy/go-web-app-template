@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/server/httpserver/user/mapping"
+	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
 	"github.com/umefy/godash/jsonkit"
 )
 
@@ -19,7 +20,9 @@ func (h *userHandler) GetUser(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	userResponse := mapping.UserModelToApiUser(user)
+	getUserResponse := api.GetUserResponse{
+		Data: mapping.UserModelToApiUser(user),
+	}
 
-	return jsonkit.JSONResponse(w, http.StatusOK, userResponse)
+	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &getUserResponse)
 }

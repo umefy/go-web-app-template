@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +13,8 @@ import (
 	"github.com/umefy/go-web-app-template/internal/server/httpserver/user/mapping"
 	loggerSrvMocks "github.com/umefy/go-web-app-template/mocks/app/logger/service"
 	userSrvMocks "github.com/umefy/go-web-app-template/mocks/app/user/service"
+	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
+	"github.com/umefy/godash/jsonkit"
 	"github.com/umefy/godash/sliceskit"
 )
 
@@ -45,7 +46,10 @@ func (s *GetUsersSuite) TestGetUsers() {
 	s.NoError(err)
 
 	s.Equal(http.StatusOK, rec.Code)
-	expectedJSON, err := json.Marshal(sliceskit.Map(users, mapping.UserModelToApiUser))
+	expectedJSON, err := jsonkit.MarshalProto(&api.GetUsersResponse{
+		Data: sliceskit.Map(users, mapping.UserModelToApiUser),
+	})
+
 	s.NoError(err)
 	s.JSONEq(string(expectedJSON), rec.Body.String())
 }
