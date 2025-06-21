@@ -4,6 +4,11 @@ import (
 	"net/http"
 )
 
+type HandlerFunc func(w http.ResponseWriter, r *http.Request) error
+
 type Handler interface {
-	HandlerFunc(handler func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc
+	ApplyMiddleware(originalHandler HandlerFunc, middlewares ...Middleware) HandlerFunc
+	Handle(handler HandlerFunc) http.HandlerFunc
 }
+
+type Middleware func(HandlerFunc) HandlerFunc

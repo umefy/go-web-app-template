@@ -9,6 +9,7 @@ import (
 	userError "github.com/umefy/go-web-app-template/app/user/error"
 	"github.com/umefy/go-web-app-template/gorm/generated/model"
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
+	"github.com/umefy/go-web-app-template/internal/server/httpserver/middlewares"
 	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
 	"github.com/umefy/go-web-app-template/pkg/null"
 )
@@ -22,17 +23,17 @@ type Repository interface {
 
 type userRepository struct {
 	loggerService loggerSrv.Service
-	query         *query.Query
+	dbQuery       *query.Query
 }
 
 var _ Repository = (*userRepository)(nil)
 
-func NewUserRepository(db *db.DB, loggerService loggerSrv.Service) *userRepository {
-	return &userRepository{loggerService: loggerService, query: query.Use(db)}
+func NewUserRepository(dbQuery *query.Query, loggerService loggerSrv.Service) *userRepository {
+	return &userRepository{loggerService: loggerService, dbQuery: dbQuery}
 }
 
 func (r *userRepository) GetUser(ctx context.Context, id int) (*model.User, error) {
-	userQuery := r.query.User
+	userQuery := r.dbQuery.User
 	user, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).Preload(userQuery.Orders).First()
 
 	if errors.Is(err, db.ErrRecordNotFound) {
@@ -48,7 +49,7 @@ func (r *userRepository) GetUser(ctx context.Context, id int) (*model.User, erro
 }
 
 func (r *userRepository) GetUsers(ctx context.Context) ([]*model.User, error) {
-	userQuery := r.query.User
+	userQuery := r.dbQuery.User
 	users, err := userQuery.WithContext(ctx).Preload(userQuery.Orders).Where(userQuery.Age.Gt(null.ValueFrom(1))).Order(userQuery.ID.Asc()).Find()
 
 	if errors.Is(err, db.ErrRecordNotFound) {
@@ -63,7 +64,7 @@ func (r *userRepository) GetUsers(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *userRepository) CreateUser(ctx context.Context, user *model.User) (*model.User, error) {
-	userQuery := r.query.User
+	userQuery := r.dbQuery.User
 	err := userQuery.WithContext(ctx).Create(user)
 
 	if errors.Is(err, db.ErrRecordNotFound) {
@@ -79,7 +80,9 @@ func (r *userRepository) CreateUser(ctx context.Context, user *model.User) (*mod
 }
 
 func (r *userRepository) UpdateUser(ctx context.Context, id int, user *model.User) (*model.User, error) {
-	userQuery := r.query.User
+	tx := ctx.Value(middlewares.Transaction).(*query.QueryTx)
+
+	userQuery := tx.User
 	info, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).Updates(user)
 
 	if err != nil {
@@ -92,11 +95,13 @@ func (r *userRepository) UpdateUser(ctx context.Context, id int, user *model.Use
 		return nil, userError.UserNotFound
 	}
 
-	user, err = r.GetUser(ctx, id)
+	// Use the transaction to get the updated user
+	updatedUser, err := tx.User.WithContext(ctx).Where(tx.User.ID.Eq(id)).Preload(tx.User.Orders).First()
+	r.loggerService.DebugContext(ctx, "Get User", slog.Any("user", updatedUser.Name))
 	if err != nil {
 		r.loggerService.ErrorContext(ctx, "Get User error", slog.String("error", err.Error()))
 		return nil, err
 	}
 
-	return user, nil
+	return updatedUser, nil
 }

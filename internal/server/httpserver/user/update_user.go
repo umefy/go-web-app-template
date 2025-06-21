@@ -27,8 +27,6 @@ func (u *UserUpdate) Validate() error {
 func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
-	h.loggerService.DebugContext(ctx, "UpdateUser")
-
 	var input UserUpdate
 	if err := jsonkit.BindProtoRequestBody(r, &input); err != nil {
 		return err

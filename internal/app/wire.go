@@ -16,6 +16,7 @@ import (
 var WireSet = wire.NewSet(
 	newLogger,
 	newDB,
+	newDBQuery,
 	wire.Bind(new(loggerSvc.Logger), new(*logger.Logger)),
 	LoadConfig,
 	configSvc.WireSet,

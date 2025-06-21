@@ -8,7 +8,7 @@ import (
 	loggerSvc "github.com/umefy/go-web-app-template/app/logger/service"
 	userRepo "github.com/umefy/go-web-app-template/app/user/repository"
 	userSvc "github.com/umefy/go-web-app-template/app/user/service"
-	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
+	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/pkg/validation"
 	"github.com/umefy/godash/logger"
 )
@@ -21,7 +21,7 @@ type App struct {
 	UserRepository userRepo.Repository
 	GreeterService greeterSvc.Service
 	ConfigService  configSvc.Service
-	DB             *db.DB
+	DbQuery        *query.Query
 }
 
 type Arguments struct {

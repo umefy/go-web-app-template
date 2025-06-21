@@ -11,27 +11,37 @@ import (
 )
 
 type DefaultHandler struct {
+	handlerName   string
 	loggerService loggerSrv.Service
 }
 
 var _ Handler = (*DefaultHandler)(nil)
 
-func NewDefaultHandler(loggerService loggerSrv.Service) *DefaultHandler {
-	return &DefaultHandler{loggerService: loggerService}
+func NewDefaultHandler(handlerName string, loggerService loggerSrv.Service) *DefaultHandler {
+	if handlerName == "" {
+		handlerName = "DefaultHandler"
+	}
+	return &DefaultHandler{handlerName: handlerName, loggerService: loggerService}
 }
 
-func (h *DefaultHandler) HandlerFunc(handler func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
+func (h *DefaultHandler) ApplyMiddleware(originalHandler HandlerFunc, middlewares ...Middleware) HandlerFunc {
+	handlerFunc := originalHandler
+	for _, middleware := range middlewares {
+		handlerFunc = middleware(handlerFunc)
+	}
+	return handlerFunc
+}
+
+func (h *DefaultHandler) Handle(handlerFunc HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := handler(w, r); err != nil {
+		if err := handlerFunc(w, r); err != nil {
 			h.HandleError(w, r, err)
 		}
 	}
 }
 
 func (h *DefaultHandler) HandleError(w http.ResponseWriter, r *http.Request, err error) {
-
-	h.loggerService.ErrorContext(r.Context(), "DefaultErrorHandler", slog.String("error", err.Error()))
-
+	h.loggerService.ErrorContext(r.Context(), h.handlerName, slog.String("error", err.Error()))
 	var appErr *appError.Error
 	if errors.As(err, &appErr) {
 		// nolint: errcheck
