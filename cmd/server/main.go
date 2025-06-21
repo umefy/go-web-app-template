@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/umefy/go-web-app-template/internal/app"
-	"github.com/umefy/go-web-app-template/internal/server/grpcserver"
-	"github.com/umefy/go-web-app-template/internal/server/httpserver"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/grpc"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/http"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -22,7 +22,7 @@ func main() {
 	flag.StringVar(&configPath, "config", "", "config file path. If set, will ignore env option")
 	flag.Parse()
 
-	args := app.Arguments{
+	args := config.Options{
 		Env:        env,
 		ConfigPath: configPath,
 	}
@@ -42,8 +42,8 @@ func main() {
 	}
 }
 
-func startHttpServer(args app.Arguments) error {
-	server, err := httpserver.New(args)
+func startHttpServer(configOptions config.Options) error {
+	server, err := http.New(configOptions)
 
 	if err != nil {
 		return err
@@ -59,8 +59,8 @@ func startHttpServer(args app.Arguments) error {
 	return nil
 }
 
-func startGrpcServer(args app.Arguments) error {
-	server, err := grpcserver.New(args)
+func startGrpcServer(configOptions config.Options) error {
+	server, err := grpc.New(configOptions)
 
 	if err != nil {
 		return err

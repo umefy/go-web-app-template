@@ -1,20 +1,18 @@
 package app
 
 import (
-	"fmt"
-
-	configSvc "github.com/umefy/go-web-app-template/app/config/service"
-	greeterSvc "github.com/umefy/go-web-app-template/app/greeter/service"
-	loggerSvc "github.com/umefy/go-web-app-template/app/logger/service"
-	userRepo "github.com/umefy/go-web-app-template/app/user/repository"
-	userSvc "github.com/umefy/go-web-app-template/app/user/service"
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
-	"github.com/umefy/go-web-app-template/pkg/validation"
+	configSvc "github.com/umefy/go-web-app-template/internal/domain/config/service"
+	greeterSvc "github.com/umefy/go-web-app-template/internal/domain/greeter/service"
+	loggerSvc "github.com/umefy/go-web-app-template/internal/domain/logger/service"
+	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repository"
+	userSvc "github.com/umefy/go-web-app-template/internal/domain/user/service"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
 	"github.com/umefy/godash/logger"
 )
 
 type App struct {
-	Arguments      Arguments
+	Arguments      config.Options
 	Logger         *logger.Logger
 	LoggerService  loggerSvc.Service
 	UserService    userSvc.Service
@@ -24,25 +22,8 @@ type App struct {
 	DbQuery        *query.Query
 }
 
-type Arguments struct {
-	Env        string
-	ConfigPath string
-}
-
-var _ validation.Validate = (*Arguments)(nil)
-
-func (a *Arguments) Validate() error {
-	return validation.ValidateStruct(a,
-		validation.Field(&a.Env, validation.In("dev", "test", "prod").Error("can only be set to dev, test or prod")),
-	)
-}
-
-func New(args Arguments) (*App, error) {
-	err := args.Validate()
-	if err != nil {
-		return nil, fmt.Errorf("invalidate arguments error: %w", err)
-	}
-	app, err := InitializeApp(args)
+func New(configOptions config.Options) (*App, error) {
+	app, err := InitializeApp(configOptions)
 	if err != nil {
 		return nil, err
 	}
