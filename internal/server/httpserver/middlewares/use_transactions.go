@@ -18,7 +18,7 @@ func UseTransaction(dbQuery *query.Query) handler.Middleware {
 	return func(next handler.HandlerFunc) handler.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) error {
 			tx := dbQuery.Begin()
-			//lint:ignore errcheck
+			// nolint: errcheck
 			defer tx.Rollback()
 
 			ctx := context.WithValue(r.Context(), Transaction, tx)
