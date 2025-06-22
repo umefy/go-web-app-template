@@ -41,8 +41,7 @@ func NewHandler(userService userSrv.Service, loggerService loggerSrv.Service) *u
 // func (h *userHandler) Handle(handlerFunc handler.HandlerFunc) http.HandlerFunc {
 // 	return func(w http.ResponseWriter, r *http.Request) {
 // 		if err := handlerFunc(w, r); err != nil {
-// 			h.loggerService.ErrorContext(r.Context(), "UserHandler Catch", slog.String("error", err.Error()))
-
+// 			h.loggerService.ErrorContext(r.Context(), "UserHandler", slog.String("error", err.Error()))
 // 			h.DefaultHandler.HandleError(w, r, err)
 // 		}
 // 	}

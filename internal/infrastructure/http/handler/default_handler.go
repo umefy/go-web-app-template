@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -41,7 +42,7 @@ func (h *DefaultHandler) Handle(handlerFunc HandlerFunc) http.HandlerFunc {
 }
 
 func (h *DefaultHandler) HandleError(w http.ResponseWriter, r *http.Request, err error) {
-	h.loggerService.ErrorContext(r.Context(), h.handlerName, slog.String("error", err.Error()))
+	h.loggerService.ErrorContext(r.Context(), fmt.Sprintf("DefaultHandler(%s) Catch", h.handlerName), slog.String("error", err.Error()))
 	var appErr *appError.Error
 	if errors.As(err, &appErr) {
 		// nolint: errcheck
