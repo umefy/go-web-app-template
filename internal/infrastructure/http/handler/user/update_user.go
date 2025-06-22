@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/infrastructure/http/handler/user/mapping"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/http/middleware"
 	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
 	"github.com/umefy/go-web-app-template/pkg/validation"
 	"github.com/umefy/godash/jsonkit"
@@ -39,7 +40,12 @@ func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) error {
 	user := mapping.ApiUserUpdateToUserModel(&input.UserUpdate)
 
 	userID := r.PathValue("id")
-	user, err := h.userService.UpdateUser(ctx, userID, user)
+
+	tx, err := middleware.GetTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	user, err = h.userService.UpdateUser(ctx, userID, user, tx)
 	if err != nil {
 		return err
 	}

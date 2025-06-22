@@ -6,8 +6,6 @@ MAIN_PATH=cmd/server/main.go
 BUILD_FOLDER=./bin
 PRODUCTION_ENTRY=$(BUILD_FOLDER)/$(APP_NAME)
 AIR_TMP_FOLDER=./tmp
-TEST_EXCLUDE_PATHS=protogen|mocks|gorm|wire.go|repository
-TEST_PATHS=$(shell go list ./... | grep -v -E "$(TEST_EXCLUDE_PATHS)")
 ENVRC_FILE ?=.envrc
 
 default: dev
@@ -52,7 +50,7 @@ fmt:
 
 test:
 	@echo "⏱️ running tests now... "
-	go test -race -parallel=4 -timeout 30s -cover $(ARGS) $(TEST_PATHS)
+	go test -race -parallel=4 -timeout 30s -cover $(ARGS) ./internal/...
 	@echo "✅ passing all tests."
 
 lint:

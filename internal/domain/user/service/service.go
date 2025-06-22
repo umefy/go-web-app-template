@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/umefy/go-web-app-template/gorm/generated/model"
+	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
 	"github.com/umefy/go-web-app-template/internal/domain/user/repository"
 )
@@ -14,8 +15,8 @@ import (
 type Service interface {
 	GetUsers(ctx context.Context) ([]*model.User, error)
 	GetUser(ctx context.Context, id string) (*model.User, error)
-	CreateUser(ctx context.Context, user *model.User) (*model.User, error)
-	UpdateUser(ctx context.Context, id string, user *model.User) (*model.User, error)
+	CreateUser(ctx context.Context, user *model.User, tx *query.QueryTx) (*model.User, error)
+	UpdateUser(ctx context.Context, id string, user *model.User, tx *query.QueryTx) (*model.User, error)
 }
 
 type userService struct {
@@ -53,8 +54,8 @@ func (u *userService) GetUser(ctx context.Context, id string) (*model.User, erro
 	return user, nil
 }
 
-func (u *userService) CreateUser(ctx context.Context, user *model.User) (*model.User, error) {
-	user, err := u.userRepository.CreateUser(ctx, user)
+func (u *userService) CreateUser(ctx context.Context, user *model.User, tx *query.QueryTx) (*model.User, error) {
+	user, err := u.userRepository.CreateUser(ctx, user, tx)
 	if err != nil {
 		return nil, err
 	}
@@ -62,20 +63,17 @@ func (u *userService) CreateUser(ctx context.Context, user *model.User) (*model.
 }
 
 // UpdateUser implements Service.
-func (u *userService) UpdateUser(ctx context.Context, id string, user *model.User) (*model.User, error) {
+func (u *userService) UpdateUser(ctx context.Context, id string, user *model.User, tx *query.QueryTx) (*model.User, error) {
 	userID, err := strconv.Atoi(id)
 	if err != nil {
 		u.loggerService.ErrorContext(ctx, "UserService.UpdateUser", slog.String("error", err.Error()))
 		return nil, fmt.Errorf("invalid user id")
 	}
 
-	user, err = u.userRepository.UpdateUser(ctx, userID, user)
+	user, err = u.userRepository.UpdateUser(ctx, userID, user, tx)
 	if err != nil {
 		return nil, err
 	}
-
-	a := 0
-	fmt.Println(1 / a)
 
 	return user, nil
 }

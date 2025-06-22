@@ -16,6 +16,8 @@ type Options struct {
 	ConfigPath string
 }
 
+const configDirRelativePath = "../../../configs"
+
 var _ validation.Validate = (*Options)(nil)
 
 func (o *Options) Validate() error {
@@ -56,7 +58,7 @@ func LoadConfig(args Options) (*appConfig.AppConfig, error) {
 
 func getConfigOptByEnv(env string) config.ConfigOption {
 	_, path, _, _ := runtime.Caller(1)
-	configDir := filepath.Join(filepath.Dir(path), "../../configs")
+	configDir := filepath.Join(filepath.Dir(path), configDirRelativePath)
 
 	return config.ConfigOption{
 		ConfigType:  "yaml",

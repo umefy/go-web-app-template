@@ -1,6 +1,6 @@
 all: false
 dir: 'mocks'
-filename: '{{.InterfaceDirRelative}}/{{.InterfaceName}}.go'
+filename: '{{.InterfaceDirRelative | replace "internal/" "" -1}}/{{.InterfaceName}}.go'
 force-file-write: true
 formatter: goimports
 log-level: info

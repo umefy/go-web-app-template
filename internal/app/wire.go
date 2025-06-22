@@ -18,15 +18,14 @@ import (
 
 var WireSet = wire.NewSet(
 	logger.NewLogger,
-	database.NewDB,
-	database.NewDBQuery,
+	database.WireSet,
 	wire.Bind(new(loggerSvc.Logger), new(*dashLogger.Logger)),
 	config.LoadConfig,
 	configSvc.WireSet,
 	userSvc.WireSet,
 	greeterSvc.WireSet,
 	loggerSvc.WireSet,
-	userRepo.WireSet,
+	wire.Bind(new(userRepo.Repository), new(*database.UserRepository)),
 	wire.Struct(new(App), "*"),
 )
 

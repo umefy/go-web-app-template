@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/infrastructure/http/handler/user/mapping"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/http/middleware"
 	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
 	"github.com/umefy/go-web-app-template/pkg/validation"
 	"github.com/umefy/godash/jsonkit"
@@ -42,7 +43,12 @@ func (h *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) error {
 
 	user := mapping.ApiUserCreateToUserModel(&userInput.UserCreate)
 
-	user, err := h.userService.CreateUser(ctx, user)
+	tx, err := middleware.GetTransaction(ctx)
+	if err != nil {
+		return err
+	}
+
+	user, err = h.userService.CreateUser(ctx, user, tx)
 	if err != nil {
 		return err
 	}
