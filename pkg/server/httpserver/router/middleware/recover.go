@@ -34,6 +34,8 @@ func Recover(logger *logger.Logger) func(next http.Handler) http.Handler {
 					)
 
 					w.WriteHeader(http.StatusInternalServerError)
+
+					//nolint:errcheck
 					jsonkit.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
 				}
 			}()
