@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/umefy/go-web-app-template/gorm/generated/model"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/handler/user/mapping"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1/handler/user/mapping"
 	loggerSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/logger/service"
 	userSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/user/service"
 	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
@@ -39,7 +39,7 @@ func (s *GetUsersSuite) TestGetUsers() {
 
 	h := NewHandler(userService, loggerService)
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/openapi/v1/users", nil)
 	rec := httptest.NewRecorder()
 
 	err := h.GetUsers(rec, req)

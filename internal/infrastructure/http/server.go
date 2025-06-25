@@ -6,6 +6,7 @@ import (
 
 	"github.com/umefy/go-web-app-template/internal/app"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
+	apiV1 "github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 )
@@ -36,6 +37,6 @@ func New(configOptions config.Options) (*httpserver.Server, error) {
 func newHttpHandler(app *app.App) http.Handler {
 	r := router.NewRootRouter(app.Logger)
 
-	r.Mount("/users", NewUserRouter(app))
+	r.Mount("/api/v1", apiV1.NewApiV1Router(app))
 	return r
 }

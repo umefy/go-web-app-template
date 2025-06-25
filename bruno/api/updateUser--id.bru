@@ -1,18 +1,18 @@
 meta {
   name: updateUser/:id
   type: http
-  seq: 4
+  seq: 1
 }
 
 patch {
-  url: {{Localhost}}:8082/users/1
+  url: {{localhost}}:8082/api/{{version}}/users/1
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "name": "Test23",
+    "name": "Test2",
     "age": 12
   }
 }

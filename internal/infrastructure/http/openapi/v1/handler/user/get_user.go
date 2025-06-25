@@ -3,7 +3,7 @@ package user
 import (
 	"net/http"
 
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/handler/user/mapping"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1/handler/user/mapping"
 	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
 	"github.com/umefy/godash/jsonkit"
 )
