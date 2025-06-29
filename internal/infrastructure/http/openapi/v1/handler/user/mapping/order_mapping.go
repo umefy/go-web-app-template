@@ -1,18 +1,16 @@
 package mapping
 
 import (
-	"time"
-
-	"github.com/umefy/go-web-app-template/gorm/generated/model"
-	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
+	"github.com/umefy/go-web-app-template/internal/domain/order/model"
+	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 )
 
-func OrderModelToApiOrder(order *model.Order) *api.Order {
-	return &api.Order{
-		Id:        int32(order.ID),
-		UserId:    int32(order.UserID.ValueOrZero()),
-		Amount:    float32(order.Amount.ValueOrZero()),
-		CreatedAt: order.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: order.UpdatedAt.Format(time.RFC3339),
+func OrderModelToApiOrder(order *model.Order) api.Order {
+	return api.Order{
+		Id:        &order.ID,
+		UserId:    order.UserID,
+		Amount:    order.Amount,
+		CreatedAt: &order.CreatedAt,
+		UpdatedAt: &order.UpdatedAt,
 	}
 }

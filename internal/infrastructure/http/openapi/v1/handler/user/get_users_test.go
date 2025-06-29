@@ -6,14 +6,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/guregu/null/v6"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/umefy/go-web-app-template/gorm/generated/model"
+	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1/handler/user/mapping"
 	loggerSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/logger/service"
 	userSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/user/service"
-	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
+	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/jsonkit"
 	"github.com/umefy/godash/sliceskit"
 )
@@ -26,11 +25,11 @@ func (s *GetUsersSuite) TestGetUsers() {
 	userService := userSrvMocks.NewMockService(s.T())
 	loggerService := loggerSrvMocks.NewMockService(s.T())
 
-	users := []*model.User{
+	users := []*userModel.User{
 		{
 			ID:   1,
-			Name: null.ValueFrom("John Doe"),
-			Age:  null.ValueFrom(20),
+			Name: "John Doe",
+			Age:  20,
 		},
 	}
 
@@ -46,7 +45,7 @@ func (s *GetUsersSuite) TestGetUsers() {
 	s.NoError(err)
 
 	s.Equal(http.StatusOK, rec.Code)
-	expectedJSON, err := jsonkit.MarshalProto(&api.UserGetAllResponse{
+	expectedJSON, err := jsonkit.Marshal(&api.UserGetAllResponse{
 		Data: sliceskit.Map(users, mapping.UserModelToApiUser),
 	})
 

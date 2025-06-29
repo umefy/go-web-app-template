@@ -1,37 +1,35 @@
 package mapping
 
 import (
-	"time"
-
-	"github.com/umefy/go-web-app-template/gorm/generated/model"
-	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
-	"github.com/umefy/go-web-app-template/pkg/null"
+	orderModel "github.com/umefy/go-web-app-template/internal/domain/order/model"
+	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
+	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/sliceskit"
 )
 
-func UserModelToApiUser(user *model.User) *api.User {
-	return &api.User{
-		Id:        int32(user.ID),
-		Name:      user.Name.ValueOrZero(),
-		Age:       int32(user.Age.ValueOrZero()),
-		CreatedAt: user.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
-		Orders: sliceskit.Map(user.Orders, func(order model.Order) *api.Order {
+func UserModelToApiUser(user *userModel.User) api.User {
+	return api.User{
+		Id:        &user.ID,
+		Name:      user.Name,
+		Age:       user.Age,
+		CreatedAt: &user.CreatedAt,
+		UpdatedAt: &user.UpdatedAt,
+		Orders: sliceskit.Map(user.Orders, func(order orderModel.Order) api.Order {
 			return OrderModelToApiOrder(&order)
 		}),
 	}
 }
 
-func ApiUserCreateToUserModel(input *api.UserCreate) *model.User {
-	return &model.User{
-		Name: null.ValueFrom(input.Name),
-		Age:  null.ValueFrom(int(input.Age)),
+func ApiUserCreateToUserModelCreate(input *api.UserCreate) *userModel.UserCreateInput {
+	return &userModel.UserCreateInput{
+		Name: input.GetName(),
+		Age:  input.GetAge(),
 	}
 }
 
-func ApiUserUpdateToUserModel(input *api.UserUpdate) *model.User {
-	return &model.User{
-		Name: null.ValueFromWrapperspbString(input.Name),
-		Age:  null.ValueFromWrapperspbInt32(input.Age),
+func ApiUserUpdateToUserModelUpdate(input *api.UserUpdate) *userModel.UserUpdateInput {
+	return &userModel.UserUpdateInput{
+		Name: input.Name.Get(),
+		Age:  input.Age.Get(),
 	}
 }

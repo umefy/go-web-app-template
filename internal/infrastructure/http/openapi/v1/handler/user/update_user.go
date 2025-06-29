@@ -5,39 +5,19 @@ import (
 
 	"github.com/umefy/go-web-app-template/internal/infrastructure/http/middleware"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1/handler/user/mapping"
-	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
-	"github.com/umefy/go-web-app-template/pkg/validation"
+	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/jsonkit"
 )
-
-type UserUpdate struct {
-	api.UserUpdate
-}
-
-var _ validation.Validate = (*UserUpdate)(nil)
-
-func (u *UserUpdate) Validate() error {
-	return validation.ValidateStruct(u,
-		validation.Field(&u.Age,
-			validation.MinWrapperspb(12),
-			validation.MaxWrapperspb(20),
-		),
-	)
-}
 
 func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
-	var input UserUpdate
-	if err := jsonkit.BindProtoRequestBody(r, &input); err != nil {
+	var input api.UserUpdate
+	if err := jsonkit.BindRequestBody(r, &input); err != nil {
 		return err
 	}
 
-	if err := input.Validate(); err != nil {
-		return err
-	}
-
-	user := mapping.ApiUserUpdateToUserModel(&input.UserUpdate)
+	userUpdateInput := mapping.ApiUserUpdateToUserModelUpdate(&input)
 
 	userID := r.PathValue("id")
 
@@ -45,14 +25,15 @@ func (h *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	user, err = h.userService.UpdateUser(ctx, userID, user, tx)
+	user, err := h.userService.UpdateUser(ctx, userID, userUpdateInput, tx)
 	if err != nil {
 		return err
 	}
 
-	userResponse := api.UserUpdateResponse{
-		Data: mapping.UserModelToApiUser(user),
+	userResp := mapping.UserModelToApiUser(user)
+	resp := api.UserUpdateResponse{
+		Data: &userResp,
 	}
 
-	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &userResponse)
+	return jsonkit.JSONResponse(w, http.StatusOK, &resp)
 }

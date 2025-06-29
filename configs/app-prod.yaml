@@ -1,3 +1,4 @@
+env: prod
 http_server:
   enabled: true
   port: 8083

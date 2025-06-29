@@ -108,16 +108,21 @@ components:
         age:
           type: integer
           example: 30
+      required:
+        - name
+        - age
     UserUpdate:
       type: object
       properties:
         name:
-          type: string
+          type: 
+            - string
+            - "null"
           example: "John Doe"
-          x-protobuf-data-type: google.protobuf.StringValue
         age:
-          type: integer
-          x-protobuf-data-type: google.protobuf.Int32Value
+          type:
+            - integer
+            - "null"
           example: 30
     User:
       type: object

@@ -5,57 +5,36 @@ import (
 
 	"github.com/umefy/go-web-app-template/internal/infrastructure/http/middleware"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1/handler/user/mapping"
-	api "github.com/umefy/go-web-app-template/openapi/protogen/v1/models"
-	"github.com/umefy/go-web-app-template/pkg/validation"
+	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/jsonkit"
 )
-
-type CreateUserInput struct {
-	api.UserCreate
-}
-
-var _ validation.Validate = (*CreateUserInput)(nil)
-
-func (u *CreateUserInput) Validate() error {
-	return validation.ValidateStruct(u,
-		validation.Field(&u.Name, validation.Required),
-		validation.Field(&u.Age,
-			validation.Required.Error("must be provided"),
-			validation.Min(12),
-			validation.Max(20),
-		),
-	)
-}
 
 func (h *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
 	h.loggerService.DebugContext(ctx, "CreateUser")
 
-	var userInput CreateUserInput
-	if err := jsonkit.BindProtoRequestBody(r, &userInput); err != nil {
+	var userInput api.UserCreate
+	if err := jsonkit.BindRequestBody(r, &userInput); err != nil {
 		return err
 	}
 
-	if err := (&userInput).Validate(); err != nil {
-		return err
-	}
-
-	user := mapping.ApiUserCreateToUserModel(&userInput.UserCreate)
+	userCreateInput := mapping.ApiUserCreateToUserModelCreate(&userInput)
 
 	tx, err := middleware.GetTransaction(ctx)
 	if err != nil {
 		return err
 	}
 
-	user, err = h.userService.CreateUser(ctx, user, tx)
+	user, err := h.userService.CreateUser(ctx, userCreateInput, tx)
 	if err != nil {
 		return err
 	}
 
+	userResp := mapping.UserModelToApiUser(user)
 	resp := api.UserCreateResponse{
-		Data: mapping.UserModelToApiUser(user),
+		Data: &userResp,
 	}
 
-	return jsonkit.ProtoJSONResponse(w, http.StatusOK, &resp)
+	return jsonkit.JSONResponse(w, http.StatusOK, &resp)
 }

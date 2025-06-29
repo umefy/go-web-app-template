@@ -48,6 +48,8 @@ check_and_install "protoc-gen-go-grpc" "go install google.golang.org/grpc/cmd/pr
 check_and_install "wire" "go install github.com/google/wire/cmd/wire@latest"
 check_and_install "mockery" "go install github.com/vektra/mockery/v3@latest"
 check_and_install "goose" "go install github.com/pressly/goose/v3/cmd/goose@latest"
+check_and_install "goimports" "go install golang.org/x/tools/cmd/goimports@latest"
+check_and_install "gqlgen" "go install github.com/99designs/gqlgen@latest"
 check_and_install "openapi-generator" "brew install openapi-generator"
 check_and_install "golangci-lint" "brew install golangci-lint"
 check_and_install "air" "go install github.com/air-verse/air@latest"
