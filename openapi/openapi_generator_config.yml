@@ -1,6 +1,7 @@
 generatorName: go
 inputSpec: openapi/docs/api.yaml
 outputDir: openapi/generated/go/openapi
+templateDir: openapi/goTemplates
 globalProperties:
   models: ""
   supportingFiles: "utils.go"
@@ -8,6 +9,7 @@ additionalProperties:
   packageName: "openapi"
   generateMarshalJSON: true
   generateUnmarshalJSON: true
+  omitEmptyFields: false
 typeMappings:
   int32: int
   float32: float64
