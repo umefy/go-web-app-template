@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/99designs/gqlgen v0.17.76
-	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-chi/cors v1.2.1
 	github.com/go-chi/httprate v0.14.1
 	github.com/google/uuid v1.6.0
@@ -22,7 +22,6 @@ require (
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gen v0.3.26
 	gorm.io/gorm v1.25.12
-	gorm.io/plugin/dbresolver v1.5.3
 )
 
 require (
@@ -64,4 +63,5 @@ require (
 	gorm.io/datatypes v1.2.5 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect
 	gorm.io/hints v1.1.2 // indirect
+	gorm.io/plugin/dbresolver v1.5.3 // indirect
 )
