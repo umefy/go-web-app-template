@@ -71,8 +71,9 @@ func (u *userService) CreateUser(ctx context.Context, createUserInput *model.Use
 		return nil, err
 	}
 
-	exists, err := u.IsUserExists(ctx, createUserInput.Email, tx)
-	if exists {
+	if exists, err := u.IsUserExists(ctx, createUserInput.Email, tx); err != nil {
+		return nil, err
+	} else if exists {
 		return nil, userError.UserAlreadyExists
 	}
 
