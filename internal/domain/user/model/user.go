@@ -12,7 +12,7 @@ import (
 
 type User struct {
 	ID        int
-	Name      string
+	Email     string
 	Age       int
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -21,7 +21,7 @@ type User struct {
 
 func (u User) MapToDbModel() *dbModel.User {
 	return &dbModel.User{
-		Name:      null.ValueFrom(u.Name),
+		Email:     null.ValueFrom(u.Email),
 		Age:       null.ValueFrom(u.Age),
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
@@ -31,7 +31,7 @@ func (u User) MapToDbModel() *dbModel.User {
 func (u User) CreateFromDbModel(dbUserModel *dbModel.User) *User {
 	return &User{
 		ID:        dbUserModel.ID,
-		Name:      dbUserModel.Name.ValueOrZero(),
+		Email:     dbUserModel.Email.ValueOrZero(),
 		Age:       dbUserModel.Age.ValueOrZero(),
 		CreatedAt: dbUserModel.CreatedAt,
 		UpdatedAt: dbUserModel.UpdatedAt,
@@ -42,39 +42,39 @@ func (u User) CreateFromDbModel(dbUserModel *dbModel.User) *User {
 }
 
 type UserCreateInput struct {
-	Name string
-	Age  int
+	Email string
+	Age   int
 }
 
 func (u *UserCreateInput) Validate() error {
 	return validation.ValidateStruct(u,
-		validation.Field(&u.Name, validation.Required),
+		validation.Field(&u.Email, validation.Required),
 		validation.Field(&u.Age, validation.Max(100)),
 	)
 }
 
 func (u UserCreateInput) MapToDbModel() *dbModel.User {
 	return &dbModel.User{
-		Name: null.ValueFrom(u.Name),
-		Age:  null.ValueFrom(u.Age),
+		Email: null.ValueFrom(u.Email),
+		Age:   null.ValueFrom(u.Age),
 	}
 }
 
 type UserUpdateInput struct {
-	Name *string
-	Age  *int
+	Email *string
+	Age   *int
 }
 
 func (u *UserUpdateInput) Validate() error {
 	return validation.ValidateStruct(u,
-		validation.Field(&u.Name),
+		validation.Field(&u.Email),
 		validation.Field(&u.Age, validation.Max(100)),
 	)
 }
 
 func (u UserUpdateInput) MapToDbModel() *dbModel.User {
 	return &dbModel.User{
-		Name: null.ValueFromPtr(u.Name),
-		Age:  null.ValueFromPtr(u.Age),
+		Email: null.ValueFromPtr(u.Email),
+		Age:   null.ValueFromPtr(u.Age),
 	}
 }

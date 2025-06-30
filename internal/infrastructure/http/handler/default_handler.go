@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	appError "github.com/umefy/go-web-app-template/internal/domain/error"
+	domainError "github.com/umefy/go-web-app-template/internal/domain/error"
 	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
 	"github.com/umefy/godash/jsonkit"
 )
@@ -43,10 +43,10 @@ func (h *DefaultHandler) Handle(handlerFunc HandlerFunc) http.HandlerFunc {
 
 func (h *DefaultHandler) HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	h.loggerService.ErrorContext(r.Context(), fmt.Sprintf("DefaultHandler(%s) Catch", h.handlerName), slog.String("error", err.Error()))
-	var appErr *appError.Error
-	if errors.As(err, &appErr) {
+	var domainErr *domainError.Error
+	if errors.As(err, &domainErr) {
 		// nolint: errcheck
-		jsonkit.JSONResponse(w, appErr.HTTPCode, map[string]string{"errorCode": appErr.ErrorCode, "errorMsg": appErr.ErrorMsg})
+		jsonkit.JSONResponse(w, domainErr.HTTPCode, map[string]any{"error": domainErr})
 		return
 	}
 	// nolint: errcheck

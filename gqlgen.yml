@@ -2,6 +2,8 @@
 schema:
   - graphql/*.graphqls
 
+omit_panic_handler: true
+
 # Where should the generated server code go?
 exec:
   package: graphql

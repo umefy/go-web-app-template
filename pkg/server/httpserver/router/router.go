@@ -18,7 +18,6 @@ func NewRootRouter(logger *logger.Logger) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger(logger))
-	// r.Use(chiMiddleware.Recoverer)
 	r.Use(middleware.Recover(logger))
 
 	r.Use(chiMiddleware.AllowContentType(allowedContentTypes[:]...))

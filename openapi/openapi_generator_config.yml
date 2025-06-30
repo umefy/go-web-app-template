@@ -6,7 +6,7 @@ globalProperties:
   supportingFiles: "utils.go"
 additionalProperties:
   packageName: "openapi"
-  generateMarshalJSON: false
+  generateMarshalJSON: true
   generateUnmarshalJSON: true
 typeMappings:
   int32: int

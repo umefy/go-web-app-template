@@ -10,4 +10,4 @@ rm -rf "$GENERATED_PATH"
 openapi-generator generate \
   -c "$CONFIG_PATH"
 
-# goimports -w "$GENERATED_PATH"
+goimports -w "$GENERATED_PATH"

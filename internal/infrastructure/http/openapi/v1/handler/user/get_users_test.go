@@ -27,9 +27,9 @@ func (s *GetUsersSuite) TestGetUsers() {
 
 	users := []*userModel.User{
 		{
-			ID:   1,
-			Name: "John Doe",
-			Age:  20,
+			ID:    1,
+			Email: "john.doe@example.com",
+			Age:   20,
 		},
 	}
 

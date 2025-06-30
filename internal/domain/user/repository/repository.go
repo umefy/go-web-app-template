@@ -14,4 +14,5 @@ type Repository interface {
 	GetUsersTx(ctx context.Context, tx *query.QueryTx) ([]*dbModel.User, error)
 	CreateUser(ctx context.Context, user *dbModel.User, tx *query.QueryTx) (*dbModel.User, error)
 	UpdateUser(ctx context.Context, id int, user *dbModel.User, tx *query.QueryTx) (*dbModel.User, error)
+	IsUserEmailExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error)
 }

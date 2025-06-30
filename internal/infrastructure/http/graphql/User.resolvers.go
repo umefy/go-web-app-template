@@ -6,13 +6,29 @@ package graphql
 
 import (
 	"context"
-	"strconv"
-	"time"
 
+	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql/mapping"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql/model"
 	"github.com/umefy/godash/sliceskit"
 )
+
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreateInput) (*model.User, error) {
+	return database.WithTx(ctx, r.DbQuery, r.LoggerService, func(ctx context.Context, tx *query.QueryTx) (*model.User, error) {
+		userModel, err := r.UserService.CreateUser(ctx, &userModel.UserCreateInput{
+			Email: input.Email,
+			Age:   int(input.Age),
+		}, tx)
+		if err != nil {
+			return nil, err
+		}
+
+		return mapping.UserModelToGraphqlUser(userModel), nil
+	})
+}
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
@@ -21,18 +37,14 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 		return nil, err
 	}
 
-	return sliceskit.Map(users, func(user *userModel.User) *model.User {
-		return &model.User{
-			ID:        strconv.Itoa(user.ID),
-			Name:      user.Name,
-			Age:       int32(user.Age),
-			CreatedAt: user.CreatedAt.Format(time.RFC3339),
-			UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
-		}
-	}), nil
+	return sliceskit.Map(users, mapping.UserModelToGraphqlUser), nil
 }
+
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

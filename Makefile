@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto
+.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto regen_graphql
 
 APP_NAME=webapp
 MAIN_PATH=cmd/server/main.go
@@ -125,6 +125,7 @@ help:
 	@echo "make regen_openapi - generating proto from openapi"
 	@echo "make regen_proto - regenerating source code from proto"
 	@echo "make regen_gorm - regenerating gorm models"
+	@echo "make regen_graphql - regenerating graphql models"
 	@echo "make migration_up - running database migrations up"
 	@echo "make migration_down - running database migrations down"
 	@echo "make migration_create - creating a new database migration"

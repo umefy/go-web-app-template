@@ -9,6 +9,7 @@ import (
 	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
+	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
 	"github.com/umefy/go-web-app-template/internal/domain/user/model"
 	"github.com/umefy/go-web-app-template/internal/domain/user/repository"
 	"github.com/umefy/godash/sliceskit"
@@ -17,6 +18,7 @@ import (
 type Service interface {
 	GetUsers(ctx context.Context) ([]*model.User, error)
 	GetUser(ctx context.Context, id string) (*model.User, error)
+	IsUserExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error)
 	CreateUser(ctx context.Context, userCreateInput *model.UserCreateInput, tx *query.QueryTx) (*model.User, error)
 	UpdateUser(ctx context.Context, id string, userUpdateInput *model.UserUpdateInput, tx *query.QueryTx) (*model.User, error)
 }
@@ -59,10 +61,19 @@ func (u *userService) GetUser(ctx context.Context, id string) (*model.User, erro
 	return model.User{}.CreateFromDbModel(user), nil
 }
 
+func (u *userService) IsUserExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error) {
+	return u.userRepository.IsUserEmailExists(ctx, email, tx)
+}
+
 func (u *userService) CreateUser(ctx context.Context, createUserInput *model.UserCreateInput, tx *query.QueryTx) (*model.User, error) {
 
 	if err := createUserInput.Validate(); err != nil {
 		return nil, err
+	}
+
+	exists, err := u.IsUserExists(ctx, createUserInput.Email, tx)
+	if exists {
+		return nil, userError.UserAlreadyExists
 	}
 
 	userDb, err := u.userRepository.CreateUser(ctx, createUserInput.MapToDbModel(), tx)

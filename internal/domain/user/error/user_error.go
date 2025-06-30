@@ -12,5 +12,6 @@ const (
 )
 
 var (
-	UserNotFound = appError.NewError(fmt.Sprintf("%s_1001", serviceName), "user not found", http.StatusNotFound)
+	UserNotFound      = appError.NewError(fmt.Sprintf("%s_1001", serviceName), "user not found", http.StatusNotFound)
+	UserAlreadyExists = appError.NewError(fmt.Sprintf("%s_1002", serviceName), "user already exists", http.StatusBadRequest)
 )

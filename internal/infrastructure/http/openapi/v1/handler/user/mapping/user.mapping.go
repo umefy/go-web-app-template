@@ -10,7 +10,7 @@ import (
 func UserModelToApiUser(user *userModel.User) api.User {
 	return api.User{
 		Id:        &user.ID,
-		Name:      user.Name,
+		Email:     user.Email,
 		Age:       user.Age,
 		CreatedAt: &user.CreatedAt,
 		UpdatedAt: &user.UpdatedAt,
@@ -22,14 +22,14 @@ func UserModelToApiUser(user *userModel.User) api.User {
 
 func ApiUserCreateToUserModelCreate(input *api.UserCreate) *userModel.UserCreateInput {
 	return &userModel.UserCreateInput{
-		Name: input.GetName(),
-		Age:  input.GetAge(),
+		Email: input.GetEmail(),
+		Age:   input.GetAge(),
 	}
 }
 
 func ApiUserUpdateToUserModelUpdate(input *api.UserUpdate) *userModel.UserUpdateInput {
 	return &userModel.UserUpdateInput{
-		Name: input.Name.Get(),
-		Age:  input.Age.Get(),
+		Email: input.Email.Get(),
+		Age:   input.Age.Get(),
 	}
 }
