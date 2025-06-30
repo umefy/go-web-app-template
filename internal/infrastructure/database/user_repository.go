@@ -121,3 +121,14 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id int, user *model.Use
 
 	return updatedUser, nil
 }
+
+func (r *UserRepository) IsUserEmailExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error) {
+	userQuery := tx.User
+	count, err := userQuery.WithContext(ctx).Where(userQuery.Email.Eq(null.ValueFrom(email))).Count()
+
+	if err != nil {
+		r.loggerService.ErrorContext(ctx, "UserRepository.IsUserEmailExists", slog.String("error", err.Error()))
+		return false, err
+	}
+	return count > 0, nil
+}

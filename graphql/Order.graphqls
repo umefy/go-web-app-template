@@ -1,0 +1,11 @@
+type Order {
+  id: ID!
+  userId: ID!
+  amount: Float!
+  createdAt: String!
+  updatedAt: String!
+}
+
+extend type Query {
+  orders: [Order!]!
+}

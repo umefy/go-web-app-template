@@ -3,7 +3,7 @@
 create table orders (
   id serial primary key,
   user_id int not null,
-  amount int not null,
+  amount float not null,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

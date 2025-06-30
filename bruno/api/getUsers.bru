@@ -1,0 +1,11 @@
+meta {
+  name: getUsers
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{localhost}}:8082/api/{{version}}/users
+  body: none
+  auth: none
+}

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate
+.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto regen_graphql
 
 APP_NAME=webapp
 MAIN_PATH=cmd/server/main.go
@@ -41,12 +41,17 @@ clean:
 
 check: tidy fmt lint test
 
-generate: openapi_to_proto regen_proto migration_up regen_gorm wire mockery
+generate: regen_openapi regen_proto migration_up regen_gorm wire mockery regen_graphql
 
 fmt:
 	@echo "⏱️ formatting code now..."
 	go fmt ./...
 	@echo "✅ formatting finish"
+
+goimports:
+	@echo "⏱️ running goimports now..."
+	goimports -w .
+	@echo "✅ finishing goimports..."
 
 test:
 	@echo "⏱️ running tests now... "
@@ -68,10 +73,10 @@ wire:
 	wire ./...
 	@echo "✅ finishing wire..."
 
-openapi_to_proto:
-	@echo "⏱️ running openapi to proto now..."
-	./scripts/openapi_to_proto.sh
-	@echo "✅ finishing openapi to proto..."
+regen_openapi:
+	@echo "⏱️ running openapi to go code now..."
+	./scripts/regen_openapi.sh
+	@echo "✅ finishing openapi to go code..."
 
 regen_proto:
 	@echo "⏱️ running regen proto now..."
@@ -82,6 +87,11 @@ regen_gorm:
 	@echo "⏱️ running regen gorm now..."
 	source $(ENVRC_FILE) && go run gorm/generate.go
 	@echo "✅ finishing regen gorm..."
+
+regen_graphql:
+	@echo "⏱️ running regen graphql now..."
+	gqlgen generate
+	@echo "✅ finishing regen graphql..."
 
 migration_up:
 	source $(ENVRC_FILE) && goose up
@@ -112,9 +122,10 @@ help:
 	@echo "make lint - running golangci lint"
 	@echo "make tidy - install all dependencies"
 	@echo "make wire - running wire"
-	@echo "make openapi_to_proto - generating proto from openapi"
+	@echo "make regen_openapi - generating Go models from OpenAPI specification"
 	@echo "make regen_proto - regenerating source code from proto"
 	@echo "make regen_gorm - regenerating gorm models"
+	@echo "make regen_graphql - regenerating graphql models and resolvers"
 	@echo "make migration_up - running database migrations up"
 	@echo "make migration_down - running database migrations down"
 	@echo "make migration_create - creating a new database migration"

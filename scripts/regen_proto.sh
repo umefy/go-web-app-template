@@ -21,10 +21,6 @@ generate_proto() {
     } 2>&1 | grep -v "warning: Import google/protobuf/.* is unused" || true
 }
 
-# OPENAPI directories
-PROTO_DIR=$BASE_PATH/openapi/proto
-OPENAPI_GO_OUT_DIR=$BASE_PATH/openapi/protogen
-
 # GRPC directories
 GRPC_PROTO_DIR=$BASE_PATH/proto/grpc
 GRPC_GO_OUT_DIR=$BASE_PATH/protogen/grpc
@@ -33,5 +29,4 @@ GRPC_GO_OUT_DIR=$BASE_PATH/protogen/grpc
 export PROTOC_FLAGS="--allow_unused_imports"
 
 # Generate Go files
-generate_proto $PROTO_DIR $OPENAPI_GO_OUT_DIR
 generate_proto $GRPC_PROTO_DIR $GRPC_GO_OUT_DIR

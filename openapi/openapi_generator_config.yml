@@ -1,35 +1,16 @@
-generatorName: protobuf-schema
+generatorName: go
 inputSpec: openapi/docs/api.yaml
-outputDir: openapi/proto
-templateDir: openapi/generator/templates
+outputDir: openapi/generated/go/openapi
 globalProperties:
   models: ""
+  supportingFiles: "utils.go"
 additionalProperties:
-  modelPackage: v1/models
-  packageName: v1.models.api
-  addJsonNameAnnotation: true
-  numberedFieldNumberList: true
-  startEnumsWithUnspecified: true
-  wrapComplexType: true
-  supportMultipleResponses: true
-  aggregateModelsName: null
-  customOptionsModel: |
-    option go_package = "v1/models;api";
-  useSimplifiedEnumNames: true
+  packageName: "openapi"
+  generateMarshalJSON: true
+  generateUnmarshalJSON: true
 typeMappings:
-  object: "google.protobuf.Struct"
+  int32: int
+  float32: float64
+  double: float64
 importMappings:
-  google.protobuf.Struct: "google/protobuf/struct"
-  google.protobuf.Timestamp: "google/protobuf/timestamp"
-  google.protobuf.Duration: "google/protobuf/duration"
-  google.protobuf.Empty: "google/protobuf/empty"
-  google.protobuf.Any: "google/protobuf/any"
-  google.protobuf.Value: "google/protobuf/struct"
-  google.protobuf.DoubleValue: "google/protobuf/wrappers"
-  google.protobuf.FloatValue: "google/protobuf/wrappers"
-  google.protobuf.Int32Value: "google/protobuf/wrappers"
-  google.protobuf.Int64Value: "google/protobuf/wrappers"
-  google.protobuf.UInt32Value: "google/protobuf/wrappers"
-  google.protobuf.UInt64Value: "google/protobuf/wrappers"
-  google.protobuf.BoolValue: "google/protobuf/wrappers"
-  google.protobuf.StringValue: "google/protobuf/wrappers"
+  

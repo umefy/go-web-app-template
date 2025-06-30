@@ -1,6 +1,11 @@
+env: dev
 http_server:
   enabled: true
   port: 8082
+  health_check_endpoint: "/health-check"
+  profiler_endpoint: "/debug"
+  allowed_origins:
+    - "http://localhost:*"
 
 logging:
   level: debug
@@ -10,5 +15,5 @@ database:
   enable_log: true
 
 grpc_server:
-  enabled: true
+  enabled: false
   port: 30082

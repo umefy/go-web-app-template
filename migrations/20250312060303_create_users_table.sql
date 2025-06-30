@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 create table users (
     id serial primary key,
-    name varchar(255),
+    email varchar(255) unique,
     age int,
     created_at timestamptz default now(),
     updated_at timestamptz default now()

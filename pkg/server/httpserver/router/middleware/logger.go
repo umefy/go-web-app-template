@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"log/slog"
 	"net"
 	"net/http"
@@ -14,9 +13,16 @@ import (
 func Logger(logger *logger.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
 			ctx := r.Context()
-			ctx = logger.WithValue(ctx, slog.String("request_id", getReqID(ctx)))
+			// Check if this is a WebSocket upgrade request
+			if IsWebSocketUpgrade(r) {
+				// For WebSocket connections, don't wrap the response writer
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+
+			start := time.Now()
+			ctx = logger.WithValue(ctx, slog.String("request_id", GetReqID(ctx)))
 
 			// We don't want to log the source file and line number from a pkg folder
 			loggerHandler := logger.GetHandler()
@@ -24,21 +30,21 @@ func Logger(logger *logger.Logger) func(next http.Handler) http.Handler {
 			loggerWithoutSource := slog.New(&loggerHandler)
 
 			loggerWithoutSource.InfoContext(ctx, "HTTP Request start",
-				slog.String("request_id", getReqID(ctx)),
+				slog.String("request_id", GetReqID(ctx)),
 				slog.String("method", r.Method),
 				slog.String("uri", r.RequestURI),
 				slog.String("content_type", r.Header.Get("Content-Type")),
 				slog.String("host", r.Host),
 				slog.String("remote_ip", ExtractIP(r)))
 
-			// Wrap ResponseWriter to capture status code
+			// Wrap ResponseWriter to capture status code for regular HTTP requests
 			ww := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 			next.ServeHTTP(ww, r.WithContext(ctx))
 			duration := time.Since(start)
 
 			loggerWithoutSource.InfoContext(ctx,
 				"HTTP Request done",
-				slog.String("request_id", getReqID(ctx)),
+				slog.String("request_id", GetReqID(ctx)),
 				slog.String("method", r.Method),
 				slog.String("uri", r.RequestURI),
 				slog.String("content_type", r.Header.Get("Content-Type")),
@@ -49,16 +55,6 @@ func Logger(logger *logger.Logger) func(next http.Handler) http.Handler {
 			)
 		})
 	}
-}
-
-func getReqID(ctx context.Context) string {
-	if ctx == nil {
-		return ""
-	}
-	if reqID, ok := ctx.Value(RequestIDKey).(string); ok {
-		return reqID
-	}
-	return ""
 }
 
 // ResponseWriter wrapper to capture status code

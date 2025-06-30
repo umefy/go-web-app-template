@@ -44,3 +44,13 @@ func getRequestID(r *http.Request) string {
 
 	return requestId
 }
+
+func GetReqID(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	if reqID, ok := ctx.Value(RequestIDKey).(string); ok {
+		return reqID
+	}
+	return ""
+}
