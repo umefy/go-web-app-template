@@ -10,6 +10,7 @@ import (
 	apiV1 "github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
+	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"
 )
 
 func New(configOptions config.Options) (*httpserver.Server, error) {
@@ -38,6 +39,10 @@ func New(configOptions config.Options) (*httpserver.Server, error) {
 func newHttpHandler(app *app.App) http.Handler {
 	r := router.NewRootRouter(app.Logger)
 
+	r.Use(middleware.Cors(app.ConfigService.GetHttpServerConfig().AllowedOrigins))
+	r.Use(middleware.HealthCheck(app.ConfigService.GetHttpServerConfig().HealthCheckEndpoint))
+
+	r.Mount(app.ConfigService.GetHttpServerConfig().ProfilerEndpoint, router.ProfilerHandler)
 	r.Mount("/api/v1", apiV1.NewApiV1Router(app))
 	r.Mount("/graphql", graphql.NewGraphqlRouter(app))
 	return r

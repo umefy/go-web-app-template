@@ -16,6 +16,14 @@ type Order struct {
 type Query struct {
 }
 
+type Subscription struct {
+}
+
+type Time struct {
+	UnixTime  int32  `json:"unixTime"`
+	Timestamp string `json:"timestamp"`
+}
+
 type User struct {
 	ID        string   `json:"id"`
 	Email     string   `json:"email"`

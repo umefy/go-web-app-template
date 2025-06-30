@@ -1,0 +1,8 @@
+type Time {
+  unixTime: Int!
+  timestamp: String!
+}
+
+type Subscription {
+  currentTime: Time!
+}
