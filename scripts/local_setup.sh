@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+BASE_PATH="$(cd "$(dirname "$0")/.." && pwd)"
+
 # Function to handle errors
 error_handler() {
   echo "❌ Error occurred on line $1"
@@ -77,6 +79,8 @@ fi
 
 # lefthook
 lefthook install
+
+cd "$BASE_PATH/scripts/commitlint" && pnpm install && cd "$BASE_PATH" || return
 
 # setup project
 go mod tidy -e

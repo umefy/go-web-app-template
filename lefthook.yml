@@ -7,3 +7,8 @@ post-merge:
   commands:
     check:
       run: make generate && make check
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm --dir scripts/commitlint exec commitlint --edit {1}
