@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/delivery/restful/handler/middleware"
-	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/handler/user/mapping"
+	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user/mapping"
 	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/jsonkit"
 )

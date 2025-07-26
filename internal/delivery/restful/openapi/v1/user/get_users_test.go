@@ -6,12 +6,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/handler/user/mapping"
+	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user/mapping"
 	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
-	loggerSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/logger/service"
 	userSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/user/service"
+	loggerMocks "github.com/umefy/go-web-app-template/mocks/infrastructure/logger"
 	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/jsonkit"
 	"github.com/umefy/godash/sliceskit"
@@ -23,7 +22,7 @@ type GetUsersSuite struct {
 
 func (s *GetUsersSuite) TestGetUsers() {
 	userService := userSrvMocks.NewMockService(s.T())
-	loggerService := loggerSrvMocks.NewMockService(s.T())
+	logger := loggerMocks.NewMockLogger(s.T())
 
 	users := []*userModel.User{
 		{
@@ -34,9 +33,9 @@ func (s *GetUsersSuite) TestGetUsers() {
 	}
 
 	userService.EXPECT().GetUsers(context.Background()).Return(users, nil)
-	loggerService.EXPECT().DebugContext(context.Background(), mock.Anything).Return()
+	logger.EXPECT().DebugContext(context.Background(), "GetUsers")
 
-	h := NewHandler(userService, loggerService)
+	h := NewHandler(userService, logger)
 
 	req := httptest.NewRequest(http.MethodGet, "/openapi/v1/users", nil)
 	rec := httptest.NewRecorder()

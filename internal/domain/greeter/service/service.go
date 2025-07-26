@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 )
 
 type Service interface {
@@ -12,17 +12,17 @@ type Service interface {
 }
 
 type greetService struct {
-	loggerService loggerSrv.Service
+	logger logger.Logger
 }
 
 var _ Service = (*greetService)(nil)
 
-func NewService(loggerService loggerSrv.Service) *greetService {
-	return &greetService{loggerService: loggerService}
+func NewService(logger logger.Logger) *greetService {
+	return &greetService{logger: logger}
 }
 
 // SayHello implements Service.
 func (g *greetService) SayHello(ctx context.Context, name string) (string, error) {
-	g.loggerService.InfoContext(ctx, "SayHello", slog.String("name", name))
+	g.logger.InfoContext(ctx, "SayHello", slog.String("name", name))
 	return "Hello, " + name, nil
 }

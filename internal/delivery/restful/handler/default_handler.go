@@ -7,22 +7,22 @@ import (
 	"net/http"
 
 	domainError "github.com/umefy/go-web-app-template/internal/domain/error"
-	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/godash/jsonkit"
 )
 
 type DefaultHandler struct {
-	handlerName   string
-	loggerService loggerSrv.Service
+	handlerName string
+	logger      logger.Logger
 }
 
 var _ Handler = (*DefaultHandler)(nil)
 
-func NewDefaultHandler(handlerName string, loggerService loggerSrv.Service) *DefaultHandler {
+func NewDefaultHandler(handlerName string, logger logger.Logger) *DefaultHandler {
 	if handlerName == "" {
 		handlerName = "DefaultHandler"
 	}
-	return &DefaultHandler{handlerName: handlerName, loggerService: loggerService}
+	return &DefaultHandler{handlerName: handlerName, logger: logger}
 }
 
 func (h *DefaultHandler) ApplyMiddlewares(originalHandler HandlerFunc, middlewares ...Middleware) HandlerFunc {
@@ -42,7 +42,7 @@ func (h *DefaultHandler) Handle(handlerFunc HandlerFunc) http.HandlerFunc {
 }
 
 func (h *DefaultHandler) HandleError(w http.ResponseWriter, r *http.Request, err error) {
-	h.loggerService.ErrorContext(r.Context(), fmt.Sprintf("DefaultHandler(%s) Catch", h.handlerName), slog.String("error", err.Error()))
+	h.logger.ErrorContext(r.Context(), fmt.Sprintf("DefaultHandler(%s) Catch", h.handlerName), slog.String("error", err.Error()))
 	var domainErr *domainError.Error
 	if errors.As(err, &domainErr) {
 		// nolint: errcheck

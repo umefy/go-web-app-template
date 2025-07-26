@@ -16,7 +16,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/websocket"
 	"github.com/umefy/go-web-app-template/internal/app"
-	"github.com/umefy/go-web-app-template/internal/domain/config"
+	"github.com/umefy/go-web-app-template/internal/core/config"
 	domainError "github.com/umefy/go-web-app-template/internal/domain/error"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"
@@ -27,14 +27,13 @@ import (
 func NewGraphqlRouter(app *app.App) http.Handler {
 	graphqlConfig := Config{
 		Resolvers: &Resolver{
-			UserService:   app.UserService,
-			LoggerService: app.LoggerService,
-			DbQuery:       app.DbQuery,
+			UserService: app.UserService,
+			Logger:      app.Logger,
+			DbQuery:     app.DbQuery,
 		},
 	}
 
-	configSvc := app.ConfigService
-	appEnv := configSvc.GetAppConfig().Env
+	appEnv := app.Config.GetEnv()
 
 	srv := handler.New(NewExecutableSchema(graphqlConfig))
 
@@ -46,7 +45,7 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 			},
 		},
 		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
-			app.LoggerService.InfoContext(ctx, "WebSocket established",
+			app.Logger.InfoContext(ctx, "WebSocket established",
 				slog.String("request_id", middleware.GetReqID(ctx)),
 			)
 			return ctx, &initPayload, nil
@@ -61,13 +60,13 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 					return
 				}
 			}
-			app.LoggerService.ErrorContext(ctx, "WebSocket error",
+			app.Logger.ErrorContext(ctx, "WebSocket error",
 				slog.String("request_id", middleware.GetReqID(ctx)),
 				slog.Any("error", err),
 			)
 		},
 		CloseFunc: func(ctx context.Context, closeCode int) {
-			app.LoggerService.InfoContext(ctx, "WebSocket closed",
+			app.Logger.InfoContext(ctx, "WebSocket closed",
 				slog.String("request_id", middleware.GetReqID(ctx)),
 				slog.Int("close_code", closeCode),
 			)
@@ -118,7 +117,7 @@ func checkWsOrigin(app *app.App, r *http.Request) bool {
 		return false
 	}
 
-	for _, allowedOrigin := range app.ConfigService.GetHttpServerConfig().AllowedOrigins {
+	for _, allowedOrigin := range app.Config.GetHttpServerConfig().AllowedOrigins {
 		// "*" matches anything
 		if allowedOrigin == "*" {
 			return true

@@ -1,11 +1,13 @@
-package service
+package logger
 
 import (
 	"context"
 	"log/slog"
+
+	"github.com/umefy/godash/logger"
 )
 
-type Logger interface {
+type slogLogger interface {
 	Info(msg string, args ...any)
 	Error(msg string, args ...any)
 	Debug(msg string, args ...any)
@@ -17,7 +19,7 @@ type Logger interface {
 	WarnContext(ctx context.Context, msg string, args ...any)
 }
 
-type Service interface {
+type Logger interface {
 	Info(msg string, args ...slog.Attr)
 	Error(msg string, args ...slog.Attr)
 	Debug(msg string, args ...slog.Attr)
@@ -27,26 +29,28 @@ type Service interface {
 	ErrorContext(ctx context.Context, msg string, args ...slog.Attr)
 	DebugContext(ctx context.Context, msg string, args ...slog.Attr)
 	WarnContext(ctx context.Context, msg string, args ...slog.Attr)
+
+	GetLogger() *logger.Logger
 }
 
-type loggerService struct {
-	logger Logger
+type appLogger struct {
+	logger *logger.Logger
 }
 
-var _ Service = (*loggerService)(nil)
+var _ Logger = (*appLogger)(nil)
 
-func NewService(logger Logger) *loggerService {
-	return &loggerService{logger: logger}
+func NewAppLogger(logger *logger.Logger) *appLogger {
+	return &appLogger{logger: logger}
 }
 
-func (l *loggerService) Info(msg string, args ...slog.Attr) {
+func (l *appLogger) Info(msg string, args ...slog.Attr) {
 	attrs := make([]any, len(args))
 	for i, attr := range args {
 		attrs[i] = attr
 	}
 	l.logger.Info(msg, attrs...)
 }
-func (l *loggerService) InfoContext(ctx context.Context, msg string, args ...slog.Attr) {
+func (l *appLogger) InfoContext(ctx context.Context, msg string, args ...slog.Attr) {
 	attrs := make([]any, len(args))
 	for i, attr := range args {
 		attrs[i] = attr
@@ -54,7 +58,7 @@ func (l *loggerService) InfoContext(ctx context.Context, msg string, args ...slo
 	l.logger.InfoContext(ctx, msg, attrs...)
 }
 
-func (l *loggerService) Error(msg string, args ...slog.Attr) {
+func (l *appLogger) Error(msg string, args ...slog.Attr) {
 	attrs := make([]any, len(args))
 	for i, attr := range args {
 		attrs[i] = attr
@@ -62,7 +66,7 @@ func (l *loggerService) Error(msg string, args ...slog.Attr) {
 	l.logger.Error(msg, attrs...)
 }
 
-func (l *loggerService) ErrorContext(ctx context.Context, msg string, args ...slog.Attr) {
+func (l *appLogger) ErrorContext(ctx context.Context, msg string, args ...slog.Attr) {
 	attrs := make([]any, len(args))
 	for i, attr := range args {
 		attrs[i] = attr
@@ -70,7 +74,7 @@ func (l *loggerService) ErrorContext(ctx context.Context, msg string, args ...sl
 	l.logger.ErrorContext(ctx, msg, attrs...)
 }
 
-func (l *loggerService) Debug(msg string, args ...slog.Attr) {
+func (l *appLogger) Debug(msg string, args ...slog.Attr) {
 	attrs := make([]any, len(args))
 	for i, attr := range args {
 		attrs[i] = attr
@@ -78,7 +82,7 @@ func (l *loggerService) Debug(msg string, args ...slog.Attr) {
 	l.logger.Debug(msg, attrs...)
 }
 
-func (l *loggerService) DebugContext(ctx context.Context, msg string, args ...slog.Attr) {
+func (l *appLogger) DebugContext(ctx context.Context, msg string, args ...slog.Attr) {
 	attrs := make([]any, len(args))
 	for i, attr := range args {
 		attrs[i] = attr
@@ -86,7 +90,7 @@ func (l *loggerService) DebugContext(ctx context.Context, msg string, args ...sl
 	l.logger.DebugContext(ctx, msg, attrs...)
 }
 
-func (l *loggerService) Warn(msg string, args ...slog.Attr) {
+func (l *appLogger) Warn(msg string, args ...slog.Attr) {
 	attrs := make([]any, len(args))
 	for i, attr := range args {
 		attrs[i] = attr
@@ -94,10 +98,14 @@ func (l *loggerService) Warn(msg string, args ...slog.Attr) {
 	l.logger.Warn(msg, attrs...)
 }
 
-func (l *loggerService) WarnContext(ctx context.Context, msg string, args ...slog.Attr) {
+func (l *appLogger) WarnContext(ctx context.Context, msg string, args ...slog.Attr) {
 	attrs := make([]any, len(args))
 	for i, attr := range args {
 		attrs[i] = attr
 	}
 	l.logger.WarnContext(ctx, msg, attrs...)
+}
+
+func (l *appLogger) GetLogger() *logger.Logger {
+	return l.logger
 }

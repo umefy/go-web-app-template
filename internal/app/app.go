@@ -2,23 +2,20 @@ package app
 
 import (
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
-	configSvc "github.com/umefy/go-web-app-template/internal/domain/config/service"
+	"github.com/umefy/go-web-app-template/internal/core/config"
 	greeterSvc "github.com/umefy/go-web-app-template/internal/domain/greeter/service"
-	loggerSvc "github.com/umefy/go-web-app-template/internal/domain/logger/service"
 	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repository"
 	userSvc "github.com/umefy/go-web-app-template/internal/domain/user/service"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
-	"github.com/umefy/godash/logger"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 )
 
 type App struct {
 	Arguments      config.Options
-	Logger         *logger.Logger
-	LoggerService  loggerSvc.Service
+	Config         config.Config
+	Logger         logger.Logger
 	UserService    userSvc.Service
 	UserRepository userRepo.Repository
 	GreeterService greeterSvc.Service
-	ConfigService  configSvc.Service
 	DbQuery        *query.Query
 }
 

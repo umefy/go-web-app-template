@@ -6,7 +6,6 @@ import (
 	"runtime"
 	"strings"
 
-	appConfig "github.com/umefy/go-web-app-template/internal/domain/config"
 	"github.com/umefy/go-web-app-template/pkg/config"
 	"github.com/umefy/go-web-app-template/pkg/validation"
 )
@@ -26,7 +25,7 @@ func (o *Options) Validate() error {
 	)
 }
 
-func LoadConfig(args Options) (*appConfig.AppConfig, error) {
+func NewConfig(args Options) (Config, error) {
 	err := args.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("invalidate config options: %w", err)
@@ -42,7 +41,7 @@ func LoadConfig(args Options) (*appConfig.AppConfig, error) {
 		opt = getConfigOptByEnv(env)
 	}
 
-	var appConfig appConfig.AppConfig
+	var appConfig appConfig
 	err = config.Unmarshal(opt, &appConfig)
 
 	if err != nil {
@@ -53,7 +52,7 @@ func LoadConfig(args Options) (*appConfig.AppConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("validate config error: %w", err)
 	}
-	return &appConfig, nil
+	return NewAppConfig(&appConfig), nil
 }
 
 func getConfigOptByEnv(env string) config.ConfigOption {

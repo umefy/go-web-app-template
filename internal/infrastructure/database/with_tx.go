@@ -5,22 +5,22 @@ import (
 	"log/slog"
 
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
-	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 )
 
-func WithTx[T any](ctx context.Context, dbQuery *query.Query, loggerService loggerSrv.Service, fn func(context.Context, *query.QueryTx) (T, error)) (T, error) {
+func WithTx[T any](ctx context.Context, dbQuery *query.Query, logger logger.Logger, fn func(context.Context, *query.QueryTx) (T, error)) (T, error) {
 	tx := dbQuery.Begin()
 	var err error
 	defer func() {
 		if rec := recover(); rec != nil {
-			loggerService.ErrorContext(ctx, "Transaction rollback because of panic")
+			logger.ErrorContext(ctx, "Transaction rollback because of panic")
 			//nolint:errcheck
 			tx.Rollback()
 			panic(rec)
 		}
 
 		if err != nil {
-			loggerService.ErrorContext(ctx, "Transaction rollback", slog.String("error", err.Error()))
+			logger.ErrorContext(ctx, "Transaction rollback", slog.String("error", err.Error()))
 			//nolint:errcheck
 			tx.Rollback()
 		}

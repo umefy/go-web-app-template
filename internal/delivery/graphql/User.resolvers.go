@@ -17,7 +17,7 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreateInput) (*model.User, error) {
-	return database.WithTx(ctx, r.DbQuery, r.LoggerService, func(ctx context.Context, tx *query.QueryTx) (*model.User, error) {
+	return database.WithTx(ctx, r.DbQuery, r.Logger, func(ctx context.Context, tx *query.QueryTx) (*model.User, error) {
 		userModel, err := r.UserService.CreateUser(ctx, &userModel.UserCreateInput{
 			Email: input.Email,
 			Age:   int(input.Age),

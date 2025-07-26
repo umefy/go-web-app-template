@@ -3,7 +3,7 @@ package user
 import (
 	"net/http"
 
-	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/handler/user/mapping"
+	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user/mapping"
 	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/jsonkit"
 	"github.com/umefy/godash/sliceskit"
@@ -12,7 +12,7 @@ import (
 func (h *userHandler) GetUsers(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
-	h.loggerService.DebugContext(ctx, "GetUsers")
+	h.logger.DebugContext(ctx, "GetUsers")
 
 	users, err := h.userService.GetUsers(ctx)
 	if err != nil {

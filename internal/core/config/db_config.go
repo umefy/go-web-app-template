@@ -6,7 +6,7 @@ import (
 	"github.com/umefy/go-web-app-template/pkg/validation"
 )
 
-type DBConfig struct {
+type dbConfig struct {
 	Url             string        `mapstructure:"url"`
 	EnableLog       bool          `mapstructure:"enable_log"`
 	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
@@ -14,9 +14,9 @@ type DBConfig struct {
 	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
 }
 
-var _ validation.Validate = (*DBConfig)(nil)
+var _ validation.Validate = (*dbConfig)(nil)
 
-func (c *DBConfig) Validate() error {
+func (c *dbConfig) Validate() error {
 	return validation.ValidateStruct(c,
 		validation.Field(&c.Url, validation.Required),
 		validation.Field(&c.EnableLog, validation.In(true, false).Error("can only be set to true or false")),

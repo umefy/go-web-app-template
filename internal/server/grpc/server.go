@@ -3,21 +3,22 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 
 	"github.com/umefy/go-web-app-template/internal/app"
+	"github.com/umefy/go-web-app-template/internal/core/config"
 	"github.com/umefy/go-web-app-template/internal/delivery/grpc/greeter"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/go-web-app-template/pkg/server/grpcserver"
 	pb "github.com/umefy/go-web-app-template/protogen/grpc/service"
-	"github.com/umefy/godash/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func registerServices(grpcServer *grpc.Server, app *app.App) {
-	pb.RegisterGreeterServer(grpcServer, greeter.NewHandler(app.LoggerService, app.GreeterService))
+	pb.RegisterGreeterServer(grpcServer, greeter.NewHandler(app.Logger, app.GreeterService))
 }
 
 func New(configOptions config.Options) (*grpcserver.GrpcServer, error) {
@@ -26,11 +27,11 @@ func New(configOptions config.Options) (*grpcserver.GrpcServer, error) {
 		return nil, err
 	}
 
-	if !app.ConfigService.GetGrpcServerConfig().Enabled {
+	if !app.Config.GetGrpcServerConfig().Enabled {
 		return nil, nil
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", app.ConfigService.GetGrpcServerConfig().Port))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", app.Config.GetGrpcServerConfig().Port))
 	if err != nil {
 		return nil, err
 	}
@@ -41,11 +42,11 @@ func New(configOptions config.Options) (*grpcserver.GrpcServer, error) {
 	)
 
 	registerServices(grpcServer, app)
-	server := grpcserver.New(listener, grpcServer, app.Logger)
+	server := grpcserver.New(listener, grpcServer, app.Logger.GetLogger())
 	return server, nil
 }
 
-func unaryRecoveryInterceptor(logger *logger.Logger) grpc.UnaryServerInterceptor {
+func unaryRecoveryInterceptor(logger logger.Logger) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -54,7 +55,7 @@ func unaryRecoveryInterceptor(logger *logger.Logger) grpc.UnaryServerInterceptor
 	) (resp interface{}, err error) {
 		defer func() {
 			if r := recover(); r != nil {
-				logger.Error("Recovered from panic in %s: %v", info.FullMethod, r)
+				logger.Error("Recovered from panic in %s: %v", slog.String("method", info.FullMethod), slog.Any("error", r))
 				err = status.Errorf(codes.Internal, "Internal server error")
 			}
 		}()
@@ -62,7 +63,7 @@ func unaryRecoveryInterceptor(logger *logger.Logger) grpc.UnaryServerInterceptor
 	}
 }
 
-func streamRecoveryInterceptor(logger *logger.Logger) grpc.StreamServerInterceptor {
+func streamRecoveryInterceptor(logger logger.Logger) grpc.StreamServerInterceptor {
 	return func(
 		srv interface{},
 		stream grpc.ServerStream,
@@ -71,7 +72,7 @@ func streamRecoveryInterceptor(logger *logger.Logger) grpc.StreamServerIntercept
 	) (err error) {
 		defer func() {
 			if r := recover(); r != nil {
-				logger.Error("Recovered from panic in %s: %v", info.FullMethod, r)
+				logger.Error("Recovered from panic in %s: %v", slog.String("method", info.FullMethod), slog.Any("error", r))
 				err = status.Errorf(codes.Internal, "Panic in %s: %v", info.FullMethod, r)
 			}
 		}()

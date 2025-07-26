@@ -2,12 +2,12 @@ package database
 
 import (
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
-	configSvc "github.com/umefy/go-web-app-template/internal/domain/config/service"
+	"github.com/umefy/go-web-app-template/internal/core/config"
 	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
 )
 
-func NewDB(configSvc configSvc.Service) (*db.DB, error) {
-	dbConfig := configSvc.GetDBConfig()
+func NewDB(config config.Config) (*db.DB, error) {
+	dbConfig := config.GetDBConfig()
 
 	db, err := db.NewDB(db.DBConfig{
 		DBString:        dbConfig.Url,

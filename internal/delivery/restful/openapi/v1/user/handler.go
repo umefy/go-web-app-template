@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/delivery/restful/handler"
-	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
 	userSrv "github.com/umefy/go-web-app-template/internal/domain/user/service"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 )
 
 type Handler interface {
@@ -18,22 +18,22 @@ type Handler interface {
 
 type userHandler struct {
 	*handler.DefaultHandler
-	userService   userSrv.Service
-	loggerService loggerSrv.Service
+	userService userSrv.Service
+	logger      logger.Logger
 }
 
 const userHandlerName = "UserHandler"
 
 var _ Handler = (*userHandler)(nil)
 
-func NewHandler(userService userSrv.Service, loggerService loggerSrv.Service) *userHandler {
+func NewHandler(userService userSrv.Service, logger logger.Logger) *userHandler {
 	return &userHandler{
 		DefaultHandler: handler.NewDefaultHandler(
 			userHandlerName,
-			loggerService,
+			logger,
 		),
-		userService:   userService,
-		loggerService: loggerService,
+		userService: userService,
+		logger:      logger,
 	}
 }
 

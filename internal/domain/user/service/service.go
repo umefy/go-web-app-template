@@ -8,10 +8,10 @@ import (
 
 	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
-	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
 	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
 	"github.com/umefy/go-web-app-template/internal/domain/user/model"
 	"github.com/umefy/go-web-app-template/internal/domain/user/repository"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/godash/sliceskit"
 )
 
@@ -24,14 +24,14 @@ type Service interface {
 }
 
 type userService struct {
-	loggerService  loggerSrv.Service
+	logger         logger.Logger
 	userRepository repository.Repository
 }
 
 var _ Service = (*userService)(nil)
 
-func NewService(loggerService loggerSrv.Service, userRepository repository.Repository) *userService {
-	return &userService{loggerService: loggerService, userRepository: userRepository}
+func NewService(logger logger.Logger, userRepository repository.Repository) *userService {
+	return &userService{logger: logger, userRepository: userRepository}
 }
 
 // GetUsers implements Service.
@@ -49,13 +49,13 @@ func (u *userService) GetUsers(ctx context.Context) ([]*model.User, error) {
 func (u *userService) GetUser(ctx context.Context, id string) (*model.User, error) {
 	userID, err := strconv.Atoi(id)
 	if err != nil {
-		u.loggerService.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
+		u.logger.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
 		return nil, fmt.Errorf("invalid user id")
 	}
 
 	user, err := u.userRepository.GetUser(ctx, userID)
 	if err != nil {
-		u.loggerService.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
+		u.logger.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return model.User{}.CreateFromDbModel(user), nil
@@ -88,7 +88,7 @@ func (u *userService) CreateUser(ctx context.Context, createUserInput *model.Use
 func (u *userService) UpdateUser(ctx context.Context, id string, updateUserInput *model.UserUpdateInput, tx *query.QueryTx) (*model.User, error) {
 	userID, err := strconv.Atoi(id)
 	if err != nil {
-		u.loggerService.ErrorContext(ctx, "UserService.UpdateUser", slog.String("error", err.Error()))
+		u.logger.ErrorContext(ctx, "UserService.UpdateUser", slog.String("error", err.Error()))
 		return nil, fmt.Errorf("invalid user id")
 	}
 
