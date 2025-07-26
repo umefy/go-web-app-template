@@ -4,7 +4,7 @@ import (
 	"time"
 
 	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
-	orderModel "github.com/umefy/go-web-app-template/internal/domain/order/model"
+	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 	"github.com/umefy/go-web-app-template/pkg/null"
 	"github.com/umefy/go-web-app-template/pkg/validation"
 	"github.com/umefy/godash/sliceskit"
@@ -16,7 +16,7 @@ type User struct {
 	Age       int
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Orders    []orderModel.Order
+	Orders    []orderDomain.Order
 }
 
 func (u User) MapToDbModel() *dbModel.User {
@@ -35,8 +35,8 @@ func (u User) CreateFromDbModel(dbUserModel *dbModel.User) *User {
 		Age:       dbUserModel.Age.ValueOrZero(),
 		CreatedAt: dbUserModel.CreatedAt,
 		UpdatedAt: dbUserModel.UpdatedAt,
-		Orders: sliceskit.Map(dbUserModel.Orders, func(order dbModel.Order) orderModel.Order {
-			return *orderModel.Order{}.CreateFromDbModel(&order)
+		Orders: sliceskit.Map(dbUserModel.Orders, func(order dbModel.Order) orderDomain.Order {
+			return *orderDomain.Order{}.CreateFromDbModel(&order)
 		}),
 	}
 }

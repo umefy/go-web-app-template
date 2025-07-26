@@ -3,10 +3,10 @@ package app
 import (
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/internal/core/config"
-	greeterSvc "github.com/umefy/go-web-app-template/internal/domain/greeter/service"
 	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repository"
-	userSvc "github.com/umefy/go-web-app-template/internal/domain/user/service"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
+	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
+	userSvc "github.com/umefy/go-web-app-template/internal/service/user"
 )
 
 type App struct {

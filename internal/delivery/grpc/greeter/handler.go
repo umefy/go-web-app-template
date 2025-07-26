@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	greeterSvc "github.com/umefy/go-web-app-template/internal/domain/greeter/service"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
+	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
 	pb "github.com/umefy/go-web-app-template/protogen/grpc/service"
 )
 

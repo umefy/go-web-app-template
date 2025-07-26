@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
-	orderModel "github.com/umefy/go-web-app-template/internal/domain/order/model"
+	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 )
 
-func OrderModelToGraphqlOrder(order orderModel.Order) *model.Order {
+func OrderModelToGraphqlOrder(order orderDomain.Order) *model.Order {
 	return &model.Order{
 		ID:        strconv.Itoa(order.ID),
 		UserID:    strconv.Itoa(order.UserID),

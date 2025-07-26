@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user/mapping"
-	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
-	userSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/user/service"
+	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	loggerMocks "github.com/umefy/go-web-app-template/mocks/infrastructure/logger"
+	userSrvMocks "github.com/umefy/go-web-app-template/mocks/service/user"
 	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/jsonkit"
 	"github.com/umefy/godash/sliceskit"
@@ -24,7 +24,7 @@ func (s *GetUsersSuite) TestGetUsers() {
 	userService := userSrvMocks.NewMockService(s.T())
 	logger := loggerMocks.NewMockLogger(s.T())
 
-	users := []*userModel.User{
+	users := []*userDomain.User{
 		{
 			ID:    1,
 			Email: "john.doe@example.com",

@@ -10,7 +10,7 @@ import (
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/mapping"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
-	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
+	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
 	"github.com/umefy/godash/sliceskit"
 )
@@ -18,7 +18,7 @@ import (
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreateInput) (*model.User, error) {
 	return database.WithTx(ctx, r.DbQuery, r.Logger, func(ctx context.Context, tx *query.QueryTx) (*model.User, error) {
-		userModel, err := r.UserService.CreateUser(ctx, &userModel.UserCreateInput{
+		userModel, err := r.UserService.CreateUser(ctx, &userDomain.UserCreateInput{
 			Email: input.Email,
 			Age:   int(input.Age),
 		}, tx)

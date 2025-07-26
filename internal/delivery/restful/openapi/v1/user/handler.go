@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/delivery/restful/handler"
-	userSrv "github.com/umefy/go-web-app-template/internal/domain/user/service"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
+	userSrv "github.com/umefy/go-web-app-template/internal/service/user"
 )
 
 type Handler interface {

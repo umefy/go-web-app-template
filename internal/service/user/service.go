@@ -8,19 +8,19 @@ import (
 
 	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
+	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
-	"github.com/umefy/go-web-app-template/internal/domain/user/model"
 	"github.com/umefy/go-web-app-template/internal/domain/user/repository"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/godash/sliceskit"
 )
 
 type Service interface {
-	GetUsers(ctx context.Context) ([]*model.User, error)
-	GetUser(ctx context.Context, id string) (*model.User, error)
+	GetUsers(ctx context.Context) ([]*userDomain.User, error)
+	GetUser(ctx context.Context, id string) (*userDomain.User, error)
 	IsUserExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error)
-	CreateUser(ctx context.Context, userCreateInput *model.UserCreateInput, tx *query.QueryTx) (*model.User, error)
-	UpdateUser(ctx context.Context, id string, userUpdateInput *model.UserUpdateInput, tx *query.QueryTx) (*model.User, error)
+	CreateUser(ctx context.Context, userCreateInput *userDomain.UserCreateInput, tx *query.QueryTx) (*userDomain.User, error)
+	UpdateUser(ctx context.Context, id string, userUpdateInput *userDomain.UserUpdateInput, tx *query.QueryTx) (*userDomain.User, error)
 }
 
 type userService struct {
@@ -35,18 +35,18 @@ func NewService(logger logger.Logger, userRepository repository.Repository) *use
 }
 
 // GetUsers implements Service.
-func (u *userService) GetUsers(ctx context.Context) ([]*model.User, error) {
+func (u *userService) GetUsers(ctx context.Context) ([]*userDomain.User, error) {
 	usersDb, err := u.userRepository.GetUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return sliceskit.Map(usersDb, func(userDb *dbModel.User) *model.User {
-		return model.User{}.CreateFromDbModel(userDb)
+	return sliceskit.Map(usersDb, func(userDb *dbModel.User) *userDomain.User {
+		return userDomain.User{}.CreateFromDbModel(userDb)
 	}), nil
 }
 
-func (u *userService) GetUser(ctx context.Context, id string) (*model.User, error) {
+func (u *userService) GetUser(ctx context.Context, id string) (*userDomain.User, error) {
 	userID, err := strconv.Atoi(id)
 	if err != nil {
 		u.logger.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
@@ -58,14 +58,14 @@ func (u *userService) GetUser(ctx context.Context, id string) (*model.User, erro
 		u.logger.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
 		return nil, err
 	}
-	return model.User{}.CreateFromDbModel(user), nil
+	return userDomain.User{}.CreateFromDbModel(user), nil
 }
 
 func (u *userService) IsUserExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error) {
 	return u.userRepository.IsUserEmailExists(ctx, email, tx)
 }
 
-func (u *userService) CreateUser(ctx context.Context, createUserInput *model.UserCreateInput, tx *query.QueryTx) (*model.User, error) {
+func (u *userService) CreateUser(ctx context.Context, createUserInput *userDomain.UserCreateInput, tx *query.QueryTx) (*userDomain.User, error) {
 
 	if err := createUserInput.Validate(); err != nil {
 		return nil, err
@@ -81,11 +81,11 @@ func (u *userService) CreateUser(ctx context.Context, createUserInput *model.Use
 	if err != nil {
 		return nil, err
 	}
-	return model.User{}.CreateFromDbModel(userDb), nil
+	return userDomain.User{}.CreateFromDbModel(userDb), nil
 }
 
 // UpdateUser implements Service.
-func (u *userService) UpdateUser(ctx context.Context, id string, updateUserInput *model.UserUpdateInput, tx *query.QueryTx) (*model.User, error) {
+func (u *userService) UpdateUser(ctx context.Context, id string, updateUserInput *userDomain.UserUpdateInput, tx *query.QueryTx) (*userDomain.User, error) {
 	userID, err := strconv.Atoi(id)
 	if err != nil {
 		u.logger.ErrorContext(ctx, "UserService.UpdateUser", slog.String("error", err.Error()))
@@ -101,5 +101,5 @@ func (u *userService) UpdateUser(ctx context.Context, id string, updateUserInput
 		return nil, err
 	}
 
-	return model.User{}.CreateFromDbModel(userDb), nil
+	return userDomain.User{}.CreateFromDbModel(userDb), nil
 }
