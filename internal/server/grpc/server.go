@@ -6,8 +6,8 @@ import (
 	"net"
 
 	"github.com/umefy/go-web-app-template/internal/app"
+	"github.com/umefy/go-web-app-template/internal/delivery/grpc/greeter"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/grpc/handler/greeter"
 	"github.com/umefy/go-web-app-template/pkg/server/grpcserver"
 	pb "github.com/umefy/go-web-app-template/protogen/grpc/service"
 	"github.com/umefy/godash/logger"
@@ -15,6 +15,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+func registerServices(grpcServer *grpc.Server, app *app.App) {
+	pb.RegisterGreeterServer(grpcServer, greeter.NewHandler(app.LoggerService, app.GreeterService))
+}
 
 func New(configOptions config.Options) (*grpcserver.GrpcServer, error) {
 	app, err := app.New(configOptions)
@@ -39,10 +43,6 @@ func New(configOptions config.Options) (*grpcserver.GrpcServer, error) {
 	registerServices(grpcServer, app)
 	server := grpcserver.New(listener, grpcServer, app.Logger)
 	return server, nil
-}
-
-func registerServices(grpcServer *grpc.Server, app *app.App) {
-	pb.RegisterGreeterServer(grpcServer, greeter.NewHandler(app.LoggerService, app.GreeterService))
 }
 
 func unaryRecoveryInterceptor(logger *logger.Logger) grpc.UnaryServerInterceptor {

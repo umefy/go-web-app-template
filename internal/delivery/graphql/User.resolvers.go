@@ -8,10 +8,10 @@ import (
 	"context"
 
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/mapping"
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql/mapping"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql/model"
 	"github.com/umefy/godash/sliceskit"
 )
 

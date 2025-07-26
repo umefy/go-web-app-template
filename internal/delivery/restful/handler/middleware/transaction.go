@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
+	"github.com/umefy/go-web-app-template/internal/delivery/restful/handler"
 	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/handler"
 )
 
 type transactionKey struct{}

@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	orderModel "github.com/umefy/go-web-app-template/internal/domain/order/model"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql/model"
 )
 
 func OrderModelToGraphqlOrder(order orderModel.Order) *model.Order {

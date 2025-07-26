@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql/model"
 	"github.com/umefy/godash/sliceskit"
 )
 

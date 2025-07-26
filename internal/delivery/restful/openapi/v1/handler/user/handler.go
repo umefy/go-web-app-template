@@ -3,9 +3,9 @@ package user
 import (
 	"net/http"
 
+	"github.com/umefy/go-web-app-template/internal/delivery/restful/handler"
 	loggerSrv "github.com/umefy/go-web-app-template/internal/domain/logger/service"
 	userSrv "github.com/umefy/go-web-app-template/internal/domain/user/service"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/handler"
 )
 
 type Handler interface {

@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql/model"
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 )
 
 // Orders is the resolver for the orders field.

@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/app"
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql"
+	apiV1 "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql"
-	apiV1 "github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"

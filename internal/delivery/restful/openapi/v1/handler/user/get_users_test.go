@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/handler/user/mapping"
 	userModel "github.com/umefy/go-web-app-template/internal/domain/user/model"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1/handler/user/mapping"
 	loggerSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/logger/service"
 	userSrvMocks "github.com/umefy/go-web-app-template/mocks/domain/user/service"
 	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"

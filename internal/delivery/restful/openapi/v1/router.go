@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/app"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/handler/middleware"
-	userHandler "github.com/umefy/go-web-app-template/internal/infrastructure/http/openapi/v1/handler/user"
+	"github.com/umefy/go-web-app-template/internal/delivery/restful/handler/middleware"
+	userHandler "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/handler/user"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 )
 

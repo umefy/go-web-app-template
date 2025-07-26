@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http/graphql/model"
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -361,7 +361,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../../../../graphql/Order.graphqls", Input: `type Order {
+	{Name: "../../../graphql/Order.graphqls", Input: `type Order {
   id: ID!
   userId: ID!
   amount: Float!
@@ -373,7 +373,7 @@ extend type Query {
   orders: [Order!]!
 }
 `, BuiltIn: false},
-	{Name: "../../../../graphql/Time.graphqls", Input: `type Time {
+	{Name: "../../../graphql/Time.graphqls", Input: `type Time {
   unixTime: Int!
   timestamp: String!
 }
@@ -382,7 +382,7 @@ type Subscription {
   currentTime: Time!
 }
 `, BuiltIn: false},
-	{Name: "../../../../graphql/User.graphqls", Input: `type User {
+	{Name: "../../../graphql/User.graphqls", Input: `type User {
   id: ID!
   email: String!
   age: Int!
@@ -427,7 +427,7 @@ func (ec *executionContext) field_Mutation_createUser_argsInput(
 ) (model.UserCreateInput, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNUserCreateInput2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐUserCreateInput(ctx, tmp)
+		return ec.unmarshalNUserCreateInput2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUserCreateInput(ctx, tmp)
 	}
 
 	var zeroVal model.UserCreateInput
@@ -579,7 +579,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -826,7 +826,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_users(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -878,7 +878,7 @@ func (ec *executionContext) _Query_orders(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]*model.Order)
 	fc.Result = res
-	return ec.marshalNOrder2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐOrderᚄ(ctx, field.Selections, res)
+	return ec.marshalNOrder2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐOrderᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_orders(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1049,7 +1049,7 @@ func (ec *executionContext) _Subscription_currentTime(ctx context.Context, field
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshalNTime2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐTime(ctx, field.Selections, res).MarshalGQL(w)
+				ec.marshalNTime2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐTime(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		case <-ctx.Done():
@@ -1365,7 +1365,7 @@ func (ec *executionContext) _User_orders(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*model.Order)
 	fc.Result = res
-	return ec.marshalNOrder2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐOrderᚄ(ctx, field.Selections, res)
+	return ec.marshalNOrder2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐOrderᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_orders(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3853,7 +3853,7 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNOrder2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐOrderᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Order) graphql.Marshaler {
+func (ec *executionContext) marshalNOrder2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐOrderᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Order) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3871,7 +3871,7 @@ func (ec *executionContext) marshalNOrder2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑweb�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNOrder2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐOrder(ctx, sel, v[i])
+			ret[i] = ec.marshalNOrder2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐOrder(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3891,7 +3891,7 @@ func (ec *executionContext) marshalNOrder2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑweb�
 	return ret
 }
 
-func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v *model.Order) graphql.Marshaler {
+func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v *model.Order) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3917,11 +3917,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTime2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐTime(ctx context.Context, sel ast.SelectionSet, v model.Time) graphql.Marshaler {
+func (ec *executionContext) marshalNTime2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐTime(ctx context.Context, sel ast.SelectionSet, v model.Time) graphql.Marshaler {
 	return ec._Time(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTime2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐTime(ctx context.Context, sel ast.SelectionSet, v *model.Time) graphql.Marshaler {
+func (ec *executionContext) marshalNTime2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐTime(ctx context.Context, sel ast.SelectionSet, v *model.Time) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3931,11 +3931,11 @@ func (ec *executionContext) marshalNTime2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑap
 	return ec._Time(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3953,7 +3953,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑweb�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3973,7 +3973,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑweb�
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3983,7 +3983,7 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑap
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserCreateInput2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋinfrastructureᚋhttpᚋgraphqlᚋmodelᚐUserCreateInput(ctx context.Context, v any) (model.UserCreateInput, error) {
+func (ec *executionContext) unmarshalNUserCreateInput2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUserCreateInput(ctx context.Context, v any) (model.UserCreateInput, error) {
 	res, err := ec.unmarshalInputUserCreateInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
