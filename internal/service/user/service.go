@@ -9,7 +9,7 @@ import (
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
-	"github.com/umefy/go-web-app-template/internal/domain/user/repository"
+	"github.com/umefy/go-web-app-template/internal/domain/user/repo"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 )
 
@@ -23,18 +23,18 @@ type Service interface {
 
 type userService struct {
 	logger         logger.Logger
-	userRepository repository.Repository
+	userRepository repo.Repository
 }
 
 var _ Service = (*userService)(nil)
 
-func NewService(logger logger.Logger, userRepository repository.Repository) *userService {
+func NewService(logger logger.Logger, userRepository repo.Repository) *userService {
 	return &userService{logger: logger, userRepository: userRepository}
 }
 
 // GetUsers implements Service.
 func (u *userService) GetUsers(ctx context.Context) ([]*userDomain.User, error) {
-	usersDb, err := u.userRepository.GetUsers(ctx)
+	usersDb, err := u.userRepository.FindUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (u *userService) GetUser(ctx context.Context, id string) (*userDomain.User,
 		return nil, fmt.Errorf("invalid user id")
 	}
 
-	user, err := u.userRepository.GetUser(ctx, userID)
+	user, err := u.userRepository.FindUser(ctx, userID)
 	if err != nil {
 		u.logger.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
 		return nil, err
@@ -93,7 +93,7 @@ func (u *userService) UpdateUser(ctx context.Context, id string, updateUserInput
 		return nil, err
 	}
 
-	user, err := u.userRepository.GetUser(ctx, userID)
+	user, err := u.userRepository.FindUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}

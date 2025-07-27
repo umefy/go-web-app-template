@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/umefy/go-web-app-template/internal/core/config"
-	"github.com/umefy/go-web-app-template/internal/server/grpc"
-	"github.com/umefy/go-web-app-template/internal/server/http"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/server/grpc"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/server/http"
 	"golang.org/x/sync/errgroup"
 )
 

@@ -1,4 +1,4 @@
-package repository
+package repo
 
 import (
 	"context"
@@ -8,11 +8,13 @@ import (
 )
 
 type Repository interface {
-	GetUser(ctx context.Context, id int) (*userDomain.User, error)
-	GetUserTx(ctx context.Context, id int, tx *query.QueryTx) (*userDomain.User, error)
-	GetUsers(ctx context.Context) ([]*userDomain.User, error)
-	GetUsersTx(ctx context.Context, tx *query.QueryTx) ([]*userDomain.User, error)
+	FindUser(ctx context.Context, id int) (*userDomain.User, error)
+	FindUserTx(ctx context.Context, id int, tx *query.QueryTx) (*userDomain.User, error)
+	FindUsers(ctx context.Context) ([]*userDomain.User, error)
+	FindUsersTx(ctx context.Context, tx *query.QueryTx) ([]*userDomain.User, error)
 	CreateUser(ctx context.Context, user *userDomain.User, tx *query.QueryTx) (*userDomain.User, error)
 	UpdateUser(ctx context.Context, id int, user *userDomain.User, tx *query.QueryTx) (*userDomain.User, error)
 	IsUserEmailExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error)
+
+	FindUserWithOrders(ctx context.Context, id int) (*userDomain.UserWithOrder, error)
 }

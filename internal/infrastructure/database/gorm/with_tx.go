@@ -10,8 +10,10 @@ import (
 
 func WithTx[T any](ctx context.Context, dbQuery *query.Query, logger logger.Logger, fn func(context.Context, *query.QueryTx) (T, error)) (T, error) {
 	tx := dbQuery.Begin()
+	logger.InfoContext(ctx, "Transaction started")
 	var err error
 	defer func() {
+
 		if rec := recover(); rec != nil {
 			logger.ErrorContext(ctx, "Transaction rollback because of panic")
 			//nolint:errcheck

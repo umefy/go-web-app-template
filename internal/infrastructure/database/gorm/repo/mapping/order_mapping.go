@@ -5,10 +5,10 @@ import (
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 )
 
-func OrderDbModelToOrderDomain(order *dbModel.Order) *orderDomain.Order {
+func DbModelToDomainOrder(order *dbModel.Order) *orderDomain.Order {
 	return &orderDomain.Order{
 		ID:        order.ID,
-		UserID:    order.UserID.ValueOrZero(),
+		UserID:    order.UserID,
 		Amount:    order.Amount.ValueOrZero(),
 		CreatedAt: order.CreatedAt,
 		UpdatedAt: order.UpdatedAt,

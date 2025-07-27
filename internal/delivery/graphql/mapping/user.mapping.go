@@ -6,7 +6,6 @@ import (
 
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
-	"github.com/umefy/godash/sliceskit"
 )
 
 func UserModelToGraphqlUser(user *userDomain.User) *model.User {
@@ -16,6 +15,5 @@ func UserModelToGraphqlUser(user *userDomain.User) *model.User {
 		Age:       int32(user.Age),
 		CreatedAt: user.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
-		Orders:    sliceskit.Map(user.Orders, OrderModelToGraphqlOrder),
 	}
 }
