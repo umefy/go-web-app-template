@@ -1,4 +1,4 @@
-package database
+package gorm
 
 import (
 	"github.com/umefy/go-web-app-template/gorm/generated/query"

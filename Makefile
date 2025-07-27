@@ -70,7 +70,9 @@ tidy:
 
 wire:
 	@echo "⏱️ running wire now..."
+	@rm -rf mocks
 	wire ./...
+	@make mockery
 	@echo "✅ finishing wire..."
 
 regen_openapi:

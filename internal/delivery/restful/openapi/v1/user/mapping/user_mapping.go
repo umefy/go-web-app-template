@@ -3,6 +3,7 @@ package mapping
 import (
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
+	userSrv "github.com/umefy/go-web-app-template/internal/service/user"
 	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/sliceskit"
 )
@@ -20,15 +21,15 @@ func UserModelToApiUser(user *userDomain.User) api.User {
 	}
 }
 
-func ApiUserCreateToUserModelCreate(input *api.UserCreate) *userDomain.UserCreateInput {
-	return &userDomain.UserCreateInput{
+func ApiUserCreateToUserModelCreate(input *api.UserCreate) *userSrv.UserCreateInput {
+	return &userSrv.UserCreateInput{
 		Email: input.GetEmail(),
 		Age:   input.GetAge(),
 	}
 }
 
-func ApiUserUpdateToUserModelUpdate(input *api.UserUpdate) *userDomain.UserUpdateInput {
-	return &userDomain.UserUpdateInput{
+func ApiUserUpdateToUserModelUpdate(input *api.UserUpdate) *userSrv.UserUpdateInput {
+	return &userSrv.UserUpdateInput{
 		Email: input.Email.Get(),
 		Age:   input.Age.Get(),
 	}

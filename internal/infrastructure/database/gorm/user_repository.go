@@ -1,15 +1,18 @@
-package database
+package gorm
 
 import (
 	"context"
 	"errors"
 	"log/slog"
 
-	"github.com/umefy/go-web-app-template/gorm/generated/model"
+	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
+	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repository"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/mapping"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/go-web-app-template/pkg/null"
+	"github.com/umefy/godash/sliceskit"
 
 	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
 	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
@@ -26,7 +29,7 @@ func NewUserRepository(dbQuery *query.Query, logger logger.Logger) *UserReposito
 	return &UserRepository{Logger: logger, dbQuery: dbQuery}
 }
 
-func (r *UserRepository) GetUser(ctx context.Context, id int) (*model.User, error) {
+func (r *UserRepository) GetUser(ctx context.Context, id int) (*userDomain.User, error) {
 	userQuery := r.dbQuery.User
 	user, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).Preload(userQuery.Orders).First()
 
@@ -37,10 +40,10 @@ func (r *UserRepository) GetUser(ctx context.Context, id int) (*model.User, erro
 		}
 		return nil, err
 	}
-	return user, nil
+	return mapping.UserDbModelToUserDomain(user), nil
 }
 
-func (r *UserRepository) GetUserTx(ctx context.Context, id int, tx *query.QueryTx) (*model.User, error) {
+func (r *UserRepository) GetUserTx(ctx context.Context, id int, tx *query.QueryTx) (*userDomain.User, error) {
 	userQuery := tx.User
 	user, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).Preload(userQuery.Orders).First()
 
@@ -51,10 +54,10 @@ func (r *UserRepository) GetUserTx(ctx context.Context, id int, tx *query.QueryT
 		}
 		return nil, err
 	}
-	return user, nil
+	return mapping.UserDbModelToUserDomain(user), nil
 }
 
-func (r *UserRepository) GetUsers(ctx context.Context) ([]*model.User, error) {
+func (r *UserRepository) GetUsers(ctx context.Context) ([]*userDomain.User, error) {
 	userQuery := r.dbQuery.User
 	users, err := userQuery.WithContext(ctx).Preload(userQuery.Orders).Where(userQuery.Age.Gt(null.ValueFrom(1))).Order(userQuery.ID.Asc()).Find()
 
@@ -65,10 +68,12 @@ func (r *UserRepository) GetUsers(ctx context.Context) ([]*model.User, error) {
 		}
 		return nil, err
 	}
-	return users, nil
+	return sliceskit.Map(users, func(user *dbModel.User) *userDomain.User {
+		return mapping.UserDbModelToUserDomain(user)
+	}), nil
 }
 
-func (r *UserRepository) GetUsersTx(ctx context.Context, tx *query.QueryTx) ([]*model.User, error) {
+func (r *UserRepository) GetUsersTx(ctx context.Context, tx *query.QueryTx) ([]*userDomain.User, error) {
 	userQuery := tx.User
 	users, err := userQuery.WithContext(ctx).Preload(userQuery.Orders).Where(userQuery.Age.Gt(null.ValueFrom(1))).Order(userQuery.ID.Asc()).Find()
 
@@ -79,12 +84,15 @@ func (r *UserRepository) GetUsersTx(ctx context.Context, tx *query.QueryTx) ([]*
 		}
 		return nil, err
 	}
-	return users, nil
+	return sliceskit.Map(users, func(user *dbModel.User) *userDomain.User {
+		return mapping.UserDbModelToUserDomain(user)
+	}), nil
 }
 
-func (r *UserRepository) CreateUser(ctx context.Context, user *model.User, tx *query.QueryTx) (*model.User, error) {
+func (r *UserRepository) CreateUser(ctx context.Context, user *userDomain.User, tx *query.QueryTx) (*userDomain.User, error) {
 	userQuery := tx.User
-	err := userQuery.WithContext(ctx).Create(user)
+	dbModel := mapping.UserDomainToUserDbModel(user)
+	err := userQuery.WithContext(ctx).Create(dbModel)
 
 	if errors.Is(err, db.ErrRecordNotFound) {
 		r.Logger.ErrorContext(ctx, "UserRepository.CreateUser", slog.String("error", err.Error()))
@@ -95,13 +103,16 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User, tx *q
 		r.Logger.ErrorContext(ctx, "UserRepository.CreateUser", slog.String("error", err.Error()))
 		return nil, err
 	}
-	return user, nil
+
+	return mapping.UserDbModelToUserDomain(dbModel), nil
 }
 
-func (r *UserRepository) UpdateUser(ctx context.Context, id int, user *model.User, tx *query.QueryTx) (*model.User, error) {
+func (r *UserRepository) UpdateUser(ctx context.Context, id int, user *userDomain.User, tx *query.QueryTx) (*userDomain.User, error) {
 
 	userQuery := tx.User
-	info, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).Updates(user)
+
+	dbModel := mapping.UserDomainToUserDbModel(user)
+	info, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).Updates(dbModel)
 
 	if err != nil {
 		r.Logger.ErrorContext(ctx, "User update error", slog.String("error", err.Error()))
@@ -113,13 +124,7 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id int, user *model.Use
 		return nil, userError.UserNotFound
 	}
 
-	updatedUser, err := r.GetUserTx(ctx, id, tx)
-	if err != nil {
-		r.Logger.ErrorContext(ctx, "Get User error", slog.String("error", err.Error()))
-		return nil, err
-	}
-
-	return updatedUser, nil
+	return mapping.UserDbModelToUserDomain(dbModel), nil
 }
 
 func (r *UserRepository) IsUserEmailExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error) {

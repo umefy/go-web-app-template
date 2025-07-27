@@ -17,7 +17,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/umefy/go-web-app-template/internal/app"
 	"github.com/umefy/go-web-app-template/internal/core/config"
-	domainError "github.com/umefy/go-web-app-template/internal/domain/error"
+	"github.com/umefy/go-web-app-template/internal/delivery/errutil"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -84,11 +84,9 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 
 	srv.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 		err := graphql.DefaultErrorPresenter(ctx, e)
-		var domainErr *domainError.Error
-		if errors.As(e, &domainErr) {
-			err.Message = domainErr.Message
-			err.Extensions = map[string]any{"code": domainErr.Code}
-		}
+		_, errMap := errutil.FormatError(e)
+		err.Message = errMap["error"].(map[string]any)["message"].(string)
+		err.Extensions = errMap
 
 		return err
 	})

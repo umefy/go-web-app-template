@@ -4,13 +4,13 @@ import (
 	"github.com/umefy/go-web-app-template/pkg/validation"
 )
 
-type loggingConfig struct {
+type LoggingConfig struct {
 	Level string
 }
 
-var _ validation.Validate = (*loggingConfig)(nil)
+var _ validation.Validate = (*LoggingConfig)(nil)
 
-func (l loggingConfig) Validate() error {
+func (l LoggingConfig) Validate() error {
 	return validation.ValidateStruct(&l,
 		validation.Field(&l.Level, validation.In("debug", "info", "warn", "error").Error("can only be set to debug, info, warn, error")),
 	)

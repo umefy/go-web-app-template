@@ -11,17 +11,17 @@ const (
 	AppEnvProd AppEnv = "prod"
 )
 
-type appConfig struct {
-	Env        AppEnv            `mapstructure:"env"`
-	HttpServer *httpServerConfig `mapstructure:"http_server"`
-	Logging    *loggingConfig    `mapstructure:"logging"`
-	DataBase   *dbConfig         `mapstructure:"database"`
-	GrpcServer *grpcServerConfig `mapstructure:"grpc_server"`
+type AppConfig struct {
+	Env        AppEnv           `mapstructure:"env"`
+	HttpServer HttpServerConfig `mapstructure:"http_server"`
+	Logging    LoggingConfig    `mapstructure:"logging"`
+	DataBase   DbConfig         `mapstructure:"database"`
+	GrpcServer GrpcServerConfig `mapstructure:"grpc_server"`
 }
 
-var _ validation.Validate = (*appConfig)(nil)
+var _ validation.Validate = (*AppConfig)(nil)
 
-func (a *appConfig) Validate() error {
+func (a *AppConfig) Validate() error {
 	return validation.ValidateStruct(a,
 		validation.Field(&a.Env, validation.In(AppEnvDev, AppEnvProd)),
 		validation.Field(&a.HttpServer, validation.Required),

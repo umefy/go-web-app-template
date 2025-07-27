@@ -3,16 +3,16 @@ package repository
 import (
 	"context"
 
-	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
 	"github.com/umefy/go-web-app-template/gorm/generated/query"
+	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 )
 
 type Repository interface {
-	GetUser(ctx context.Context, id int) (*dbModel.User, error)
-	GetUserTx(ctx context.Context, id int, tx *query.QueryTx) (*dbModel.User, error)
-	GetUsers(ctx context.Context) ([]*dbModel.User, error)
-	GetUsersTx(ctx context.Context, tx *query.QueryTx) ([]*dbModel.User, error)
-	CreateUser(ctx context.Context, user *dbModel.User, tx *query.QueryTx) (*dbModel.User, error)
-	UpdateUser(ctx context.Context, id int, user *dbModel.User, tx *query.QueryTx) (*dbModel.User, error)
+	GetUser(ctx context.Context, id int) (*userDomain.User, error)
+	GetUserTx(ctx context.Context, id int, tx *query.QueryTx) (*userDomain.User, error)
+	GetUsers(ctx context.Context) ([]*userDomain.User, error)
+	GetUsersTx(ctx context.Context, tx *query.QueryTx) ([]*userDomain.User, error)
+	CreateUser(ctx context.Context, user *userDomain.User, tx *query.QueryTx) (*userDomain.User, error)
+	UpdateUser(ctx context.Context, id int, user *userDomain.User, tx *query.QueryTx) (*userDomain.User, error)
 	IsUserEmailExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error)
 }

@@ -41,7 +41,7 @@ func NewConfig(args Options) (Config, error) {
 		opt = getConfigOptByEnv(env)
 	}
 
-	var appConfig appConfig
+	var appConfig AppConfig
 	err = config.Unmarshal(opt, &appConfig)
 
 	if err != nil {
@@ -52,7 +52,7 @@ func NewConfig(args Options) (Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("validate config error: %w", err)
 	}
-	return NewAppConfig(&appConfig), nil
+	return NewAppConfig(appConfig), nil
 }
 
 func getConfigOptByEnv(env string) config.ConfigOption {

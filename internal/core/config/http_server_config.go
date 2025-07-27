@@ -4,7 +4,7 @@ import (
 	"github.com/umefy/go-web-app-template/pkg/validation"
 )
 
-type httpServerConfig struct {
+type HttpServerConfig struct {
 	Enabled             bool
 	Port                int
 	AllowedOrigins      []string `mapstructure:"allowed_origins"`
@@ -12,9 +12,9 @@ type httpServerConfig struct {
 	ProfilerEndpoint    string   `mapstructure:"profiler_endpoint"`
 }
 
-var _ validation.Validate = (*httpServerConfig)(nil)
+var _ validation.Validate = (*HttpServerConfig)(nil)
 
-func (s *httpServerConfig) Validate() error {
+func (s *HttpServerConfig) Validate() error {
 	return validation.ValidateStruct(s,
 		validation.Field(&s.Enabled, validation.In(true, false).Error("can only be set to true or false")),
 		validation.Field(&s.Port, validation.Required),
