@@ -1,8 +1,8 @@
 package mapping
 
 import (
+	api "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/generated"
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
-	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 )
 
 func OrderModelToApiOrder(order *orderDomain.Order) api.Order {

@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	api "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/generated"
 	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user/mapping"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	loggerMocks "github.com/umefy/go-web-app-template/mocks/infrastructure/logger"
 	userSrvMocks "github.com/umefy/go-web-app-template/mocks/service/user"
-	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 	"github.com/umefy/godash/jsonkit"
 	"github.com/umefy/godash/sliceskit"
 )

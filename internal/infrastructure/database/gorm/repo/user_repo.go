@@ -43,13 +43,6 @@ func (r *UserRepo) FindUser(ctx context.Context, id int) (*userDomain.User, erro
 		return nil, err
 	}
 
-	u, err := r.FindUserWithOrders(ctx, id)
-	if err != nil {
-		r.Logger.ErrorContext(ctx, "UserRepository.GetUser", slog.String("error", err.Error()))
-		return nil, err
-	}
-	r.Logger.InfoContext(ctx, "UserRepository.GetUser", slog.Any("userWithOrders", u))
-
 	return mapping.DbModelToDomainUser(user), nil
 }
 

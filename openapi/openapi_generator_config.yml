@@ -1,6 +1,6 @@
 generatorName: go
 inputSpec: openapi/docs/api.yaml
-outputDir: openapi/generated/go/openapi
+outputDir: internal/delivery/restful/openapi/v1/generated
 templateDir: openapi/goTemplates
 globalProperties:
   models: ""

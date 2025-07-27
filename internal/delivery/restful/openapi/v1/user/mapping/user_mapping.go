@@ -1,9 +1,9 @@
 package mapping
 
 import (
+	api "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/generated"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	userSrv "github.com/umefy/go-web-app-template/internal/service/user"
-	api "github.com/umefy/go-web-app-template/openapi/generated/go/openapi"
 )
 
 func UserModelToApiUser(user *userDomain.User) api.User {
