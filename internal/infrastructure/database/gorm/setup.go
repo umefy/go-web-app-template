@@ -1,8 +1,8 @@
 package gorm
 
 import (
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/internal/core/config"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/generated/query"
 	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
 )
 

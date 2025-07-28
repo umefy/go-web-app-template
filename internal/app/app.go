@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/internal/core/config"
 	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repo"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
 	userSvc "github.com/umefy/go-web-app-template/internal/service/user"
@@ -16,7 +16,7 @@ type App struct {
 	UserService    userSvc.Service
 	UserRepository userRepo.Repository
 	GreeterService greeterSvc.Service
-	DbQuery        *query.Query
+	DbQuery        *database.Query
 }
 
 func New(configOptions config.Options) (*App, error) {

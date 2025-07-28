@@ -13,7 +13,7 @@ import (
 func getGeneratePath() string {
 	_, filePath, _, _ := runtime.Caller(1)
 	dirname := filepath.Dir(filePath)
-	return filepath.Join(dirname, "./generated/query")
+	return filepath.Join(dirname, "../internal/infrastructure/database/gorm/generated/query")
 }
 
 func getTablesToGenerate() []string {

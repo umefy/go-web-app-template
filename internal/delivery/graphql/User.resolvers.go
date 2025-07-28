@@ -7,27 +7,23 @@ package graphql
 import (
 	"context"
 
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/mapping"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
 	userSrv "github.com/umefy/go-web-app-template/internal/service/user"
 	"github.com/umefy/godash/sliceskit"
 )
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreateInput) (*model.User, error) {
-	return database.WithTx(ctx, r.DbQuery, r.Logger, func(ctx context.Context, tx *query.QueryTx) (*model.User, error) {
-		userModel, err := r.UserService.CreateUser(ctx, &userSrv.UserCreateInput{
-			Email: input.Email,
-			Age:   int(input.Age),
-		}, tx)
-		if err != nil {
-			return nil, err
-		}
-
-		return mapping.UserModelToGraphqlUser(userModel), nil
+	userModel, err := r.UserService.CreateUser(ctx, &userSrv.UserCreateInput{
+		Email: input.Email,
+		Age:   int(input.Age),
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	return mapping.UserModelToGraphqlUser(userModel), nil
 }
 
 // Users is the resolver for the users field.

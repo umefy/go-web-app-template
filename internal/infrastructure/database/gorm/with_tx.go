@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 )
 
@@ -13,7 +13,6 @@ func WithTx[T any](ctx context.Context, dbQuery *query.Query, logger logger.Logg
 	logger.InfoContext(ctx, "Transaction started")
 	var err error
 	defer func() {
-
 		if rec := recover(); rec != nil {
 			logger.ErrorContext(ctx, "Transaction rollback because of panic")
 			//nolint:errcheck
@@ -25,7 +24,9 @@ func WithTx[T any](ctx context.Context, dbQuery *query.Query, logger logger.Logg
 			logger.ErrorContext(ctx, "Transaction rollback", slog.String("error", err.Error()))
 			//nolint:errcheck
 			tx.Rollback()
+			return
 		}
+		logger.InfoContext(ctx, "Transaction committed")
 	}()
 
 	v, err := fn(ctx, tx)

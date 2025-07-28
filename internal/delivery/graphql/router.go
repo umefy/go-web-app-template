@@ -10,7 +10,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
+	gqlgenExtension "github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -18,6 +18,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/app"
 	"github.com/umefy/go-web-app-template/internal/core/config"
 	"github.com/umefy/go-web-app-template/internal/delivery/errutil"
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/extension"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -29,7 +30,6 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 		Resolvers: &Resolver{
 			UserService: app.UserService,
 			Logger:      app.Logger,
-			DbQuery:     app.DbQuery,
 		},
 	}
 
@@ -78,8 +78,13 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 	srv.AddTransport(transport.POST{})
 	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
 
-	srv.Use(extension.AutomaticPersistedQuery{
+	srv.Use(gqlgenExtension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
+	})
+
+	srv.Use(&extension.TransactionExtension{
+		DbQuery: app.DbQuery,
+		Logger:  app.Logger,
 	})
 
 	srv.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
@@ -92,7 +97,7 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 	})
 
 	if appEnv == config.AppEnvDev {
-		srv.Use(extension.Introspection{})
+		srv.Use(gqlgenExtension.Introspection{})
 	}
 
 	// Create a router that handles WebSocket connections properly

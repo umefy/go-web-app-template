@@ -6,11 +6,12 @@ import (
 	"log/slog"
 	"time"
 
-	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repo"
+	dbContext "github.com/umefy/go-web-app-template/internal/infrastructure/database/ctx"
+	dbModel "github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/generated/model"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/repo/mapping"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/go-web-app-template/pkg/null"
@@ -46,7 +47,8 @@ func (r *UserRepo) FindUser(ctx context.Context, id int) (*userDomain.User, erro
 	return mapping.DbModelToDomainUser(user), nil
 }
 
-func (r *UserRepo) FindUserTx(ctx context.Context, id int, tx *query.QueryTx) (*userDomain.User, error) {
+func (r *UserRepo) FindUserTx(ctx context.Context, id int) (*userDomain.User, error) {
+	tx := ctx.Value(dbContext.TransactionCtxKey).(*query.QueryTx)
 	userQuery := tx.User
 	user, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).First()
 
@@ -77,7 +79,8 @@ func (r *UserRepo) FindUsers(ctx context.Context) ([]*userDomain.User, error) {
 	}), nil
 }
 
-func (r *UserRepo) FindUsersTx(ctx context.Context, tx *query.QueryTx) ([]*userDomain.User, error) {
+func (r *UserRepo) FindUsersTx(ctx context.Context) ([]*userDomain.User, error) {
+	tx := ctx.Value(dbContext.TransactionCtxKey).(*query.QueryTx)
 	userQuery := tx.User
 	users, err := userQuery.WithContext(ctx).Order(userQuery.ID.Asc()).Find()
 
@@ -93,7 +96,8 @@ func (r *UserRepo) FindUsersTx(ctx context.Context, tx *query.QueryTx) ([]*userD
 	}), nil
 }
 
-func (r *UserRepo) CreateUser(ctx context.Context, user *userDomain.User, tx *query.QueryTx) (*userDomain.User, error) {
+func (r *UserRepo) CreateUser(ctx context.Context, user *userDomain.User) (*userDomain.User, error) {
+	tx := ctx.Value(dbContext.TransactionCtxKey).(*query.QueryTx)
 	userQuery := tx.User
 	dbModel := mapping.DomainUserToDbModel(user)
 	err := userQuery.WithContext(ctx).Create(dbModel)
@@ -111,8 +115,9 @@ func (r *UserRepo) CreateUser(ctx context.Context, user *userDomain.User, tx *qu
 	return mapping.DbModelToDomainUser(dbModel), nil
 }
 
-func (r *UserRepo) UpdateUser(ctx context.Context, id int, user *userDomain.User, tx *query.QueryTx) (*userDomain.User, error) {
+func (r *UserRepo) UpdateUser(ctx context.Context, id int, user *userDomain.User) (*userDomain.User, error) {
 
+	tx := ctx.Value(dbContext.TransactionCtxKey).(*query.QueryTx)
 	userQuery := tx.User
 
 	dbModel := mapping.DomainUserToDbModel(user)
@@ -131,8 +136,8 @@ func (r *UserRepo) UpdateUser(ctx context.Context, id int, user *userDomain.User
 	return mapping.DbModelToDomainUser(dbModel), nil
 }
 
-func (r *UserRepo) IsUserEmailExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error) {
-	userQuery := tx.User
+func (r *UserRepo) IsUserEmailExists(ctx context.Context, email string) (bool, error) {
+	userQuery := r.dbQuery.User
 	count, err := userQuery.WithContext(ctx).Where(userQuery.Email.Eq(null.ValueFrom(email))).Count()
 
 	if err != nil {

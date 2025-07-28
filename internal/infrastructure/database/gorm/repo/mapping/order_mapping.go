@@ -1,8 +1,8 @@
 package mapping
 
 import (
-	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
+	dbModel "github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/generated/model"
 )
 
 func DbModelToDomainOrder(order *dbModel.Order) *orderDomain.Order {

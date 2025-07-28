@@ -1,9 +1,9 @@
 package mapping
 
 import (
-	dbModel "github.com/umefy/go-web-app-template/gorm/generated/model"
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
+	dbModel "github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/generated/model"
 	"github.com/umefy/go-web-app-template/pkg/null"
 	"github.com/umefy/godash/sliceskit"
 )

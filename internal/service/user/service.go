@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"strconv"
 
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
 	"github.com/umefy/go-web-app-template/internal/domain/user/repo"
@@ -16,9 +15,9 @@ import (
 type Service interface {
 	GetUsers(ctx context.Context) ([]*userDomain.User, error)
 	GetUser(ctx context.Context, id string) (*userDomain.User, error)
-	IsUserExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error)
-	CreateUser(ctx context.Context, userCreateInput *UserCreateInput, tx *query.QueryTx) (*userDomain.User, error)
-	UpdateUser(ctx context.Context, id string, userUpdateInput *UserUpdateInput, tx *query.QueryTx) (*userDomain.User, error)
+	IsUserExists(ctx context.Context, email string) (bool, error)
+	CreateUser(ctx context.Context, userCreateInput *UserCreateInput) (*userDomain.User, error)
+	UpdateUser(ctx context.Context, id string, userUpdateInput *UserUpdateInput) (*userDomain.User, error)
 }
 
 type userService struct {
@@ -57,24 +56,24 @@ func (u *userService) GetUser(ctx context.Context, id string) (*userDomain.User,
 	return user, nil
 }
 
-func (u *userService) IsUserExists(ctx context.Context, email string, tx *query.QueryTx) (bool, error) {
-	return u.userRepository.IsUserEmailExists(ctx, email, tx)
+func (u *userService) IsUserExists(ctx context.Context, email string) (bool, error) {
+	return u.userRepository.IsUserEmailExists(ctx, email)
 }
 
-func (u *userService) CreateUser(ctx context.Context, createUserInput *UserCreateInput, tx *query.QueryTx) (*userDomain.User, error) {
+func (u *userService) CreateUser(ctx context.Context, createUserInput *UserCreateInput) (*userDomain.User, error) {
 
 	if err := createUserInput.Validate(); err != nil {
 		return nil, err
 	}
 
-	if exists, err := u.IsUserExists(ctx, createUserInput.Email, tx); err != nil {
+	if exists, err := u.IsUserExists(ctx, createUserInput.Email); err != nil {
 		return nil, err
 	} else if exists {
 		return nil, userError.UserAlreadyExists
 	}
 
 	user := createUserInput.MapToDomainUser()
-	userDb, err := u.userRepository.CreateUser(ctx, user, tx)
+	userDb, err := u.userRepository.CreateUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +81,7 @@ func (u *userService) CreateUser(ctx context.Context, createUserInput *UserCreat
 }
 
 // UpdateUser implements Service.
-func (u *userService) UpdateUser(ctx context.Context, id string, updateUserInput *UserUpdateInput, tx *query.QueryTx) (*userDomain.User, error) {
+func (u *userService) UpdateUser(ctx context.Context, id string, updateUserInput *UserUpdateInput) (*userDomain.User, error) {
 	userID, err := strconv.Atoi(id)
 	if err != nil {
 		u.logger.ErrorContext(ctx, "UserService.UpdateUser", slog.String("error", err.Error()))
@@ -100,7 +99,7 @@ func (u *userService) UpdateUser(ctx context.Context, id string, updateUserInput
 
 	updatedUser := updateDomainUser(user, updateUserInput)
 
-	userDb, err := u.userRepository.UpdateUser(ctx, userID, updatedUser, tx)
+	userDb, err := u.userRepository.UpdateUser(ctx, userID, updatedUser)
 	if err != nil {
 		return nil, err
 	}

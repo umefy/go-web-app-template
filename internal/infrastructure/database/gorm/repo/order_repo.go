@@ -5,10 +5,10 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 	orderError "github.com/umefy/go-web-app-template/internal/domain/order/error"
 	orderRepo "github.com/umefy/go-web-app-template/internal/domain/order/repo"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/generated/query"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/repo/mapping"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/godash/sliceskit"

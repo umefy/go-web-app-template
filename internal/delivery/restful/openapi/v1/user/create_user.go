@@ -3,7 +3,6 @@ package user
 import (
 	"net/http"
 
-	"github.com/umefy/go-web-app-template/internal/delivery/restful/handler/middleware"
 	api "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/generated"
 	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user/mapping"
 	"github.com/umefy/godash/jsonkit"
@@ -21,12 +20,7 @@ func (h *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) error {
 
 	userCreateInput := mapping.ApiUserCreateToUserModelCreate(&userInput)
 
-	tx, err := middleware.GetTransaction(ctx)
-	if err != nil {
-		return err
-	}
-
-	user, err := h.userService.CreateUser(ctx, userCreateInput, tx)
+	user, err := h.userService.CreateUser(ctx, userCreateInput)
 	if err != nil {
 		return err
 	}
