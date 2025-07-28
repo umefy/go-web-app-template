@@ -44,50 +44,86 @@ go-web-app-template/
 ├── cmd/                           # Application entry points
 │   └── server/                   # HTTP/gRPC server startup
 ├── internal/                      # Private application code (Go-enforced privacy)
-│   ├── domain/                    # Pure business logic (no external dependencies)
+│   ├── domain/                    # Pure business logic & interfaces (no external dependencies)
 │   │   ├── user/                 # User domain
-│   │   │   ├── repository/       # Repository interfaces
-│   │   │   ├── service/          # Business logic services
+│   │   │   ├── repo/             # Repository interfaces
+│   │   │   ├── user.go           # Domain models
+│   │   │   ├── user_with_order.go # Domain models with relationships
 │   │   │   └── error/            # Domain-specific errors
-│   │   ├── config/               # Configuration domain
-│   │   ├── greeter/              # Greeter domain
-│   │   └── logger/               # Logger domain
-│   ├── infrastructure/            # External concerns & implementations
-│   │   ├── database/             # Database implementations
-│   │   │   ├── setup.go          # Database connection
-│   │   │   ├── user_repository.go # Repository implementations
-│   │   │   └── wire.go           # Database wire set
-│   │   ├── http/                 # HTTP infrastructure (REST + GraphQL)
-│   │   │   ├── handler/          # Default HTTP handlers
-│   │   │   │   ├── default_handler.go # Default handler
+│   │   ├── order/                # Order domain
+│   │   │   ├── repo/             # Repository interfaces
+│   │   │   └── order.go          # Domain models
+│   │   └── error/                # Shared domain errors
+│   ├── service/                   # Business logic implementation
+│   │   ├── user/                 # User business logic
+│   │   │   ├── service.go        # User service implementation
+│   │   │   ├── wire.go           # Service wire set
+│   │   │   └── input.go          # Service input/output models
+│   │   ├── order/                # Order business logic
+│   │   │   ├── service.go        # Order service implementation
+│   │   │   └── wire.go           # Service wire set
+│   │   └── greeter/              # Greeter business logic
+│   │       ├── service.go        # Greeter service implementation
+│   │       └── wire.go           # Service wire set
+│   ├── delivery/                  # Transport layer (HTTP/gRPC/GraphQL)
+│   │   ├── restful/              # HTTP REST API
+│   │   │   ├── handler/          # Shared handler utilities
 │   │   │   │   ├── handler.go    # Handler interface
+│   │   │   │   ├── default_handler.go # Default handler with error handling
 │   │   │   │   └── middleware/   # HTTP middleware
-│   │   │   ├── graphql/          # GraphQL infrastructure
-│   │   │   │   ├── generated.go  # gqlgen generated code
-│   │   │   │   ├── User.resolvers.go # User GraphQL resolvers
-│   │   │   │   ├── Order.resolvers.go # Order GraphQL resolvers
-│   │   │   │   ├── router.go     # GraphQL router with playground
-│   │   │   │   └── model/        # GraphQL models
-│   │   │   ├── openapi/          # OpenAPI infrastructure
-│   │   │   │   └── v1/           # API version 1
-│   │   │   │       ├── router.go # OpenAPI router
-│   │   │   │       └── handler/  # OpenAPI handlers
-│   │   │   │           └── user/ # User OpenAPI handlers
-│   │   │   │               ├── create_user.go
-│   │   │   │               ├── get_user.go
-│   │   │   │               ├── get_users.go
-│   │   │   │               ├── update_user.go
-│   │   │   │               ├── handler.go
-│   │   │   │               └── mapping/ # Data mapping
-│   │   │   ├── middleware/       # HTTP middleware
-│   │   │   ├── router.go         # Main router setup
-│   │   │   └── server.go         # HTTP server
-│   │   ├── grpc/                 # gRPC infrastructure
+│   │   │   └── openapi/          # OpenAPI REST endpoints
+│   │   │       └── v1/           # API version 1
+│   │   │           ├── router.go # OpenAPI router
+│   │   │           └── user/     # User REST handlers
+│   │   │               ├── handler.go      # User handler interface
+│   │   │               ├── create_user.go  # Create user endpoint
+│   │   │               ├── get_user.go     # Get user endpoint
+│   │   │               ├── get_users.go    # Get users endpoint
+│   │   │               ├── update_user.go  # Update user endpoint
+│   │   │               ├── router.go       # User routing
+│   │   │               └── mapping/        # Data mapping
+│   │   ├── graphql/              # GraphQL API
+│   │   │   ├── generated.go      # gqlgen generated code
+│   │   │   ├── User.resolvers.go # User GraphQL resolvers
+│   │   │   ├── Order.resolvers.go # Order GraphQL resolvers
+│   │   │   ├── router.go         # GraphQL router with playground
+│   │   │   └── model/            # GraphQL models
+│   │   ├── grpc/                 # gRPC API
 │   │   │   ├── handler/          # gRPC handlers
 │   │   │   │   └── greeter/      # Greeter gRPC service
 │   │   │   └── server.go         # gRPC server
-│   │   ├── config/               # Configuration loading
+│   │   └── errutil/              # Error handling utilities
+│   ├── infrastructure/            # External concerns & implementations
+│   │   ├── database/             # Database infrastructure
+│   │   │   ├── wire.go           # Database wire set
+│   │   │   ├── with_tx.go        # Transaction utilities
+│   │   │   ├── ctx/              # Database context utilities
+│   │   │   └── gorm/             # GORM database implementation
+│   │   │       ├── setup.go      # Database connection setup
+│   │   │       ├── with_tx.go    # GORM transaction utilities
+│   │   │       ├── generated/    # GORM generated models
+│   │   │       └── repo/         # Repository implementations
+│   │   │           ├── user_repo.go    # User repository implementation
+│   │   │           ├── order_repo.go   # Order repository implementation
+│   │   │           └── mapping/        # Database mapping utilities
+│   │   ├── server/               # Server infrastructure
+│   │   │   ├── http/             # HTTP server setup
+│   │   │   │   ├── router.go     # Main HTTP router
+│   │   │   │   ├── server.go     # HTTP server
+│   │   │   │   └── middleware/   # HTTP middleware
+│   │   │   └── grpc/             # gRPC server setup
+│   │   │       ├── handler/      # gRPC handlers
+│   │   │       └── server.go     # gRPC server
 │   │   └── logger/               # Logger setup
+│   ├── core/                      # Core shared components
+│   │   └── config/               # Configuration management
+│   │       ├── config.go         # Main configuration struct
+│   │       ├── setup.go          # Configuration loading
+│   │       ├── app_config.go     # Application configuration
+│   │       ├── db_config.go      # Database configuration
+│   │       ├── http_server_config.go # HTTP server configuration
+│   │       ├── grpc_server_config.go # gRPC server configuration
+│   │       └── logging_config.go # Logging configuration
 │   └── app/                      # Application composition & DI
 │       ├── app.go                # Main application struct
 │       ├── wire.go               # Dependency injection
@@ -116,18 +152,21 @@ go-web-app-template/
 
 ### Architecture Principles
 
-- **Domain Layer**: Pure business logic with interfaces only
-- **Infrastructure Layer**: External implementations (database, HTTP, gRPC)
+- **Domain Layer**: Pure business logic with interfaces and models only
+- **Service Layer**: Business logic implementation using domain interfaces
+- **Delivery Layer**: Transport concerns (HTTP, GraphQL, gRPC)
+- **Infrastructure Layer**: External implementations (database, server, logger)
+- **Core Layer**: Shared core components (configuration)
 - **App Layer**: Dependency injection and composition
-- **Dependency Direction**: Domain ← Infrastructure (Domain doesn't know about infrastructure)
+- **Dependency Direction**: Domain ← Service ← Delivery ← Infrastructure (Domain doesn't know about external concerns)
 
 ### Key Architectural Decisions
 
-#### 1. Clean Architecture Implementation
+#### 1. Clean Architecture with Clear Layer Separation
 
-- **Decision**: Follow clean architecture with clear layer separation
+- **Decision**: Follow clean architecture with distinct layers for domain, service, delivery, and infrastructure
 - **Why**: Ensures testability, maintainability, and independence from external concerns
-- **Structure**: Domain (business logic) → Infrastructure (implementations) → App (composition)
+- **Structure**: Domain (interfaces) → Service (business logic) → Delivery (transport) → Infrastructure (implementations)
 
 #### 2. Multi-Protocol API Support
 
@@ -141,27 +180,32 @@ go-web-app-template/
 - **Why**: Maintains clean architecture while providing data access abstraction
 - **Benefit**: Easy to swap database implementations and test with mocks
 
+#### 4. Shared Handler Architecture
+
+- **Decision**: Common handler interface and default implementation for all HTTP handlers
+- **Why**: Consistent error handling and middleware application across all endpoints
+- **Benefit**: Reduces code duplication and ensures consistent behavior
+
 ### Key Features
 
-- ✅ **Clean Architecture**: Clear separation of concerns
+- ✅ **Clean Architecture**: Clear separation of concerns with domain, service, delivery, and infrastructure layers
 - ✅ **Dependency Injection**: Wire-based DI with proper bindings
 - ✅ **Transaction Support**: Full transaction handling in services and repositories
-- ✅ **Domain-Driven Design**: Organized by business domains
+- ✅ **Domain-Driven Design**: Organized by business domains with clear boundaries
 - ✅ **Multi-Protocol Support**: HTTP (REST + GraphQL) and gRPC with configuration-driven selection
-- ✅ **Database Integration**: GORM with migrations
-- ✅ **Multi-Protocol API**: OpenAPI (REST) + GraphQL support on HTTP
+- ✅ **Database Integration**: GORM with migrations and generated queries
 - ✅ **API-First Development**: OpenAPI-driven development with Go model generation
 - ✅ **GraphQL Support**: gqlgen-based GraphQL server with type-safe resolvers and playground
-- ✅ **Comprehensive Testing**: Mockery for mocking
+- ✅ **Comprehensive Testing**: Mockery for mocking with comprehensive test coverage
 - ✅ **Health Checks**: Built-in health check endpoints with chi middleware
 - ✅ **Rate Limiting**: Request throttling with httprate (600 req/min global, 100 req/min per IP)
-- ✅ **Logging**: Structured logging with request ID tracking
+- ✅ **Logging**: Structured logging with request ID tracking and context-aware logging
 - ✅ **Input Validation**: Comprehensive validation with custom validation rules
 - ✅ **Content Type Validation**: JSON content type enforcement
 - ✅ **Request Timeout**: 60-second request timeout
-- ✅ **Error Recovery**: Panic recovery with logging
+- ✅ **Error Recovery**: Panic recovery with logging and graceful error handling
 - ✅ **GitHub Actions**: CI/CD workflows for linting and testing
-- ✅ **Profiling**: Built-in debug profiler endpoint
+- ✅ **Profiling**: Built-in debug profiler endpoint for performance analysis
 
 ## 3. Development Workflow
 
@@ -190,20 +234,20 @@ grpc_server:
 
 - Update `./openapi/docs/api.yaml` with new API definitions
 - Run `make regen_openapi` to generate Go models
-- Implement handlers in `internal/infrastructure/http/openapi/v1/handler/[domain]/`
+- Implement handlers in `internal/delivery/restful/openapi/v1/[domain]/`
 
 #### GraphQL Development
 
 - Update GraphQL schema files in `graphql/` directory
 - Run `make regen_graphql` to generate resolvers and models
-- Implement resolvers in `internal/infrastructure/http/graphql/`
+- Implement resolvers in `internal/delivery/graphql/`
 - Access GraphQL playground at `/graphql/playground` in development
 
 #### gRPC Development
 
 - Update protocol buffer definitions in `proto/` directory
 - Run `make regen_proto` to generate Go code
-- Implement handlers in `internal/infrastructure/grpc/handler/`
+- Implement handlers in `internal/delivery/grpc/handler/`
 - Enable gRPC server in configuration when needed
 
 ### Database Development
@@ -215,13 +259,30 @@ grpc_server:
 
 ### Adding New Domains
 
-1. Create domain structure: `internal/domain/[domain]/`
-2. Define repository interface and service
-3. Implement repository in `internal/infrastructure/database/`
-4. Add REST handlers in `internal/infrastructure/http/openapi/v1/handler/[domain]/`
-5. Add GraphQL resolvers in `internal/infrastructure/http/graphql/`
-6. Add gRPC handlers in `internal/infrastructure/grpc/handler/` (if needed)
-7. Update wire configuration
+1. **Create Domain Structure**: `internal/domain/[domain]/`
+
+   - Define domain models (e.g., `user.go`)
+   - Create repository interface in `repo/repo.go`
+   - Add domain-specific errors in `error/`
+
+2. **Implement Business Logic**: `internal/service/[domain]/`
+
+   - Create service interface and implementation
+   - Add service wire set
+   - Define input/output models
+
+3. **Add Transport Layer**:
+
+   - **REST**: Add handlers in `internal/delivery/restful/openapi/v1/[domain]/`
+   - **GraphQL**: Add resolvers in `internal/delivery/graphql/`
+   - **gRPC**: Add handlers in `internal/delivery/grpc/handler/` (if needed)
+
+4. **Implement Data Access**: `internal/infrastructure/database/gorm/repo/`
+
+   - Create repository implementation
+   - Add database mapping utilities
+
+5. **Update Wire Configuration**: Add new services and repositories to DI
 
 ## 4. Future Enhancements
 
@@ -258,10 +319,12 @@ This is a template project designed for rapid development of Go web applications
 
 ### Best Practices
 
-- Follow clean architecture principles
-- Write tests for all business logic
+- Follow clean architecture principles with clear layer separation
+- Write tests for all business logic in the service layer
 - Use dependency injection for all dependencies
 - Keep domain logic pure and infrastructure-agnostic
 - Document APIs with OpenAPI specifications
 - Use transactions for data consistency
 - Implement proper error handling and logging
+- Use the shared handler architecture for consistent HTTP handling
+- Organize code by business domains rather than technical concerns
