@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
@@ -40,7 +41,7 @@ func Logger(logger *logger.Logger) func(next http.Handler) http.Handler {
 			// Wrap ResponseWriter to capture status code for regular HTTP requests
 			ww := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 			next.ServeHTTP(ww, r.WithContext(ctx))
-			duration := time.Since(start)
+			duration := fmt.Sprintf("%dms", time.Since(start).Milliseconds())
 
 			loggerWithoutSource.InfoContext(ctx,
 				"HTTP Request done",
@@ -51,7 +52,7 @@ func Logger(logger *logger.Logger) func(next http.Handler) http.Handler {
 				slog.Int("status", ww.statusCode),
 				slog.String("host", r.Host),
 				slog.String("remote_ip", ExtractIP(r)),
-				slog.Duration("latency", duration),
+				slog.String("latency", duration),
 			)
 		})
 	}

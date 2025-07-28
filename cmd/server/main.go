@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/grpc"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/http"
+	"github.com/umefy/go-web-app-template/internal/core/config"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/server/grpc"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/server/http"
 	"golang.org/x/sync/errgroup"
 )
 

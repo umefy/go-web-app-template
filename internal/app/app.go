@@ -1,25 +1,26 @@
 package app
 
 import (
-	"github.com/umefy/go-web-app-template/gorm/generated/query"
-	configSvc "github.com/umefy/go-web-app-template/internal/domain/config/service"
-	greeterSvc "github.com/umefy/go-web-app-template/internal/domain/greeter/service"
-	loggerSvc "github.com/umefy/go-web-app-template/internal/domain/logger/service"
-	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repository"
-	userSvc "github.com/umefy/go-web-app-template/internal/domain/user/service"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/config"
-	"github.com/umefy/godash/logger"
+	"github.com/umefy/go-web-app-template/internal/core/config"
+	orderRepo "github.com/umefy/go-web-app-template/internal/domain/order/repo"
+	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repo"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
+	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
+	orderSvc "github.com/umefy/go-web-app-template/internal/service/order"
+	userSvc "github.com/umefy/go-web-app-template/internal/service/user"
 )
 
 type App struct {
-	Arguments      config.Options
-	Logger         *logger.Logger
-	LoggerService  loggerSvc.Service
-	UserService    userSvc.Service
-	UserRepository userRepo.Repository
-	GreeterService greeterSvc.Service
-	ConfigService  configSvc.Service
-	DbQuery        *query.Query
+	Arguments       config.Options
+	Config          config.Config
+	Logger          logger.Logger
+	UserService     userSvc.Service
+	UserRepository  userRepo.Repository
+	OrderService    orderSvc.Service
+	OrderRepository orderRepo.Repository
+	GreeterService  greeterSvc.Service
+	DbQuery         *database.Query
 }
 
 func New(configOptions config.Options) (*App, error) {

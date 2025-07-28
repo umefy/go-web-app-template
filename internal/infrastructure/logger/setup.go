@@ -4,12 +4,12 @@ import (
 	"log/slog"
 	"os"
 
-	configSvc "github.com/umefy/go-web-app-template/internal/domain/config/service"
+	"github.com/umefy/go-web-app-template/internal/core/config"
 	"github.com/umefy/godash/logger"
 )
 
-func NewLogger(configSvc configSvc.Service) *logger.Logger {
-	logLevel := GetLogLevel(configSvc)
+func NewLogger(config config.Config) Logger {
+	logLevel := GetLogLevel(config)
 
 	loggerOpts := logger.NewLoggerOps(true, os.Stdout, logLevel, true, "source", 4)
 	logger := logger.New(loggerOpts, func(handler slog.Handler) slog.Handler {
@@ -18,11 +18,11 @@ func NewLogger(configSvc configSvc.Service) *logger.Logger {
 		})
 	})
 
-	return logger
+	return NewAppLogger(logger)
 }
 
-func GetLogLevel(configSvc configSvc.Service) slog.Level {
-	loggingConfig := configSvc.GetLoggingConfig()
+func GetLogLevel(config config.Config) slog.Level {
+	loggingConfig := config.GetLoggingConfig()
 
 	switch loggingConfig.Level {
 	case "debug":
