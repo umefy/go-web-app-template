@@ -1,5 +1,9 @@
 # Go Web App Template
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/umefy/go-web-app-template)](https://goreportcard.com/report/github.com/umefy/go-web-app-template)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/umefy/go-web-app-template)](https://go.dev/)
+[![License](https://img.shields.io/github/license/umefy/go-web-app-template)](LICENSE)
+
 A production-ready Go web application template following clean architecture principles with HTTP/gRPC servers, database integration, and comprehensive tooling.
 
 ## 1. Quick Start
@@ -313,7 +317,19 @@ grpc_server:
 - [ ] **Performance Monitoring**: Development-time performance insights
 - [ ] **Database Tools**: Database schema visualization, query optimization tools
 
-## 5. Contributing
+## 5. License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### What MIT License Means for You
+
+- ✅ **Use freely**: Use this template for any purpose (personal, commercial, etc.)
+- ✅ **Modify freely**: Customize and adapt the code to your needs
+- ✅ **Distribute freely**: Share your modified versions
+- ✅ **Minimal requirements**: Just include the original license and copyright notice
+- ✅ **No warranty**: The software is provided "as is" without warranties
+
+## 6. Contributing
 
 This is a template project designed for rapid development of Go web applications. Feel free to fork and customize for your specific needs.
 
