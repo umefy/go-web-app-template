@@ -16,6 +16,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/umefy/godash v0.0.0-20250316184252-8bd3adec516c
 	github.com/vektah/gqlparser/v2 v2.5.30
+	github.com/vikstrous/dataloadgen v0.0.9
 	golang.org/x/sync v0.15.0
 	google.golang.org/grpc v1.67.3
 	google.golang.org/protobuf v1.36.6
@@ -51,6 +52,8 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	go.opentelemetry.io/otel v1.29.0 // indirect
+	go.opentelemetry.io/otel/trace v1.29.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/crypto v0.39.0 // indirect

@@ -7,6 +7,6 @@ import (
 )
 
 type Repository interface {
-	FindOrdersByUserId(ctx context.Context, userId int) ([]*orderDomain.Order, error)
-	FindOrdersByUserIds(ctx context.Context, userIds []int) ([]*orderDomain.Order, error)
+	FindOrdersByUserID(ctx context.Context, userID int) ([]*orderDomain.Order, error)
+	FindOrdersByUserIDs(ctx context.Context, userIDs []int) ([]*orderDomain.Order, error)
 }

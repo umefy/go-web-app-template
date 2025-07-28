@@ -18,6 +18,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/app"
 	"github.com/umefy/go-web-app-template/internal/core/config"
 	"github.com/umefy/go-web-app-template/internal/delivery/errutil"
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/dataloader"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/extension"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"
@@ -103,13 +104,17 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 	// Create a router that handles WebSocket connections properly
 	r := router.NewRouter()
 
+	dataloaderDeps := dataloader.LoaderDeps{
+		OrderService: app.OrderService,
+		Logger:       app.Logger,
+	}
 	// Handle playground in development
 	if appEnv == config.AppEnvDev {
-		r.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
+		r.Handle("/playground", dataloader.Middleware(playground.Handler("GraphQL playground", "/graphql"), dataloaderDeps))
 	}
 
 	// Handle GraphQL requests
-	r.Handle("/", srv)
+	r.Handle("/", dataloader.Middleware(srv, dataloaderDeps))
 
 	return r
 }

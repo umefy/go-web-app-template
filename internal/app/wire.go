@@ -9,6 +9,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
+	orderSvc "github.com/umefy/go-web-app-template/internal/service/order"
 	userSvc "github.com/umefy/go-web-app-template/internal/service/user"
 )
 
@@ -17,6 +18,7 @@ var WireSet = wire.NewSet(
 	database.WireSet,
 	config.NewConfig,
 	userSvc.WireSet,
+	orderSvc.WireSet,
 	greeterSvc.WireSet,
 	wire.Struct(new(App), "*"),
 )

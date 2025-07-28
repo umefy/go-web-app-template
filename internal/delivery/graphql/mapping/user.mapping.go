@@ -8,7 +8,7 @@ import (
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 )
 
-func UserModelToGraphqlUser(user *userDomain.User) *model.User {
+func DomainUserToGraphqlUser(user *userDomain.User) *model.User {
 	return &model.User{
 		ID:        strconv.Itoa(user.ID),
 		Email:     user.Email,

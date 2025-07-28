@@ -7,6 +7,7 @@ package graphql
 import (
 	"context"
 
+	"github.com/umefy/go-web-app-template/internal/delivery/graphql/dataloader"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/mapping"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	userSrv "github.com/umefy/go-web-app-template/internal/service/user"
@@ -15,7 +16,7 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreateInput) (*model.User, error) {
-	userModel, err := r.UserService.CreateUser(ctx, &userSrv.UserCreateInput{
+	user, err := r.UserService.CreateUser(ctx, &userSrv.UserCreateInput{
 		Email: input.Email,
 		Age:   int(input.Age),
 	})
@@ -23,7 +24,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreat
 		return nil, err
 	}
 
-	return mapping.UserModelToGraphqlUser(userModel), nil
+	return mapping.DomainUserToGraphqlUser(user), nil
 }
 
 // Users is the resolver for the users field.
@@ -33,7 +34,25 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 		return nil, err
 	}
 
-	return sliceskit.Map(users, mapping.UserModelToGraphqlUser), nil
+	return sliceskit.Map(users, mapping.DomainUserToGraphqlUser), nil
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	user, err := r.UserService.GetUser(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return mapping.DomainUserToGraphqlUser(user), nil
+}
+
+// Orders is the resolver for the orders field.
+func (r *userResolver) Orders(ctx context.Context, obj *model.User) ([]*model.Order, error) {
+	orders, err := dataloader.GetOrdersByUserID(ctx, obj.ID, r.Logger)
+	if err != nil {
+		return []*model.Order{}, err
+	}
+	return orders, nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -42,5 +61,9 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// User returns UserResolver implementation.
+func (r *Resolver) User() UserResolver { return &userResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type userResolver struct{ *Resolver }

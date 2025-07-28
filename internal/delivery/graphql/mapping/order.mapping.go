@@ -8,7 +8,7 @@ import (
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 )
 
-func OrderModelToGraphqlOrder(order orderDomain.Order) *model.Order {
+func OrderModelToGraphqlOrder(order *orderDomain.Order) *model.Order {
 	return &model.Order{
 		ID:        strconv.Itoa(order.ID),
 		UserID:    strconv.Itoa(order.UserID),
