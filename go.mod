@@ -14,7 +14,7 @@ require (
 	github.com/jellydator/validation v1.1.0
 	github.com/spf13/viper v1.20.0
 	github.com/stretchr/testify v1.10.0
-	github.com/umefy/godash v0.0.0-20250316184252-8bd3adec516c
+	github.com/umefy/godash v0.0.2
 	github.com/vektah/gqlparser/v2 v2.5.30
 	github.com/vikstrous/dataloadgen v0.0.9
 	golang.org/x/sync v0.16.0
