@@ -4,7 +4,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/umefy/go-web-app-template)](https://go.dev/)
 [![License](https://img.shields.io/github/license/umefy/go-web-app-template)](LICENSE)
 
-A production-ready Go web application template following clean architecture principles with HTTP/gRPC servers, database integration, and comprehensive tooling.
+A production-ready Go web application template following clean architecture principles with HTTP/gRPC servers, database integration, OpenTelemetry tracing, and comprehensive tooling.
 
 ## 1. Quick Start
 
@@ -13,7 +13,13 @@ A production-ready Go web application template following clean architecture prin
    - Run `./scripts/local_setup.sh` to setup the tools required by the project
    - Update `.envrc` and `.envrc.test` based on your own needs (especially `DATABASE_URL`)
 
-2. **Generate Code**
+2. **Start Infrastructure Services**
+
+   - Run `make docker_compose_up` to start PostgreSQL and Jaeger services
+   - PostgreSQL will be available at `localhost:5433`
+   - Jaeger UI will be available at `http://localhost:16686`
+
+3. **Generate Code**
 
    - Run `make generate` to generate all required files (OpenAPI models, GraphQL resolvers, proto code, GORM models, Wire DI, and mocks)
    - Or run individual commands:
@@ -24,18 +30,20 @@ A production-ready Go web application template following clean architecture prin
      - `make wire` - Generate dependency injection files
      - `make mockery` - Generate testing mocks
 
-3. **Database Setup**
+4. **Database Setup**
 
    - Run `make migration_create migration_name=[MigrationName]` to create a new migration
    - Write SQL in the generated migration file
    - Run `make migration_up` to apply all migrations
 
-4. **Start Development**
+5. **Start Development**
    - Run `make` or `make dev` to start the project in development mode 🚀
+   - This will automatically start Docker services, run migrations, and start the development server
    - Access APIs:
      - REST API: `http://localhost:8082/api/v1/`
      - GraphQL: `http://localhost:8082/graphql/` (playground available in dev mode)
      - Health check: `http://localhost:8082/health`
+   - View traces in Jaeger UI: `http://localhost:16686`
 
 **Note**: For testing, run `make generate ENVRC_FILE=.envrc.test` to use test environment configuration.
 
@@ -118,7 +126,11 @@ go-web-app-template/
 │   │   │   └── grpc/             # gRPC server setup
 │   │   │       ├── handler/      # gRPC handlers
 │   │   │       └── server.go     # gRPC server
-│   │   └── logger/               # Logger setup
+│   │   ├── logger/               # Logger setup
+│   │   └── tracing/              # OpenTelemetry tracing setup
+│   │       ├── opentelemetry/    # OpenTelemetry implementation
+│   │       │   └── setup.go      # Tracing setup and configuration
+│   │       └── wire.go           # Tracing wire set
 │   ├── core/                      # Core shared components
 │   │   └── config/               # Configuration management
 │   │       ├── config.go         # Main configuration struct
@@ -127,7 +139,8 @@ go-web-app-template/
 │   │       ├── db_config.go      # Database configuration
 │   │       ├── http_server_config.go # HTTP server configuration
 │   │       ├── grpc_server_config.go # gRPC server configuration
-│   │       └── logging_config.go # Logging configuration
+│   │       ├── logging_config.go # Logging configuration
+│   │       └── tracing_config.go # Tracing configuration
 │   └── app/                      # Application composition & DI
 │       ├── app.go                # Main application struct
 │       ├── wire.go               # Dependency injection
@@ -151,6 +164,7 @@ go-web-app-template/
 ├── gorm/                          # GORM generated code
 ├── scripts/                       # Build and deployment scripts
 ├── bruno/                         # API testing
+├── docker-compose.yml             # Docker Compose for local development
 └── ... (other config files)
 ```
 
@@ -159,7 +173,7 @@ go-web-app-template/
 - **Domain Layer**: Pure business logic with interfaces and models only
 - **Service Layer**: Business logic implementation using domain interfaces
 - **Delivery Layer**: Transport concerns (HTTP, GraphQL, gRPC)
-- **Infrastructure Layer**: External implementations (database, server, logger)
+- **Infrastructure Layer**: External implementations (database, server, logger, tracing)
 - **Core Layer**: Shared core components (configuration)
 - **App Layer**: Dependency injection and composition
 - **Dependency Direction**: Domain ← Service ← Delivery ← Infrastructure (Domain doesn't know about external concerns)
@@ -190,6 +204,12 @@ go-web-app-template/
 - **Why**: Consistent error handling and middleware application across all endpoints
 - **Benefit**: Reduces code duplication and ensures consistent behavior
 
+#### 5. Observability with OpenTelemetry
+
+- **Decision**: OpenTelemetry tracing with Jaeger backend for distributed tracing
+- **Why**: Provides visibility into request flows across services and infrastructure
+- **Benefit**: Better debugging, performance monitoring, and operational insights
+
 ### Key Features
 
 - ✅ **Clean Architecture**: Clear separation of concerns with domain, service, delivery, and infrastructure layers
@@ -210,8 +230,30 @@ go-web-app-template/
 - ✅ **Error Recovery**: Panic recovery with logging and graceful error handling
 - ✅ **GitHub Actions**: CI/CD workflows for linting and testing
 - ✅ **Profiling**: Built-in debug profiler endpoint for performance analysis
+- ✅ **Docker Compose**: Local development environment with PostgreSQL and Jaeger
+- ✅ **OpenTelemetry Tracing**: Distributed tracing with Jaeger backend for observability
 
 ## 3. Development Workflow
+
+### Infrastructure Setup
+
+The project includes Docker Compose for local development:
+
+```bash
+# Start infrastructure services
+make docker_compose_up
+
+# Stop infrastructure services
+make docker_compose_down
+
+# Start development with auto-infrastructure setup
+make dev  # This automatically starts Docker services and runs migrations
+```
+
+**Services Available:**
+
+- **PostgreSQL**: `localhost:5433` (user: `test_user`, password: `test_password`, database: `goWebapp_test`)
+- **Jaeger**: `http://localhost:16686` (UI), `localhost:4317` (OTLP gRPC), `localhost:4318` (OTLP HTTP)
 
 ### Protocol Selection
 
@@ -226,11 +268,28 @@ http_server:
 grpc_server:
   enabled: false # Disable gRPC
   port: 30082
+
+tracing:
+  enabled: true # Enable OpenTelemetry tracing
+  jaeger_endpoint: 'localhost:4318'
+  tracer_name: 'http.server'
+  service_name: 'Server'
+  service_version: '0.0.1'
 ```
 
 - **HTTP Protocol**: Serves both OpenAPI (REST) and GraphQL APIs
 - **gRPC Protocol**: Separate gRPC services (when enabled)
-- **Configuration**: Easy to enable/disable protocols via YAML config
+- **Tracing**: OpenTelemetry tracing with Jaeger backend (configurable)
+- **Configuration**: Easy to enable/disable protocols and tracing via YAML config
+
+### Observability with OpenTelemetry
+
+The application includes comprehensive tracing support:
+
+- **Tracing**: OpenTelemetry integration with Jaeger backend
+- **Jaeger UI**: Access traces at `http://localhost:16686`
+- **Configuration**: Tracing can be enabled/disabled per environment
+- **Service Context**: Automatic service name, version, and tracer configuration
 
 ### API Development (Multi-Protocol)
 
@@ -295,7 +354,7 @@ grpc_server:
 - [ ] **Authentication & Authorization**: JWT, OAuth2, RBAC
 - [ ] **Caching Layer**: Redis integration
 - [ ] **Event System**: Domain events and messaging
-- [ ] **Metrics & Observability**: Prometheus, OpenTelemetry
+- [ ] **Metrics & Observability**: Prometheus integration, enhanced OpenTelemetry metrics
 - [ ] **Advanced API Versioning**: Multiple version coexistence, deprecation policies, migration guides
 - [ ] **Background Jobs**: Task queue integration
 - [ ] **File Upload**: Multipart file handling
@@ -303,12 +362,12 @@ grpc_server:
 
 ### Infrastructure Improvements
 
-- [ ] **Docker Support**: Multi-stage builds
-- [ ] **Kubernetes**: Deployment manifests
+- [ ] **Docker Support**: Multi-stage builds, production Docker images
+- [ ] **Kubernetes**: Deployment manifests, Helm charts
 - [ ] **Enhanced CI/CD**: Additional GitHub Actions workflows
-- [ ] **Monitoring**: Enhanced health checks, metrics dashboard
-- [ ] **Security**: Security headers, enhanced CORS configuration
-- [ ] **Performance**: Connection pooling, caching strategies
+- [ ] **Monitoring**: Enhanced health checks, metrics dashboard, alerting
+- [ ] **Security**: Security headers, enhanced CORS configuration, security scanning
+- [ ] **Performance**: Connection pooling, caching strategies, performance testing
 
 ### Development Experience
 
@@ -316,6 +375,7 @@ grpc_server:
 - [ ] **Development Tools**: Additional development utilities and scripts
 - [ ] **Performance Monitoring**: Development-time performance insights
 - [ ] **Database Tools**: Database schema visualization, query optimization tools
+- [ ] **Tracing Enhancements**: Custom trace attributes, sampling strategies, trace correlation
 
 ## 5. License
 
@@ -344,3 +404,5 @@ This is a template project designed for rapid development of Go web applications
 - Implement proper error handling and logging
 - Use the shared handler architecture for consistent HTTP handling
 - Organize code by business domains rather than technical concerns
+- Leverage OpenTelemetry tracing for observability and debugging
+- Use Docker Compose for consistent local development environment
