@@ -12,9 +12,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/infrastructure/server/grpc"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/server/http"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/tracing"
-	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
-	orderSvc "github.com/umefy/go-web-app-template/internal/service/order"
-	userSvc "github.com/umefy/go-web-app-template/internal/service/user"
+	"github.com/umefy/go-web-app-template/internal/service"
 	"go.uber.org/fx"
 )
 
@@ -44,9 +42,7 @@ func main() {
 		tracing.Module,
 		http.Module,
 		grpc.Module,
-		userSvc.Module,
-		orderSvc.Module,
-		greeterSvc.Module,
+		service.Module,
 		fx.Invoke(start),
 	)
 
