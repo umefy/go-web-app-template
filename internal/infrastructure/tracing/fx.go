@@ -1,10 +1,10 @@
 package tracing
 
 import (
-	"github.com/google/wire"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/tracing/opentelemetry"
+	"go.uber.org/fx"
 )
 
-var WireSet = wire.NewSet(
-	opentelemetry.NewTracer,
+var Module = fx.Module("tracing",
+	fx.Provide(opentelemetry.NewTracer),
 )

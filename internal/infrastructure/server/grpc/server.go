@@ -6,43 +6,49 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/umefy/go-web-app-template/internal/app"
 	"github.com/umefy/go-web-app-template/internal/core/config"
 	"github.com/umefy/go-web-app-template/internal/delivery/grpc/greeter"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
+	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
 	"github.com/umefy/go-web-app-template/pkg/server/grpcserver"
 	pb "github.com/umefy/go-web-app-template/protogen/grpc/service"
+	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func registerServices(grpcServer *grpc.Server, app *app.App) {
-	pb.RegisterGreeterServer(grpcServer, greeter.NewHandler(app.Logger, app.GreeterService))
+type GrpcServerParams struct {
+	fx.In
+
+	ConfigOptions  config.Options
+	Config         config.Config
+	Logger         logger.Logger
+	GreeterService greeterSvc.Service
 }
 
-func New(configOptions config.Options) (*grpcserver.GrpcServer, error) {
-	app, err := app.New(configOptions)
-	if err != nil {
-		return nil, err
-	}
+func registerServices(grpcServer *grpc.Server, params GrpcServerParams) {
+	pb.RegisterGreeterServer(grpcServer, greeter.NewHandler(params.Logger, params.GreeterService))
+}
 
-	if !app.Config.GetGrpcServerConfig().Enabled {
+func NewServer(params GrpcServerParams) (*grpcserver.GrpcServer, error) {
+
+	if !params.Config.GetGrpcServerConfig().Enabled {
 		return nil, nil
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", app.Config.GetGrpcServerConfig().Port))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", params.Config.GetGrpcServerConfig().Port))
 	if err != nil {
 		return nil, err
 	}
 
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(unaryRecoveryInterceptor(app.Logger)),
-		grpc.StreamInterceptor(streamRecoveryInterceptor(app.Logger)),
+		grpc.UnaryInterceptor(unaryRecoveryInterceptor(params.Logger)),
+		grpc.StreamInterceptor(streamRecoveryInterceptor(params.Logger)),
 	)
 
-	registerServices(grpcServer, app)
-	server := grpcserver.New(listener, grpcServer, app.Logger.GetLogger())
+	registerServices(grpcServer, params)
+	server := grpcserver.New(listener, grpcServer, params.Logger.GetLogger())
 	return server, nil
 }
 

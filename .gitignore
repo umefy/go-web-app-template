@@ -55,9 +55,6 @@ temp
 
 mocks
 
-# wire
-wire_gen.go
-
 # google
 google
 
