@@ -12,6 +12,6 @@ var _ validation.Validate = (*LoggingConfig)(nil)
 
 func (l LoggingConfig) Validate() error {
 	return validation.ValidateStruct(&l,
-		validation.Field(&l.Level, validation.In("debug", "info", "warn", "error").Error("can only be set to debug, info, warn, error")),
+		validation.Field(&l.Level, validation.Required, validation.In("debug", "info", "warn", "error").Error("can only be set to debug, info, warn, error")),
 	)
 }

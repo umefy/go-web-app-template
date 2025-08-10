@@ -4,6 +4,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/core/config"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/generated/query"
 	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
+	gormTracing "gorm.io/plugin/opentelemetry/tracing"
 )
 
 func NewDB(config config.Config) (*db.DB, error) {
@@ -18,6 +19,11 @@ func NewDB(config config.Config) (*db.DB, error) {
 	})
 
 	if err != nil {
+		return nil, err
+	}
+
+	// opentelemetry gorm plugin
+	if err := db.Use(gormTracing.NewPlugin()); err != nil {
 		return nil, err
 	}
 

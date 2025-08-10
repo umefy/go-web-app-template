@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+
 	"github.com/umefy/go-web-app-template/internal/core/config"
 	orderRepo "github.com/umefy/go-web-app-template/internal/domain/order/repo"
 	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repo"
@@ -9,9 +11,11 @@ import (
 	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
 	orderSvc "github.com/umefy/go-web-app-template/internal/service/order"
 	userSvc "github.com/umefy/go-web-app-template/internal/service/user"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type App struct {
+	ctx             context.Context // context used for initial different infra
 	Arguments       config.Options
 	Config          config.Config
 	Logger          logger.Logger
@@ -21,10 +25,12 @@ type App struct {
 	OrderRepository orderRepo.Repository
 	GreeterService  greeterSvc.Service
 	DbQuery         *database.Query
+	Tracer          trace.Tracer
 }
 
 func New(configOptions config.Options) (*App, error) {
-	app, err := InitializeApp(configOptions)
+	ctx := context.Background()
+	app, err := InitializeApp(configOptions, ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -41,6 +41,7 @@ func newHttpHandler(app *app.App) http.Handler {
 
 	r.Use(middleware.Cors(app.Config.GetHttpServerConfig().AllowedOrigins))
 	r.Use(middleware.HealthCheck(app.Config.GetHttpServerConfig().HealthCheckEndpoint))
+	r.Use(middleware.OTelTracing(app.Config.GetTracingConfig().TracerName, app.Tracer))
 
 	r.Mount(app.Config.GetHttpServerConfig().ProfilerEndpoint, router.ProfilerHandler)
 	r.Mount("/api/v1", apiV1.NewApiV1Router(app))

@@ -7,13 +7,20 @@ http_server:
   allowed_origins:
     - "http://localhost:*"
 
+grpc_server:
+  enabled: false
+  port: 30082
+
+tracing:
+  enabled: true
+  jaeger_endpoint: "localhost:4318"
+  tracer_name: "http.server"
+  service_name: "Server"
+  service_version: "0.0.1"
+
 logging:
   level: debug
 
 database:
   url: "" # load from env
   enable_log: true
-
-grpc_server:
-  enabled: false
-  port: 30082

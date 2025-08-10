@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"sort"
@@ -11,7 +10,7 @@ import (
 )
 
 func ValidateStruct(v interface{}, fields ...*val.FieldRules) error {
-	err := val.ValidateStructWithContext(context.Background(), v, fields...)
+	err := val.ValidateStruct(v, fields...)
 
 	var errs val.Errors
 	if errors.As(err, &errs) {
