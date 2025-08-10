@@ -7,11 +7,12 @@ import (
 	"net"
 
 	"github.com/umefy/go-web-app-template/internal/core/config"
-	"github.com/umefy/go-web-app-template/internal/delivery/grpc/greeter"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
-	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
 	"github.com/umefy/go-web-app-template/pkg/server/grpcserver"
 	pb "github.com/umefy/go-web-app-template/protogen/grpc/service"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -24,11 +25,12 @@ type GrpcServerParams struct {
 	ConfigOptions  config.Options
 	Config         config.Config
 	Logger         logger.Logger
-	GreeterService greeterSvc.Service
+	GreeterServer  pb.GreeterServer
+	TracerProvider trace.TracerProvider
 }
 
 func registerServices(grpcServer *grpc.Server, params GrpcServerParams) {
-	pb.RegisterGreeterServer(grpcServer, greeter.NewHandler(params.Logger, params.GreeterService))
+	pb.RegisterGreeterServer(grpcServer, params.GreeterServer)
 }
 
 func NewServer(params GrpcServerParams) (*grpcserver.GrpcServer, error) {
@@ -43,8 +45,14 @@ func NewServer(params GrpcServerParams) (*grpcserver.GrpcServer, error) {
 	}
 
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(unaryRecoveryInterceptor(params.Logger)),
-		grpc.StreamInterceptor(streamRecoveryInterceptor(params.Logger)),
+		grpc.StatsHandler(
+			otelgrpc.NewServerHandler(
+				otelgrpc.WithTracerProvider(params.TracerProvider),
+				otelgrpc.WithPropagators(otel.GetTextMapPropagator()),
+			),
+		),
+		grpc.ChainUnaryInterceptor(unaryRecoveryInterceptor(params.Logger)),
+		grpc.ChainStreamInterceptor(streamRecoveryInterceptor(params.Logger)),
 	)
 
 	registerServices(grpcServer, params)

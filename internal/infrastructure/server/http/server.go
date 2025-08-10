@@ -6,9 +6,6 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/core/config"
-	"github.com/umefy/go-web-app-template/internal/delivery/graphql"
-	apiV1 "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1"
-	userRouter "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user"
 	orderRepo "github.com/umefy/go-web-app-template/internal/domain/order/repo"
 	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repo"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
@@ -36,8 +33,10 @@ type ServerParams struct {
 	OrderRepository orderRepo.Repository
 	GreeterService  greeterSvc.Service
 	DbQuery         *database.Query
-	Tracer          trace.Tracer
+	TracerProvider  trace.TracerProvider
 	ConfigOptions   config.Options
+	GraphqlRouter   http.Handler `name:"graphqlRouter"`
+	ApiV1Router     http.Handler `name:"apiV1Router"`
 }
 
 func NewServer(params ServerParams) (*httpserver.Server, error) {
@@ -64,22 +63,10 @@ func newHttpHandler(params ServerParams) http.Handler {
 
 	r.Use(middleware.Cors(params.Config.GetHttpServerConfig().AllowedOrigins))
 	r.Use(middleware.HealthCheck(params.Config.GetHttpServerConfig().HealthCheckEndpoint))
-	r.Use(middleware.OTelTracing(params.Config.GetTracingConfig().TracerName, params.Tracer))
+	r.Use(middleware.OTelTracing(params.Config.GetHttpServerConfig().ServerName, params.TracerProvider))
 
 	r.Mount(params.Config.GetHttpServerConfig().ProfilerEndpoint, router.ProfilerHandler)
-	r.Mount("/api/v1", apiV1.NewApiV1Router(apiV1.ApiV1RouterParams{
-		UserRouterParams: userRouter.UserRouterParams{
-			UserService: params.UserService,
-			Logger:      params.Logger,
-			DbQuery:     params.DbQuery,
-		},
-	}))
-	r.Mount("/graphql", graphql.NewGraphqlRouter(graphql.GraphqlRouterParams{
-		UserService:  params.UserService,
-		Logger:       params.Logger,
-		Config:       params.Config,
-		DbQuery:      params.DbQuery,
-		OrderService: params.OrderService,
-	}))
+	r.Mount("/api/v1", params.ApiV1Router)
+	r.Mount("/graphql", params.GraphqlRouter)
 	return r
 }

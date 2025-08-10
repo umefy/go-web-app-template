@@ -14,7 +14,10 @@ var (
 	allowedContentTypes = [...]string{"application/json"}
 )
 
-func NewRootRouter(logger *logger.Logger) *chi.Mux {
+type Router = chi.Router
+type Mux = chi.Mux
+
+func NewRootRouter(logger *logger.Logger) *Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger(logger))
@@ -28,7 +31,7 @@ func NewRootRouter(logger *logger.Logger) *chi.Mux {
 	return r
 }
 
-func NewRouter() *chi.Mux {
+func NewRouter() *Mux {
 	r := chi.NewRouter()
 	return r
 }

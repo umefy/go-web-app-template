@@ -22,7 +22,6 @@ import (
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	orderSvc "github.com/umefy/go-web-app-template/internal/service/order"
-	userSvc "github.com/umefy/go-web-app-template/internal/service/user"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -33,19 +32,16 @@ import (
 type GraphqlRouterParams struct {
 	fx.In
 
-	UserService  userSvc.Service
 	Logger       logger.Logger
 	Config       config.Config
 	DbQuery      *database.Query
 	OrderService orderSvc.Service
+	Resolver     *Resolver
 }
 
 func NewGraphqlRouter(params GraphqlRouterParams) http.Handler {
 	graphqlConfig := Config{
-		Resolvers: &Resolver{
-			UserService: params.UserService,
-			Logger:      params.Logger,
-		},
+		Resolvers: params.Resolver,
 	}
 
 	appEnv := params.Config.GetEnv()

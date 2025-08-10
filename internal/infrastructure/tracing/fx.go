@@ -6,5 +6,5 @@ import (
 )
 
 var Module = fx.Module("tracing",
-	fx.Provide(opentelemetry.NewTracer),
+	fx.Provide(opentelemetry.NewTracerProvider),
 )

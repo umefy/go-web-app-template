@@ -6,7 +6,6 @@ import (
 
 type TracingConfig struct {
 	Enabled        bool
-	TracerName     string `mapstructure:"tracer_name"`
 	JaegerEndpoint string `mapstructure:"jaeger_endpoint"`
 	ServiceName    string `mapstructure:"service_name"`
 	ServiceVersion string `mapstructure:"service_version"`
@@ -20,6 +19,5 @@ func (c TracingConfig) Validate() error {
 		validation.Field(&c.JaegerEndpoint, validation.When(c.Enabled, validation.Required)),
 		validation.Field(&c.ServiceName, validation.When(c.Enabled, validation.Required)),
 		validation.Field(&c.ServiceVersion, validation.When(c.Enabled, validation.Required)),
-		validation.Field(&c.TracerName, validation.When(c.Enabled, validation.Required)),
 	)
 }

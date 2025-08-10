@@ -12,6 +12,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	userSrv "github.com/umefy/go-web-app-template/internal/service/user"
 	"github.com/umefy/godash/sliceskit"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -39,6 +40,11 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	tr := r.TracerProvider.Tracer("graphql.query")
+	_, span := tr.Start(ctx, "User")
+	span.SetAttributes(attribute.String("id", id))
+	defer span.End()
+
 	user, err := r.UserService.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
