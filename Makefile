@@ -49,7 +49,7 @@ clean:
 
 check: tidy fmt lint test
 
-generate: regen_openapi regen_proto migration_up regen_gorm wire mockery regen_graphql
+generate: docker_compose_up regen_openapi regen_proto migration_up regen_gorm wire mockery regen_graphql docker_compose_down
 
 fmt:
 	@echo "⏱️ formatting code now..."
