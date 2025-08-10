@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user"
-	userRouter "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"go.uber.org/fx"
 )
@@ -12,7 +11,7 @@ import (
 type ApiV1RouterParams struct {
 	fx.In
 
-	userRouter.UserRouterParams
+	user.UserRouterParams
 }
 
 func NewApiV1Router(params ApiV1RouterParams) http.Handler {
