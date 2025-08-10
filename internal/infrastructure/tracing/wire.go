@@ -6,5 +6,5 @@ import (
 )
 
 var WireSet = wire.NewSet(
-	opentelemetry.NewTraceProvider,
+	opentelemetry.NewTracer,
 )

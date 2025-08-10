@@ -25,7 +25,7 @@ type App struct {
 	OrderRepository orderRepo.Repository
 	GreeterService  greeterSvc.Service
 	DbQuery         *database.Query
-	Tp              trace.TracerProvider
+	Tracer          trace.Tracer
 }
 
 func New(configOptions config.Options) (*App, error) {
