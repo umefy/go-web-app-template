@@ -16,8 +16,8 @@ type DbConfig struct {
 
 var _ validation.Validate = (*DbConfig)(nil)
 
-func (c *DbConfig) Validate() error {
-	return validation.ValidateStruct(c,
+func (c DbConfig) Validate() error {
+	return validation.ValidateStruct(&c,
 		validation.Field(&c.Url, validation.Required),
 		validation.Field(&c.EnableLog, validation.In(true, false).Error("can only be set to true or false")),
 	)

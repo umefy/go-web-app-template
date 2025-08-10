@@ -7,6 +7,7 @@ type Config interface {
 	GetLoggingConfig() LoggingConfig
 	GetDBConfig() DbConfig
 	GetGrpcServerConfig() GrpcServerConfig
+	GetTracingConfig() TracingConfig
 }
 
 type coreConfig struct {
@@ -41,4 +42,8 @@ func (c *coreConfig) GetDBConfig() DbConfig {
 
 func (c *coreConfig) GetGrpcServerConfig() GrpcServerConfig {
 	return c.appConfig.GrpcServer
+}
+
+func (c *coreConfig) GetTracingConfig() TracingConfig {
+	return c.appConfig.Tracing
 }

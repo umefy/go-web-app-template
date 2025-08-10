@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:17
+    ports:
+      - 5433:5432 # 5432 is the default port for postgres, 5433 is the port for the container. Using 5433 to avoid conflict with the default port in case of local postgres is running.
+    environment:
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DB=goWebapp_test
+      - TZ=America/Los_Angeles
+    command: ['postgres', '-c', 'timezone=America/Los_Angeles']
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - '16686:16686' # Jaeger UI
+      - '4317:4317' # OTLP gRPC
+      - '4318:4318' # OTLP HTTP
+
+volumes:
+  postgres_data:

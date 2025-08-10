@@ -17,16 +17,18 @@ type AppConfig struct {
 	Logging    LoggingConfig    `mapstructure:"logging"`
 	DataBase   DbConfig         `mapstructure:"database"`
 	GrpcServer GrpcServerConfig `mapstructure:"grpc_server"`
+	Tracing    TracingConfig    `mapstructure:"tracing"`
 }
 
 var _ validation.Validate = (*AppConfig)(nil)
 
-func (a *AppConfig) Validate() error {
-	return validation.ValidateStruct(a,
+func (a AppConfig) Validate() error {
+	return validation.ValidateStruct(&a,
 		validation.Field(&a.Env, validation.In(AppEnvDev, AppEnvProd)),
-		validation.Field(&a.HttpServer, validation.Required),
-		validation.Field(&a.Logging, validation.Required),
-		validation.Field(&a.DataBase, validation.Required),
-		validation.Field(&a.GrpcServer, validation.Required),
+		validation.FieldStruct(&a.HttpServer),
+		validation.FieldStruct(&a.Logging),
+		validation.FieldStruct(&a.DataBase),
+		validation.FieldStruct(&a.GrpcServer),
+		validation.FieldStruct(&a.Tracing),
 	)
 }

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto regen_graphql
+.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto regen_graphql docker_compose_up docker_compose_down
 
 APP_NAME=webapp
 MAIN_PATH=cmd/server/main.go
@@ -13,9 +13,17 @@ default: dev
 print:
 	echo "ENV_FILE is $(ENVRC_FILE)"
 
+docker_compose_up:
+	docker compose up -d
+
+docker_compose_down:
+	docker compose down
+
 dev:
-	# @trap "exit 0" SIGINT;source .envrc && go run -race $(MAIN_PATH) --env=dev $(ARGS) # ARGS is append for flag parse arguments
-	air
+	@make docker_compose_up
+	@make migration_up
+	@trap 'make docker_compose_down' INT TERM; \
+	air; 
 
 build:
 	@echo "⏱️ building code now..."
@@ -132,3 +140,5 @@ help:
 	@echo "make migration_down - running database migrations down"
 	@echo "make migration_create - creating a new database migration"
 	@echo "make migration_reset - resetting all database migrations"
+	@echo "make docker_compose_up - starting docker compose"
+	@echo "make docker_compose_down - stopping docker compose"

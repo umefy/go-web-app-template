@@ -7,13 +7,19 @@ http_server:
   allowed_origins:
     - ""
 
+grpc_server:
+  enabled: false
+  port: 30083
+
+tracing:
+  enabled: false
+  jaeger_endpoint: ""
+  service_name: ""
+  service_version: ""
+
 logging:
   level: info
 
 database:
   url: "" # load from env
-  enable_log: true
-
-grpc_server:
-  enabled: false
-  port: 30083
+  enable_log: false
