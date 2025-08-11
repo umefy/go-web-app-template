@@ -24,7 +24,10 @@ func updateUser(id int, email string, age int) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	err = resp.Body.Close()
+	if err != nil {
+		return err
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to update user: %s", resp.Status)
