@@ -9,7 +9,7 @@ http_server:
     - "http://localhost:*"
 
 grpc_server:
-  enabled: true
+  enabled: false
   port: 30082
 
 tracing:
