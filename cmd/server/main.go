@@ -7,9 +7,13 @@ import (
 	"time"
 
 	"github.com/umefy/go-web-app-template/internal/core/config"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/server/grpc"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/server/http"
-	"golang.org/x/sync/errgroup"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/tracing"
+	"github.com/umefy/go-web-app-template/internal/service"
+	"go.uber.org/fx"
 )
 
 func main() {
@@ -27,23 +31,52 @@ func main() {
 		ConfigPath: configPath,
 	}
 
-	g, _ := errgroup.WithContext(context.Background())
+	app := fx.New(
+		fx.Supply(args),
+		fx.Provide(func() context.Context {
+			return context.Background()
+		}),
+		config.Module,
+		database.Module,
+		logger.Module,
+		tracing.Module,
+		http.Module,
+		grpc.Module,
+		service.Module,
+		fx.Invoke(start),
+	)
 
-	g.Go(func() error {
-		return startHttpServer(args)
-	})
+	app.Run()
 
-	g.Go(func() error {
-		return startGrpcServer(args)
-	})
-
-	if err := g.Wait(); err != nil {
-		log.Fatalln("Failed to start:", err)
-	}
 }
 
-func startHttpServer(configOptions config.Options) error {
-	server, err := http.New(configOptions)
+func start(ctx context.Context, lc fx.Lifecycle, httpParams http.ServerParams, grpcParams grpc.GrpcServerParams) {
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			// Start servers in background goroutines without waiting
+			go func() {
+				if err := startHttpServer(httpParams); err != nil {
+					log.Printf("HTTP server error: %v", err)
+				}
+			}()
+
+			go func() {
+				if err := startGrpcServer(grpcParams); err != nil {
+					log.Printf("gRPC server error: %v", err)
+				}
+			}()
+
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			log.Println("Server stopped...")
+			return nil
+		},
+	})
+}
+
+func startHttpServer(params http.ServerParams) error {
+	server, err := http.NewServer(params)
 
 	if err != nil {
 		return err
@@ -59,8 +92,8 @@ func startHttpServer(configOptions config.Options) error {
 	return nil
 }
 
-func startGrpcServer(configOptions config.Options) error {
-	server, err := grpc.New(configOptions)
+func startGrpcServer(params grpc.GrpcServerParams) error {
+	server, err := grpc.NewServer(params)
 
 	if err != nil {
 		return err

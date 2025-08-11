@@ -35,7 +35,7 @@ func (s *GetUsersSuite) TestGetUsers() {
 	userService.EXPECT().GetUsers(context.Background()).Return(users, nil)
 	logger.EXPECT().DebugContext(context.Background(), "GetUsers")
 
-	h := NewHandler(userService, logger)
+	h := NewHandler(userService, logger, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/openapi/v1/users", nil)
 	rec := httptest.NewRecorder()

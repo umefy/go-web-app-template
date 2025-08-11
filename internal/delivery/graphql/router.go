@@ -15,26 +15,36 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/websocket"
-	"github.com/umefy/go-web-app-template/internal/app"
 	"github.com/umefy/go-web-app-template/internal/core/config"
 	"github.com/umefy/go-web-app-template/internal/delivery/errutil"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/dataloader"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/extension"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
+	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
+	orderSvc "github.com/umefy/go-web-app-template/internal/service/order"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"go.uber.org/fx"
 )
 
-func NewGraphqlRouter(app *app.App) http.Handler {
+type GraphqlRouterParams struct {
+	fx.In
+
+	Logger       logger.Logger
+	Config       config.Config
+	DbQuery      *database.Query
+	OrderService orderSvc.Service
+	Resolver     *Resolver
+}
+
+func NewGraphqlRouter(params GraphqlRouterParams) http.Handler {
 	graphqlConfig := Config{
-		Resolvers: &Resolver{
-			UserService: app.UserService,
-			Logger:      app.Logger,
-		},
+		Resolvers: params.Resolver,
 	}
 
-	appEnv := app.Config.GetEnv()
+	appEnv := params.Config.GetEnv()
 
 	srv := handler.New(NewExecutableSchema(graphqlConfig))
 
@@ -42,11 +52,11 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 		KeepAlivePingInterval: 10 * time.Second,
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
-				return checkWsOrigin(app, r)
+				return checkWsOrigin(params, r)
 			},
 		},
 		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
-			app.Logger.InfoContext(ctx, "WebSocket established",
+			params.Logger.InfoContext(ctx, "WebSocket established",
 				slog.String("request_id", middleware.GetReqID(ctx)),
 			)
 			return ctx, &initPayload, nil
@@ -61,13 +71,13 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 					return
 				}
 			}
-			app.Logger.ErrorContext(ctx, "WebSocket error",
+			params.Logger.ErrorContext(ctx, "WebSocket error",
 				slog.String("request_id", middleware.GetReqID(ctx)),
 				slog.Any("error", err),
 			)
 		},
 		CloseFunc: func(ctx context.Context, closeCode int) {
-			app.Logger.InfoContext(ctx, "WebSocket closed",
+			params.Logger.InfoContext(ctx, "WebSocket closed",
 				slog.String("request_id", middleware.GetReqID(ctx)),
 				slog.Int("close_code", closeCode),
 			)
@@ -84,8 +94,8 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 	})
 
 	srv.Use(&extension.TransactionExtension{
-		DbQuery: app.DbQuery,
-		Logger:  app.Logger,
+		DbQuery: params.DbQuery,
+		Logger:  params.Logger,
 	})
 
 	srv.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
@@ -105,8 +115,8 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 	r := router.NewRouter()
 
 	dataloaderDeps := dataloader.LoaderDeps{
-		OrderService: app.OrderService,
-		Logger:       app.Logger,
+		OrderService: params.OrderService,
+		Logger:       params.Logger,
 	}
 	// Handle playground in development
 	if appEnv == config.AppEnvDev {
@@ -119,13 +129,13 @@ func NewGraphqlRouter(app *app.App) http.Handler {
 	return r
 }
 
-func checkWsOrigin(app *app.App, r *http.Request) bool {
+func checkWsOrigin(params GraphqlRouterParams, r *http.Request) bool {
 	origin := r.Header.Get("Origin")
 	if origin == "" {
 		return false
 	}
 
-	for _, allowedOrigin := range app.Config.GetHttpServerConfig().AllowedOrigins {
+	for _, allowedOrigin := range params.Config.GetHttpServerConfig().AllowedOrigins {
 		// "*" matches anything
 		if allowedOrigin == "*" {
 			return true

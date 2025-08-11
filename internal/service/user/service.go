@@ -24,18 +24,19 @@ type Service interface {
 type userService struct {
 	logger         logger.Logger
 	userRepository repo.Repository
-	tracer         trace.Tracer
+	tracerProvider trace.TracerProvider
 }
 
 var _ Service = (*userService)(nil)
 
-func NewService(logger logger.Logger, userRepository repo.Repository, tracer trace.Tracer) *userService {
-	return &userService{logger: logger, userRepository: userRepository, tracer: tracer}
+func NewService(logger logger.Logger, userRepository repo.Repository, tracerProvider trace.TracerProvider) *userService {
+	return &userService{logger: logger, userRepository: userRepository, tracerProvider: tracerProvider}
 }
 
 // GetUsers implements Service.
 func (u *userService) GetUsers(ctx context.Context) ([]*userDomain.User, error) {
-	_, span := u.tracer.Start(ctx, "user.service.GetUsers")
+	tr := u.tracerProvider.Tracer("userService")
+	_, span := tr.Start(ctx, "GetUsers")
 	defer span.End()
 
 	usersDb, err := u.userRepository.FindUsers(ctx)

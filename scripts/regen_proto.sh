@@ -6,7 +6,8 @@ BASE_PATH="$(cd "$(dirname "$0")/.." && pwd)"
 generate_proto() {
     local proto_dir=$1
     local output_dir=$2
-    local proto_files=$(find $proto_dir -name "*.proto")
+    local proto_files
+    proto_files=$(find $proto_dir -name "*.proto")
 
     # Clean and create output directory
     rm -rf $output_dir

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: default build run clean check fmt test lint help tidy wire regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto regen_graphql docker_compose_up docker_compose_down
+.PHONY: default build run clean check fmt test lint help tidy regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto regen_graphql docker_compose_up docker_compose_down
 
 APP_NAME=webapp
 MAIN_PATH=cmd/server/main.go
@@ -49,7 +49,7 @@ clean:
 
 check: tidy fmt lint test
 
-generate: regen_openapi regen_proto migration_up regen_gorm wire mockery regen_graphql
+generate: docker_compose_up regen_openapi regen_proto migration_up regen_gorm  mockery regen_graphql docker_compose_down
 
 fmt:
 	@echo "⏱️ formatting code now..."
@@ -75,13 +75,6 @@ tidy:
 	@echo "⏱️ go mod tidy now..."
 	go mod tidy
 	@echo "✅ finishing tidy..."
-
-wire:
-	@echo "⏱️ running wire now..."
-	@rm -rf mocks
-	wire ./...
-	@make mockery
-	@echo "✅ finishing wire..."
 
 regen_openapi:
 	@echo "⏱️ running openapi to go code now..."
@@ -131,7 +124,6 @@ help:
 	@echo "make fmt - formatting go code"
 	@echo "make lint - running golangci lint"
 	@echo "make tidy - install all dependencies"
-	@echo "make wire - running wire"
 	@echo "make regen_openapi - generating Go models from OpenAPI specification"
 	@echo "make regen_proto - regenerating source code from proto"
 	@echo "make regen_gorm - regenerating gorm models"

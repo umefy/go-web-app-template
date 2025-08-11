@@ -1,5 +1,6 @@
 env: dev
 http_server:
+  server_name: "httpServer"
   enabled: true
   port: 8082
   health_check_endpoint: "/health-check"
@@ -14,7 +15,6 @@ grpc_server:
 tracing:
   enabled: true
   jaeger_endpoint: "localhost:4318"
-  tracer_name: "http.server"
   service_name: "Server"
   service_version: "0.0.1"
 

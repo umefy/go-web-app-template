@@ -1,5 +1,6 @@
 env: prod
 http_server:
+  server_name: "httpServer"
   enabled: true
   port: 8083
   health_check_endpoint: "/health-check"

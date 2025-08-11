@@ -14,11 +14,10 @@ import (
 	"go.opentelemetry.io/otel/trace/noop"
 )
 
-func NewTracer(ctx context.Context, config config.Config) (trace.Tracer, error) {
+func NewTracerProvider(ctx context.Context, config config.Config) (trace.TracerProvider, error) {
 	traceConfig := config.GetTracingConfig()
-	tracerName := traceConfig.TracerName
 	if !traceConfig.Enabled {
-		return noop.NewTracerProvider().Tracer(tracerName), nil
+		return noop.NewTracerProvider(), nil
 	}
 
 	exporter, err := otlptracehttp.New(ctx, otlptracehttp.WithEndpoint(traceConfig.JaegerEndpoint), otlptracehttp.WithInsecure())
@@ -44,5 +43,5 @@ func NewTracer(ctx context.Context, config config.Config) (trace.Tracer, error) 
 	otel.SetTracerProvider(traceProvider)
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 
-	return traceProvider.Tracer(tracerName), nil
+	return traceProvider, nil
 }

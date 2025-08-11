@@ -2,13 +2,16 @@ pre-push:
   commands:
     check:
       run: make check
+      interactive: true
 
 post-merge:
   commands:
     check:
       run: make generate && make check
+      interactive: true
 
 commit-msg:
   commands:
     commitlint:
       run: pnpm --dir scripts/commitlint exec commitlint --edit {1}
+      interactive: true
