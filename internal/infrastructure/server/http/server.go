@@ -61,8 +61,9 @@ func NewServer(params ServerParams) (*httpserver.Server, error) {
 func newHttpHandler(params ServerParams) http.Handler {
 	r := router.NewRootRouter(params.Logger.GetLogger())
 
+	appConfig := params.Config.GetAppConfig()
 	r.Use(middleware.Cors(params.Config.GetHttpServerConfig().AllowedOrigins))
-	r.Use(middleware.HealthCheck(params.Config.GetHttpServerConfig().HealthCheckEndpoint))
+	r.Use(middleware.HealthCheck(params.Config.GetHttpServerConfig().HealthCheckEndpoint, string(appConfig.Env), appConfig.Version, params.Logger.GetLogger()))
 	r.Use(middleware.OTelTracing(params.Config.GetHttpServerConfig().ServerName, params.TracerProvider))
 
 	r.Mount(params.Config.GetHttpServerConfig().ProfilerEndpoint, router.ProfilerHandler)

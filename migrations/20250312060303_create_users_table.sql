@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-create table users (
+create table if not exists users (
     id serial primary key,
     email varchar(255) unique not null,
     age int not null,
@@ -16,5 +16,5 @@ EXECUTE FUNCTION updated_at_trigger();
 
 -- +goose Down
 -- +goose StatementBegin
-drop table users;
+drop table if exists users;
 -- +goose StatementEnd

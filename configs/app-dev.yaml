@@ -1,4 +1,5 @@
 env: dev
+version: "" # inject git hash from .envrc
 http_server:
   server_name: "httpServer"
   enabled: true

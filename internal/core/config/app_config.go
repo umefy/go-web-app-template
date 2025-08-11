@@ -13,6 +13,7 @@ const (
 
 type AppConfig struct {
 	Env        AppEnv           `mapstructure:"env"`
+	Version    string           `mapstructure:"version"`
 	HttpServer HttpServerConfig `mapstructure:"http_server"`
 	Logging    LoggingConfig    `mapstructure:"logging"`
 	DataBase   DbConfig         `mapstructure:"database"`
@@ -25,6 +26,7 @@ var _ validation.Validate = (*AppConfig)(nil)
 func (a AppConfig) Validate() error {
 	return validation.ValidateStruct(&a,
 		validation.Field(&a.Env, validation.In(AppEnvDev, AppEnvProd)),
+		validation.Field(&a.Version, validation.Required),
 		validation.FieldStruct(&a.HttpServer),
 		validation.FieldStruct(&a.Logging),
 		validation.FieldStruct(&a.DataBase),

@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-create table orders (
+create table if not exists orders (
   id serial primary key,
   user_id int not null,
   amount float not null,
@@ -19,5 +19,5 @@ alter table orders add constraint fk_orders_user_id foreign key (user_id) refere
 -- +goose Down
 -- +goose StatementBegin
 alter table orders drop constraint fk_orders_user_id;
-drop table orders;
+drop table if exists orders;
 -- +goose StatementEnd
