@@ -21,13 +21,13 @@ A production-ready Go web application template following clean architecture prin
 
 3. **Generate Code**
 
-   - Run `make generate` to generate all required files (OpenAPI models, GraphQL resolvers, proto code, GORM models, Wire DI, and mocks)
+   - Run `make generate` to generate all required files (OpenAPI models, GraphQL resolvers, proto code, GORM models, and mocks)
    - Or run individual commands:
      - `make regen_openapi` - Generate Go models from OpenAPI specification
      - `make regen_graphql` - Generate GraphQL resolvers and models
      - `make regen_proto` - Generate Go code from proto files
      - `make regen_gorm` - Generate database models and queries
-     - `make wire` - Generate dependency injection files
+     - `make generate` - Generate all required files including dependency injection
      - `make mockery` - Generate testing mocks
 
 4. **Database Setup**
@@ -49,7 +49,23 @@ A production-ready Go web application template following clean architecture prin
 
 ## 2. Project Structure
 
-This project follows **Clean Architecture** principles with a clear separation of concerns:
+This project follows **Clean Architecture** principles with a clear separation of concerns and uses **Uber FX** for dependency injection. Each major component has its own `fx.go` file that defines its dependencies and provides its services to the application.
+
+**FX Module Files:**
+
+- `internal/core/config/fx.go` - Configuration management
+- `internal/infrastructure/database/fx.go` - Database and repositories
+- `internal/infrastructure/logger/fx.go` - Logging infrastructure
+- `internal/infrastructure/tracing/fx.go` - OpenTelemetry tracing
+- `internal/infrastructure/server/fx.go` - Server infrastructure
+- `internal/infrastructure/server/http/fx.go` - HTTP server and REST/GraphQL routers
+- `internal/infrastructure/server/grpc/fx.go` - gRPC server and handlers
+- `internal/service/fx.go` - Business logic services
+- `internal/delivery/graphql/fx.go` - GraphQL resolvers and router
+- `internal/delivery/restful/openapi/v1/fx.go` - REST API handlers
+- `internal/delivery/grpc/fx.go` - gRPC handlers
+
+**Project Structure:**
 
 ```bash
 go-web-app-template/
@@ -67,16 +83,14 @@ go-web-app-template/
 │   │   │   └── order.go          # Domain models
 │   │   └── error/                # Shared domain errors
 │   ├── service/                   # Business logic implementation
+│   │   ├── fx.go                 # Service FX module
 │   │   ├── user/                 # User business logic
 │   │   │   ├── service.go        # User service implementation
-│   │   │   ├── wire.go           # Service wire set
 │   │   │   └── input.go          # Service input/output models
 │   │   ├── order/                # Order business logic
 │   │   │   ├── service.go        # Order service implementation
-│   │   │   └── wire.go           # Service wire set
 │   │   └── greeter/              # Greeter business logic
 │   │       ├── service.go        # Greeter service implementation
-│   │       └── wire.go           # Service wire set
 │   ├── delivery/                  # Transport layer (HTTP/gRPC/GraphQL)
 │   │   ├── restful/              # HTTP REST API
 │   │   │   ├── handler/          # Shared handler utilities
@@ -85,6 +99,7 @@ go-web-app-template/
 │   │   │   │   └── middleware/   # HTTP middleware
 │   │   │   └── openapi/          # OpenAPI REST endpoints
 │   │   │       └── v1/           # API version 1
+│   │   │           ├── fx.go     # API V1 FX module
 │   │   │           ├── router.go # OpenAPI router
 │   │   │           └── user/     # User REST handlers
 │   │   │               ├── handler.go      # User handler interface
@@ -95,19 +110,21 @@ go-web-app-template/
 │   │   │               ├── router.go       # User routing
 │   │   │               └── mapping/        # Data mapping
 │   │   ├── graphql/              # GraphQL API
+│   │   │   ├── fx.go             # GraphQL FX module
 │   │   │   ├── generated.go      # gqlgen generated code
 │   │   │   ├── User.resolvers.go # User GraphQL resolvers
 │   │   │   ├── Order.resolvers.go # Order GraphQL resolvers
 │   │   │   ├── router.go         # GraphQL router with playground
 │   │   │   └── model/            # GraphQL models
 │   │   ├── grpc/                 # gRPC API
+│   │   │   ├── fx.go             # gRPC handler FX module
 │   │   │   ├── handler/          # gRPC handlers
 │   │   │   │   └── greeter/      # Greeter gRPC service
 │   │   │   └── server.go         # gRPC server
 │   │   └── errutil/              # Error handling utilities
 │   ├── infrastructure/            # External concerns & implementations
 │   │   ├── database/             # Database infrastructure
-│   │   │   ├── wire.go           # Database wire set
+│   │   │   ├── fx.go             # Database FX module
 │   │   │   ├── with_tx.go        # Transaction utilities
 │   │   │   ├── ctx/              # Database context utilities
 │   │   │   └── gorm/             # GORM database implementation
@@ -119,20 +136,25 @@ go-web-app-template/
 │   │   │           ├── order_repo.go   # Order repository implementation
 │   │   │           └── mapping/        # Database mapping utilities
 │   │   ├── server/               # Server infrastructure
+│   │   │   ├── fx.go             # Server FX module
 │   │   │   ├── http/             # HTTP server setup
+│   │   │   │   ├── fx.go         # HTTP server FX module
 │   │   │   │   ├── router.go     # Main HTTP router
 │   │   │   │   ├── server.go     # HTTP server
 │   │   │   │   └── middleware/   # HTTP middleware
 │   │   │   └── grpc/             # gRPC server setup
+│   │   │       ├── fx.go         # gRPC server FX module
 │   │   │       ├── handler/      # gRPC handlers
 │   │   │       └── server.go     # gRPC server
 │   │   ├── logger/               # Logger setup
+│   │   │   └── fx.go             # Logger FX module
 │   │   └── tracing/              # OpenTelemetry tracing setup
 │   │       ├── opentelemetry/    # OpenTelemetry implementation
 │   │       │   └── setup.go      # Tracing setup and configuration
-│   │       └── wire.go           # Tracing wire set
+│   │       └── fx.go             # Tracing FX module
 │   ├── core/                      # Core shared components
 │   │   └── config/               # Configuration management
+│   │       ├── fx.go             # Config FX module
 │   │       ├── config.go         # Main configuration struct
 │   │       ├── setup.go          # Configuration loading
 │   │       ├── app_config.go     # Application configuration
@@ -141,10 +163,9 @@ go-web-app-template/
 │   │       ├── grpc_server_config.go # gRPC server configuration
 │   │       ├── logging_config.go # Logging configuration
 │   │       └── tracing_config.go # Tracing configuration
-│   └── app/                      # Application composition & DI
-│       ├── app.go                # Main application struct
-│       ├── wire.go               # Dependency injection
-│       └── wire_gen.go           # Generated wire code
+│   └── cmd/                      # Application entry point
+│       └── server/               # Main server application
+│           └── main.go           # Server entry point with FX DI
 ├── pkg/                           # Public reusable packages
 ├── openapi/                       # OpenAPI specifications & generated code
 │   ├── docs/                     # OpenAPI specification files
@@ -213,7 +234,7 @@ go-web-app-template/
 ### Key Features
 
 - ✅ **Clean Architecture**: Clear separation of concerns with domain, service, delivery, and infrastructure layers
-- ✅ **Dependency Injection**: Wire-based DI with proper bindings
+- ✅ **Dependency Injection**: FX-based DI with proper module organization
 - ✅ **Transaction Support**: Full transaction handling in services and repositories
 - ✅ **Domain-Driven Design**: Organized by business domains with clear boundaries
 - ✅ **Multi-Protocol Support**: HTTP (REST + GraphQL) and gRPC with configuration-driven selection
@@ -232,6 +253,30 @@ go-web-app-template/
 - ✅ **Profiling**: Built-in debug profiler endpoint for performance analysis
 - ✅ **Docker Compose**: Local development environment with PostgreSQL and Jaeger
 - ✅ **OpenTelemetry Tracing**: Distributed tracing with Jaeger backend for observability
+
+### FX Dependency Injection Architecture
+
+The project uses [Uber FX](https://github.com/uber-go/fx) for dependency injection, providing a clean and modular approach to managing application dependencies.
+
+**Module Structure:**
+
+- **Config Module** (`internal/core/config/fx.go`): Configuration management
+- **Database Module** (`internal/infrastructure/database/fx.go`): Database connections and repositories
+- **Logger Module** (`internal/infrastructure/logger/fx.go`): Logging infrastructure
+- **Tracing Module** (`internal/infrastructure/tracing/fx.go`): OpenTelemetry tracing
+- **HTTP Server Module** (`internal/infrastructure/server/http/fx.go`): HTTP server and REST/GraphQL routers
+- **gRPC Server Module** (`internal/infrastructure/server/grpc/fx.go`): gRPC server and handlers
+- **Service Module** (`internal/service/fx.go`): Business logic services
+- **GraphQL Module** (`internal/delivery/graphql/fx.go`): GraphQL resolvers and router
+- **API V1 Module** (`internal/delivery/restful/openapi/v1/fx.go`): REST API handlers
+
+**Benefits:**
+
+- **Modular Design**: Each component is self-contained with its own dependencies
+- **Lazy Loading**: Dependencies are only created when needed
+- **Lifecycle Management**: Automatic startup and shutdown of services
+- **Error Handling**: Graceful error handling during dependency resolution
+- **Testing**: Easy to mock and test individual modules
 
 ## 3. Development Workflow
 
@@ -331,7 +376,6 @@ The application includes comprehensive tracing support:
 2. **Implement Business Logic**: `internal/service/[domain]/`
 
    - Create service interface and implementation
-   - Add service wire set
    - Define input/output models
 
 3. **Add Transport Layer**:
@@ -345,7 +389,7 @@ The application includes comprehensive tracing support:
    - Create repository implementation
    - Add database mapping utilities
 
-5. **Update Wire Configuration**: Add new services and repositories to DI
+5. **Update FX Configuration**: Add new services and repositories to appropriate FX modules
 
 ## 4. Future Enhancements
 
@@ -397,7 +441,7 @@ This is a template project designed for rapid development of Go web applications
 
 - Follow clean architecture principles with clear layer separation
 - Write tests for all business logic in the service layer
-- Use dependency injection for all dependencies
+- Use FX dependency injection for all dependencies
 - Keep domain logic pure and infrastructure-agnostic
 - Document APIs with OpenAPI specifications
 - Use transactions for data consistency
