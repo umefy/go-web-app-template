@@ -13,6 +13,7 @@ func DbModelToDomainUser(user *dbModel.User) *userDomain.User {
 		ID:        user.ID,
 		Email:     user.Email.ValueOrZero(),
 		Age:       user.Age.ValueOrZero(),
+		Version:   user.Version,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
@@ -23,6 +24,7 @@ func DomainUserToDbModel(user *userDomain.User) *dbModel.User {
 		ID:        user.ID,
 		Email:     null.ValueFrom(user.Email),
 		Age:       null.ValueFrom(user.Age),
+		Version:   user.Version,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}

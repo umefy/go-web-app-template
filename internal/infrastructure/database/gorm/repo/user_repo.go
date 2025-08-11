@@ -121,16 +121,20 @@ func (r *UserRepo) UpdateUser(ctx context.Context, id int, user *userDomain.User
 	userQuery := tx.User
 
 	dbModel := mapping.DomainUserToDbModel(user)
-	info, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).Updates(dbModel)
+	info, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id), userQuery.Version.Eq(user.Version)).Updates(dbModel)
 
 	if err != nil {
-		r.Logger.ErrorContext(ctx, "User update error", slog.String("error", err.Error()))
+		r.Logger.ErrorContext(ctx, "UserRepository.UpdateUser", slog.String("error", err.Error()))
 		return nil, err
 	}
 
 	if info.RowsAffected == 0 {
-		r.Logger.ErrorContext(ctx, "User update error", slog.String("error", "user not found"))
-		return nil, userError.UserNotFound
+		// When RowsAffected is 0 with optimistic locking, it means either:
+		// 1. User doesn't exist, or 2. Version mismatch (optimistic lock conflict)
+		// Since we're using optimistic locking, assume it's a version conflict
+		// But service level should already handle 1st case, so we don't need to return user not found error
+		r.Logger.ErrorContext(ctx, "UserRepository.UpdateUser", slog.String("error", "user update conflict - version mismatch"))
+		return nil, userError.UserUpdateConflict
 	}
 
 	return mapping.DbModelToDomainUser(dbModel), nil

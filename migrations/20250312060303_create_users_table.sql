@@ -4,6 +4,7 @@ create table if not exists users (
     id serial primary key,
     email varchar(255) unique not null,
     age int not null,
+    version bigint not null default 0,
     created_at timestamptz default now(),
     updated_at timestamptz default now()
 );

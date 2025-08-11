@@ -12,6 +12,7 @@ const (
 )
 
 var (
-	UserNotFound      = appError.NewError(fmt.Sprintf("%s_1001", serviceName), "user not found", http.StatusNotFound)
-	UserAlreadyExists = appError.NewError(fmt.Sprintf("%s_1002", serviceName), "user already exists", http.StatusBadRequest)
+	UserNotFound       = appError.NewError(fmt.Sprintf("%s_1001", serviceName), "user not found", http.StatusNotFound)
+	UserAlreadyExists  = appError.NewError(fmt.Sprintf("%s_1002", serviceName), "user already exists", http.StatusBadRequest)
+	UserUpdateConflict = appError.NewError(fmt.Sprintf("%s_1003", serviceName), "user update conflict - version mismatch", http.StatusConflict)
 )
