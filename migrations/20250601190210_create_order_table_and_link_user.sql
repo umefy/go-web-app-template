@@ -3,7 +3,8 @@
 create table if not exists orders (
   id serial primary key,
   user_id int not null,
-  amount float not null,
+  amount_cents bigint not null,
+  version bigint not null default 0,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

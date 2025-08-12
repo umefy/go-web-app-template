@@ -1,7 +1,9 @@
+scalar Long
+
 type Order {
   id: ID!
   userId: ID!
-  amount: Float!
+  amountCents: Long!
   createdAt: String!
   updatedAt: String!
 }

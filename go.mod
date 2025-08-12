@@ -4,6 +4,7 @@ go 1.24.2
 
 require (
 	github.com/99designs/gqlgen v0.17.78
+	github.com/brianvoe/gofakeit/v7 v7.3.0
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-chi/cors v1.2.1
 	github.com/go-chi/httprate v0.14.1
@@ -30,6 +31,7 @@ require (
 	gorm.io/gorm v1.30.1
 	gorm.io/plugin/dbresolver v1.6.2
 	gorm.io/plugin/opentelemetry v0.1.16
+	gorm.io/plugin/optimisticlock v1.1.3
 )
 
 require (

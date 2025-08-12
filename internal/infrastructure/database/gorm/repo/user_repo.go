@@ -121,16 +121,20 @@ func (r *UserRepo) UpdateUser(ctx context.Context, id int, user *userDomain.User
 	userQuery := tx.User
 
 	dbModel := mapping.DomainUserToDbModel(user)
-	info, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id)).Updates(dbModel)
+	info, err := userQuery.WithContext(ctx).Where(userQuery.ID.Eq(id), userQuery.Version.Eq(user.Version)).Updates(dbModel)
 
 	if err != nil {
-		r.Logger.ErrorContext(ctx, "User update error", slog.String("error", err.Error()))
+		r.Logger.ErrorContext(ctx, "UserRepository.UpdateUser", slog.String("error", err.Error()))
 		return nil, err
 	}
 
 	if info.RowsAffected == 0 {
-		r.Logger.ErrorContext(ctx, "User update error", slog.String("error", "user not found"))
-		return nil, userError.UserNotFound
+		// When RowsAffected is 0 with optimistic locking, it means either:
+		// 1. User doesn't exist, or 2. Version mismatch (optimistic lock conflict)
+		// Since we're using optimistic locking, assume it's a version conflict
+		// But service level should already handle 1st case, so we don't need to return user not found error
+		r.Logger.ErrorContext(ctx, "UserRepository.UpdateUser", slog.String("error", "user update conflict - version mismatch"))
+		return nil, userError.UserUpdateConflict
 	}
 
 	return mapping.DbModelToDomainUser(dbModel), nil
@@ -149,15 +153,15 @@ func (r *UserRepo) IsUserEmailExists(ctx context.Context, email string) (bool, e
 
 func (r *UserRepo) FindUserWithOrders(ctx context.Context, id int) (*userDomain.UserWithOrder, error) {
 	type UserOrderRow struct {
-		ID             int
-		Email          string
-		Age            int
-		CreatedAt      time.Time
-		UpdatedAt      time.Time
-		OrderID        int
-		OrderAmount    float64
-		OrderCreatedAt time.Time
-		OrderUpdatedAt time.Time
+		ID               int
+		Email            string
+		Age              int
+		CreatedAt        time.Time
+		UpdatedAt        time.Time
+		OrderID          int
+		OrderAmountCents int64
+		OrderCreatedAt   time.Time
+		OrderUpdatedAt   time.Time
 	}
 
 	userQuery := r.dbQuery.User
@@ -171,7 +175,7 @@ func (r *UserRepo) FindUserWithOrders(ctx context.Context, id int) (*userDomain.
 		userQuery.CreatedAt,
 		userQuery.UpdatedAt,
 		orderQuery.ID.As("order_id"),
-		orderQuery.Amount.As("order_amount"),
+		orderQuery.AmountCents.As("order_amount_cents"),
 		orderQuery.CreatedAt.As("order_created_at"),
 		orderQuery.UpdatedAt.As("order_updated_at"),
 	).LeftJoin(orderQuery, userQuery.ID.EqCol(orderQuery.UserID)).Where(userQuery.ID.Eq(id)).Scan(&userOrderRows)
@@ -201,10 +205,10 @@ func (r *UserRepo) FindUserWithOrders(ctx context.Context, id int) (*userDomain.
 		}
 
 		user.Orders = append(user.Orders, orderDomain.Order{
-			ID:        userOrderRow.OrderID,
-			Amount:    userOrderRow.OrderAmount,
-			CreatedAt: userOrderRow.OrderCreatedAt,
-			UpdatedAt: userOrderRow.OrderUpdatedAt,
+			ID:          userOrderRow.OrderID,
+			AmountCents: userOrderRow.OrderAmountCents,
+			CreatedAt:   userOrderRow.OrderCreatedAt,
+			UpdatedAt:   userOrderRow.OrderUpdatedAt,
 		})
 	}
 

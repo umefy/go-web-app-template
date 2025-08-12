@@ -32,7 +32,7 @@ func main() {
 	})
 
 	g.WithDataTypeMap(getDataTypeMap())
-	g.WithImportPkgPath("github.com/guregu/null/v6") // specify the 3rd party library import path
+	g.WithImportPkgPath("github.com/guregu/null/v6", "gorm.io/plugin/optimisticlock") // specify the 3rd party library import path
 
 	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")))
 
@@ -57,6 +57,7 @@ func generateModels(g *gen.Generator) {
 				table,
 				gen.FieldType("id", "int"),
 				gen.FieldType("user_id", "int"),
+				gen.FieldType("version", "optimisticlock.Version"),
 			),
 		)
 	}
@@ -74,7 +75,10 @@ func getDataTypeMap() map[string]func(detailType gorm.ColumnType) (dataType stri
 			return "null.Value[int]"
 		},
 		"int8": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.Value[int]"
+			return "null.Value[int64]"
+		},
+		"bigint": func(detailType gorm.ColumnType) (dataType string) {
+			return "null.Value[int64]"
 		},
 		"float4": func(detailType gorm.ColumnType) (dataType string) {
 			return "null.Value[float64]"

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: default build run clean check fmt test lint help tidy regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto regen_graphql docker_compose_up docker_compose_down
+.PHONY: default build run clean check fmt test lint help tidy regen_gorm migration_up migration_down migration_create migration_reset generate regen_openapi regen_proto regen_graphql docker_compose_up docker_compose_down seed_database
 
 APP_NAME=webapp
 MAIN_PATH=cmd/server/main.go
@@ -112,6 +112,13 @@ migration_create:
 migration_reset:
 	source $(ENVRC_FILE) && goose reset
 
+seed_database:
+	@echo "⏱️ seeding database now..."
+	@make migration_reset
+	@make migration_up
+	source $(ENVRC_FILE) && go run cmd/seed/database/*.go
+	@echo "✅ seeding database finish"
+
 help:
 	@echo "make - running go code with go run"
 	@echo "make dev - running go code with dev environment"
@@ -134,3 +141,4 @@ help:
 	@echo "make migration_reset - resetting all database migrations"
 	@echo "make docker_compose_up - starting docker compose"
 	@echo "make docker_compose_down - stopping docker compose"
+	@echo "make seed_database - seeding database"
