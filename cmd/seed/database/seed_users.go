@@ -12,7 +12,10 @@ import (
 const userCount = 100
 
 func seedUsers(query *query.Query) ([]*dbModel.User, error) {
-	gofakeit.Seed(666)
+	err := gofakeit.Seed(666)
+	if err != nil {
+		return nil, err
+	}
 
 	users := make([]*dbModel.User, userCount)
 
@@ -23,7 +26,7 @@ func seedUsers(query *query.Query) ([]*dbModel.User, error) {
 		}
 	}
 
-	err := query.User.WithContext(context.Background()).CreateInBatches(
+	err = query.User.WithContext(context.Background()).CreateInBatches(
 		users,
 		userCount,
 	)

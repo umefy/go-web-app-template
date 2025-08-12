@@ -13,7 +13,10 @@ import (
 const orderCount = 1000
 
 func seedOrders(query *query.Query, users []*dbModel.User) ([]*dbModel.Order, error) {
-	gofakeit.Seed(666)
+	err := gofakeit.Seed(666)
+	if err != nil {
+		return nil, err
+	}
 
 	orders := make([]*dbModel.Order, orderCount)
 
@@ -28,7 +31,7 @@ func seedOrders(query *query.Query, users []*dbModel.User) ([]*dbModel.Order, er
 		}
 	}
 
-	err := query.Order.WithContext(context.Background()).CreateInBatches(
+	err = query.Order.WithContext(context.Background()).CreateInBatches(
 		orders,
 		orderCount,
 	)
