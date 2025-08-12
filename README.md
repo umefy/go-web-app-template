@@ -4,7 +4,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/umefy/go-web-app-template)](https://go.dev/)
 [![License](https://img.shields.io/github/license/umefy/go-web-app-template)](LICENSE)
 
-A production-ready Go web application template following clean architecture principles with HTTP/gRPC servers, database integration, OpenTelemetry tracing, and comprehensive tooling.
+A production-ready Go web application template following clean architecture principles with HTTP/gRPC servers, database integration, OpenTelemetry tracing, optimistic locking, database seeding, and comprehensive tooling.
 
 ## 1. Quick Start
 
@@ -36,7 +36,13 @@ A production-ready Go web application template following clean architecture prin
    - Write SQL in the generated migration file
    - Run `make migration_up` to apply all migrations
 
-5. **Start Development**
+5. **Database Seeding (Optional)**
+
+   - Run `make seed_database` to populate the database with sample data
+   - This will reset the database, run migrations, and seed with 100 users and 1000 orders
+   - Useful for development and testing
+
+6. **Start Development**
    - Run `make` or `make dev` to start the project in development mode 🚀
    - This will automatically start Docker services, run migrations, and start the development server
    - Access APIs:
@@ -70,14 +76,21 @@ This project follows **Clean Architecture** principles with a clear separation o
 ```bash
 go-web-app-template/
 ├── cmd/                           # Application entry points
-│   └── server/                   # HTTP/gRPC server startup
+│   ├── server/                   # HTTP/gRPC server startup
+│   ├── seed/                     # Database seeding utilities
+│   │   └── database/             # Database seeding implementation
+│   │       ├── main.go           # Main seeding entry point
+│   │       ├── seed_users.go     # User seeding logic
+│   │       └── seed_orders.go    # Order seeding logic
+│   └── concurrent/               # Concurrent testing utilities
+│       └── concurrent_user_update.go # Optimistic locking test
 ├── internal/                      # Private application code (Go-enforced privacy)
 │   ├── domain/                    # Pure business logic & interfaces (no external dependencies)
 │   │   ├── user/                 # User domain
 │   │   │   ├── repo/             # Repository interfaces
-│   │   │   ├── user.go           # Domain models
+│   │   │   ├── user.go           # Domain models with optimistic locking
 │   │   │   ├── user_with_order.go # Domain models with relationships
-│   │   │   └── error/            # Domain-specific errors
+│   │   │   └── error/            # Domain-specific errors including optimistic lock conflicts
 │   │   ├── order/                # Order domain
 │   │   │   ├── repo/             # Repository interfaces
 │   │   │   └── order.go          # Domain models
@@ -85,7 +98,7 @@ go-web-app-template/
 │   ├── service/                   # Business logic implementation
 │   │   ├── fx.go                 # Service FX module
 │   │   ├── user/                 # User business logic
-│   │   │   ├── service.go        # User service implementation
+│   │   │   ├── service.go        # User service implementation with optimistic locking
 │   │   │   └── input.go          # Service input/output models
 │   │   ├── order/                # Order business logic
 │   │   │   ├── service.go        # Order service implementation
@@ -106,7 +119,7 @@ go-web-app-template/
 │   │   │               ├── create_user.go  # Create user endpoint
 │   │   │               ├── get_user.go     # Get user endpoint
 │   │   │               ├── get_users.go    # Get users endpoint
-│   │   │               ├── update_user.go  # Update user endpoint
+│   │   │               ├── update_user.go  # Update user endpoint with optimistic locking
 │   │   │               ├── router.go       # User routing
 │   │   │               └── mapping/        # Data mapping
 │   │   ├── graphql/              # GraphQL API
@@ -130,9 +143,9 @@ go-web-app-template/
 │   │   │   └── gorm/             # GORM database implementation
 │   │   │       ├── setup.go      # Database connection setup
 │   │   │       ├── with_tx.go    # GORM transaction utilities
-│   │   │       ├── generated/    # GORM generated models
+│   │   │       ├── generated/    # GORM generated models with optimistic locking
 │   │   │       └── repo/         # Repository implementations
-│   │   │           ├── user_repo.go    # User repository implementation
+│   │   │           ├── user_repo.go    # User repository with optimistic locking
 │   │   │           ├── order_repo.go   # Order repository implementation
 │   │   │           └── mapping/        # Database mapping utilities
 │   │   ├── server/               # Server infrastructure
@@ -180,9 +193,9 @@ go-web-app-template/
 ├── configs/                       # Configuration files
 │   ├── app-dev.yaml              # Development configuration
 │   └── app-prod.yaml             # Production configuration
-├── migrations/                    # Database migrations
+├── migrations/                    # Database migrations with optimistic locking support
 ├── proto/                         # Protocol buffer definitions
-├── gorm/                          # GORM generated code
+├── gorm/                          # GORM generated code with optimistic locking
 ├── scripts/                       # Build and deployment scripts
 ├── bruno/                         # API testing
 ├── docker-compose.yml             # Docker Compose for local development
@@ -231,6 +244,20 @@ go-web-app-template/
 - **Why**: Provides visibility into request flows across services and infrastructure
 - **Benefit**: Better debugging, performance monitoring, and operational insights
 
+#### 6. Optimistic Locking for Data Consistency
+
+- **Decision**: Implement optimistic locking using GORM's optimistic lock plugin
+- **Why**: Prevents data corruption in concurrent update scenarios without performance penalties of pessimistic locking
+- **Implementation**: Version field in database tables, automatic version checking in updates
+- **Benefit**: Better performance, handles concurrent updates gracefully, prevents lost updates
+
+#### 7. Database Seeding for Development
+
+- **Decision**: Comprehensive database seeding system with realistic test data
+- **Why**: Provides consistent development environment and realistic data for testing
+- **Implementation**: Separate seeding command with configurable data generation
+- **Benefit**: Faster development setup, better testing scenarios, consistent demo data
+
 ### Key Features
 
 - ✅ **Clean Architecture**: Clear separation of concerns with domain, service, delivery, and infrastructure layers
@@ -253,6 +280,9 @@ go-web-app-template/
 - ✅ **Profiling**: Built-in debug profiler endpoint for performance analysis
 - ✅ **Docker Compose**: Local development environment with PostgreSQL and Jaeger
 - ✅ **OpenTelemetry Tracing**: Distributed tracing with Jaeger backend for observability
+- ✅ **Optimistic Locking**: Version-based optimistic locking for concurrent update safety
+- ✅ **Database Seeding**: Comprehensive seeding system with realistic test data generation
+- ✅ **Concurrent Testing**: Utilities for testing optimistic locking behavior
 
 ### FX Dependency Injection Architecture
 
@@ -336,6 +366,106 @@ The application includes comprehensive tracing support:
 - **Configuration**: Tracing can be enabled/disabled per environment
 - **Service Context**: Automatic service name, version, and tracer configuration
 
+### Optimistic Locking
+
+The application implements optimistic locking to handle concurrent updates safely:
+
+**How It Works:**
+
+1. **Version Field**: Each entity has a `version` field that increments on each update
+2. **Update Validation**: Updates check that the current version matches the expected version
+3. **Conflict Detection**: If versions don't match, the update fails with a conflict error
+4. **Automatic Handling**: GORM automatically increments the version field on successful updates
+
+**Database Schema:**
+
+```sql
+-- Users table with optimistic locking
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    age INT NOT NULL,
+    version BIGINT NOT NULL DEFAULT 0,  -- Optimistic lock version
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Orders table with optimistic locking
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    amount_cents BIGINT NOT NULL,
+    version BIGINT NOT NULL DEFAULT 0,  -- Optimistic lock version
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**Error Handling:**
+
+```go
+// User update conflict error
+var UserUpdateConflict = appError.NewError(
+    "userService_1003",
+    "user update conflict - version mismatch",
+    http.StatusConflict,
+)
+```
+
+**Testing Concurrent Updates:**
+
+```bash
+# Test optimistic locking with concurrent updates
+go run cmd/concurrent/concurrent_user_update.go
+```
+
+This will attempt to update the same user concurrently, demonstrating how optimistic locking prevents data corruption.
+
+### Database Seeding
+
+The application includes a comprehensive seeding system for development and testing:
+
+**Seeding Command:**
+
+```bash
+# Seed database with sample data
+make seed_database
+```
+
+**What Gets Seeded:**
+
+- **Users**: 100 users with realistic email addresses and ages
+- **Orders**: 1000 orders linked to random users with realistic amounts
+- **Data Generation**: Uses `gofakeit` for realistic test data
+
+**Seeding Process:**
+
+1. **Database Reset**: Clears existing data and runs migrations
+2. **User Creation**: Creates 100 users with fake data
+3. **Order Creation**: Creates 1000 orders linked to users
+4. **Batch Processing**: Uses efficient batch inserts for performance
+
+**Customization:**
+
+```go
+// Adjust seeding quantities
+const userCount = 100
+const orderCount = 1000
+
+// Customize data generation
+users[i] = &dbModel.User{
+    Email: null.ValueFrom(gofakeit.Email()),
+    Age:   null.ValueFrom(gofakeit.IntRange(0, 60)),
+}
+```
+
+**Benefits:**
+
+- **Consistent Environment**: Same data across all development instances
+- **Realistic Testing**: Test with realistic data volumes and relationships
+- **Quick Setup**: Fast development environment initialization
+- **Demo Ready**: Immediate demonstration of application capabilities
+
 ### API Development (Multi-Protocol)
 
 #### OpenAPI (REST) Development
@@ -369,7 +499,7 @@ The application includes comprehensive tracing support:
 
 1. **Create Domain Structure**: `internal/domain/[domain]/`
 
-   - Define domain models (e.g., `user.go`)
+   - Define domain models (e.g., `user.go`) with optimistic locking if needed
    - Create repository interface in `repo/repo.go`
    - Add domain-specific errors in `error/`
 
@@ -388,38 +518,32 @@ The application includes comprehensive tracing support:
 
    - Create repository implementation
    - Add database mapping utilities
+   - Implement optimistic locking if needed
 
 5. **Update FX Configuration**: Add new services and repositories to appropriate FX modules
+
+6. **Add Seeding** (Optional): Add seeding logic in `cmd/seed/database/`
 
 ## 4. Future Enhancements
 
 ### Planned Features
 
-- [ ] **Authentication & Authorization**: JWT, OAuth2, RBAC
-- [ ] **Caching Layer**: Redis integration
-- [ ] **Event System**: Domain events and messaging
-- [ ] **Metrics & Observability**: Prometheus integration, enhanced OpenTelemetry metrics
-- [ ] **Advanced API Versioning**: Multiple version coexistence, deprecation policies, migration guides
-- [ ] **Background Jobs**: Task queue integration
-- [ ] **File Upload**: Multipart file handling
-- [ ] **Email Integration**: SMTP/email service
+See [TODO.md](TODO.md) for a comprehensive list of planned features and enhancements.
 
 ### Infrastructure Improvements
 
-- [ ] **Docker Support**: Multi-stage builds, production Docker images
-- [ ] **Kubernetes**: Deployment manifests, Helm charts
-- [ ] **Enhanced CI/CD**: Additional GitHub Actions workflows
-- [ ] **Monitoring**: Enhanced health checks, metrics dashboard, alerting
+See [TODO.md](TODO.md) for a comprehensive list of infrastructure improvements.
+
 - [ ] **Security**: Security headers, enhanced CORS configuration, security scanning
 - [ ] **Performance**: Connection pooling, caching strategies, performance testing
 
 ### Development Experience
 
-- [ ] **Enhanced Testing**: Integration tests, performance tests, test coverage reporting
-- [ ] **Development Tools**: Additional development utilities and scripts
-- [ ] **Performance Monitoring**: Development-time performance insights
-- [ ] **Database Tools**: Database schema visualization, query optimization tools
-- [ ] **Tracing Enhancements**: Custom trace attributes, sampling strategies, trace correlation
+See [TODO.md](TODO.md) for a comprehensive list of development experience improvements.
+
+### Optimistic Locking & Database Seeding Enhancements
+
+See [TODO.md](TODO.md) for a comprehensive list of optimistic locking and database seeding enhancements.
 
 ## 5. License
 
@@ -450,3 +574,6 @@ This is a template project designed for rapid development of Go web applications
 - Organize code by business domains rather than technical concerns
 - Leverage OpenTelemetry tracing for observability and debugging
 - Use Docker Compose for consistent local development environment
+- Implement optimistic locking for concurrent update safety
+- Use database seeding for consistent development environments
+- Test optimistic locking behavior with concurrent operations
