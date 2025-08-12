@@ -6,11 +6,11 @@ type Mutation struct {
 }
 
 type Order struct {
-	ID        string  `json:"id"`
-	UserID    string  `json:"userId"`
-	Amount    float64 `json:"amount"`
-	CreatedAt string  `json:"createdAt"`
-	UpdatedAt string  `json:"updatedAt"`
+	ID          string `json:"id"`
+	UserID      string `json:"userId"`
+	AmountCents string `json:"amountCents"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 type Query struct {

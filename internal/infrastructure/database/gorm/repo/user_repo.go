@@ -153,15 +153,15 @@ func (r *UserRepo) IsUserEmailExists(ctx context.Context, email string) (bool, e
 
 func (r *UserRepo) FindUserWithOrders(ctx context.Context, id int) (*userDomain.UserWithOrder, error) {
 	type UserOrderRow struct {
-		ID             int
-		Email          string
-		Age            int
-		CreatedAt      time.Time
-		UpdatedAt      time.Time
-		OrderID        int
-		OrderAmount    float64
-		OrderCreatedAt time.Time
-		OrderUpdatedAt time.Time
+		ID               int
+		Email            string
+		Age              int
+		CreatedAt        time.Time
+		UpdatedAt        time.Time
+		OrderID          int
+		OrderAmountCents int64
+		OrderCreatedAt   time.Time
+		OrderUpdatedAt   time.Time
 	}
 
 	userQuery := r.dbQuery.User
@@ -175,7 +175,7 @@ func (r *UserRepo) FindUserWithOrders(ctx context.Context, id int) (*userDomain.
 		userQuery.CreatedAt,
 		userQuery.UpdatedAt,
 		orderQuery.ID.As("order_id"),
-		orderQuery.Amount.As("order_amount"),
+		orderQuery.AmountCents.As("order_amount_cents"),
 		orderQuery.CreatedAt.As("order_created_at"),
 		orderQuery.UpdatedAt.As("order_updated_at"),
 	).LeftJoin(orderQuery, userQuery.ID.EqCol(orderQuery.UserID)).Where(userQuery.ID.Eq(id)).Scan(&userOrderRows)
@@ -205,10 +205,10 @@ func (r *UserRepo) FindUserWithOrders(ctx context.Context, id int) (*userDomain.
 		}
 
 		user.Orders = append(user.Orders, orderDomain.Order{
-			ID:        userOrderRow.OrderID,
-			Amount:    userOrderRow.OrderAmount,
-			CreatedAt: userOrderRow.OrderCreatedAt,
-			UpdatedAt: userOrderRow.OrderUpdatedAt,
+			ID:          userOrderRow.OrderID,
+			AmountCents: userOrderRow.OrderAmountCents,
+			CreatedAt:   userOrderRow.OrderCreatedAt,
+			UpdatedAt:   userOrderRow.OrderUpdatedAt,
 		})
 	}
 

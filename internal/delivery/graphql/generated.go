@@ -54,11 +54,11 @@ type ComplexityRoot struct {
 	}
 
 	Order struct {
-		Amount    func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
-		UserID    func(childComplexity int) int
+		AmountCents func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		ID          func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+		UserID      func(childComplexity int) int
 	}
 
 	Query struct {
@@ -132,12 +132,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(model.UserCreateInput)), true
 
-	case "Order.amount":
-		if e.complexity.Order.Amount == nil {
+	case "Order.amountCents":
+		if e.complexity.Order.AmountCents == nil {
 			break
 		}
 
-		return e.complexity.Order.Amount(childComplexity), true
+		return e.complexity.Order.AmountCents(childComplexity), true
 
 	case "Order.createdAt":
 		if e.complexity.Order.CreatedAt == nil {
@@ -379,10 +379,12 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../../../graphql/Order.graphqls", Input: `type Order {
+	{Name: "../../../graphql/Order.graphqls", Input: `scalar Long
+
+type Order {
   id: ID!
   userId: ID!
-  amount: Float!
+  amountCents: Long!
   createdAt: String!
   updatedAt: String!
 }
@@ -732,15 +734,15 @@ func (ec *executionContext) fieldContext_Order_userId(_ context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _Order_amount(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Order_amount(ctx, field)
+func (ec *executionContext) _Order_amountCents(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Order_amountCents(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Amount, nil
+		return obj.AmountCents, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -752,19 +754,19 @@ func (ec *executionContext) _Order_amount(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalNLong2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Order_amount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Order_amountCents(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Order",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Float does not have child fields")
+			return nil, errors.New("field of type Long does not have child fields")
 		},
 	}
 	return fc, nil
@@ -992,8 +994,8 @@ func (ec *executionContext) fieldContext_Query_orders(_ context.Context, field g
 				return ec.fieldContext_Order_id(ctx, field)
 			case "userId":
 				return ec.fieldContext_Order_userId(ctx, field)
-			case "amount":
-				return ec.fieldContext_Order_amount(ctx, field)
+			case "amountCents":
+				return ec.fieldContext_Order_amountCents(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Order_createdAt(ctx, field)
 			case "updatedAt":
@@ -1479,8 +1481,8 @@ func (ec *executionContext) fieldContext_User_orders(_ context.Context, field gr
 				return ec.fieldContext_Order_id(ctx, field)
 			case "userId":
 				return ec.fieldContext_Order_userId(ctx, field)
-			case "amount":
-				return ec.fieldContext_Order_amount(ctx, field)
+			case "amountCents":
+				return ec.fieldContext_Order_amountCents(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Order_createdAt(ctx, field)
 			case "updatedAt":
@@ -3303,8 +3305,8 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "amount":
-			out.Values[i] = ec._Order_amount(ctx, field, obj)
+		case "amountCents":
+			out.Values[i] = ec._Order_amountCents(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3947,22 +3949,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
-	res, err := graphql.UnmarshalFloatContext(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
-	_ = sel
-	res := graphql.MarshalFloatContext(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return graphql.WrapContextMarshaler(ctx, res)
-}
-
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3987,6 +3973,22 @@ func (ec *executionContext) unmarshalNInt2int32(ctx context.Context, v any) (int
 func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalInt32(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNLong2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNLong2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

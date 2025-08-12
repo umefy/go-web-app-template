@@ -4,6 +4,7 @@ go 1.24.2
 
 require (
 	github.com/99designs/gqlgen v0.17.78
+	github.com/brianvoe/gofakeit/v7 v7.3.0
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-chi/cors v1.2.1
 	github.com/go-chi/httprate v0.14.1

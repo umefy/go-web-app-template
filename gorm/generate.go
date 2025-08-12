@@ -75,10 +75,10 @@ func getDataTypeMap() map[string]func(detailType gorm.ColumnType) (dataType stri
 			return "null.Value[int]"
 		},
 		"int8": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.Value[int]"
+			return "null.Value[int64]"
 		},
 		"bigint": func(detailType gorm.ColumnType) (dataType string) {
-			return "null.Value[int]"
+			return "null.Value[int64]"
 		},
 		"float4": func(detailType gorm.ColumnType) (dataType string) {
 			return "null.Value[float64]"
