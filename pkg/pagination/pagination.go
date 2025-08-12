@@ -65,7 +65,7 @@ func WithDefaultPageSize(pageSize int) Option {
 
 func WithDefaultIncludeTotal(includeTotal bool) Option {
 	return func(p *Pagination) {
-		if p.IncludeTotal == false {
+		if !p.IncludeTotal {
 			p.IncludeTotal = includeTotal
 		}
 	}
