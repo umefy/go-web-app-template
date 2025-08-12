@@ -11,6 +11,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/mapping"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	userSrv "github.com/umefy/go-web-app-template/internal/service/user"
+	"github.com/umefy/go-web-app-template/pkg/pagination"
 	"github.com/umefy/godash/sliceskit"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -30,7 +31,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreat
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	users, err := r.UserService.GetUsers(ctx)
+	users, _, err := r.UserService.GetUsers(ctx, pagination.NewPagination("0", "10", "false"))
 	if err != nil {
 		return nil, err
 	}

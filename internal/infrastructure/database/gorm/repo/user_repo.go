@@ -15,6 +15,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/infrastructure/database/gorm/repo/mapping"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
 	"github.com/umefy/go-web-app-template/pkg/null"
+	"github.com/umefy/go-web-app-template/pkg/pagination"
 	"github.com/umefy/godash/sliceskit"
 
 	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
@@ -63,20 +64,37 @@ func (r *UserRepo) FindUserTx(ctx context.Context, id int) (*userDomain.User, er
 	return mapping.DbModelToDomainUser(user), nil
 }
 
-func (r *UserRepo) FindUsers(ctx context.Context) ([]*userDomain.User, error) {
+func (r *UserRepo) FindUsers(ctx context.Context, p pagination.Pagination) ([]*userDomain.User, *pagination.PaginationMetadata, error) {
 	userQuery := r.dbQuery.User
-	users, err := userQuery.WithContext(ctx).Order(userQuery.ID.Asc()).Find()
+	users, err := userQuery.WithContext(ctx).Order(userQuery.ID.Asc()).Offset(p.Offset).Limit(p.PageSize + 1).Find()
 
 	if err != nil {
 		r.Logger.ErrorContext(ctx, "UserRepository.GetUsers", slog.String("error", err.Error()))
 		if errors.Is(err, db.ErrRecordNotFound) {
-			return nil, userError.UserNotFound
+			return nil, nil, userError.UserNotFound
 		}
-		return nil, err
+		return nil, nil, err
 	}
+
+	hasMore := len(users) > p.PageSize
+
+	if hasMore {
+		users = users[:p.PageSize]
+	}
+
+	var total *int64 = nil
+	metadata := pagination.NewPaginationMetadata(p.Offset, p.PageSize, len(users), hasMore, total)
+	if p.IncludeTotal {
+		totalCount, err := userQuery.WithContext(ctx).Count()
+		if err != nil {
+			return nil, nil, err
+		}
+		metadata.Total = &totalCount
+	}
+
 	return sliceskit.Map(users, func(user *dbModel.User) *userDomain.User {
 		return mapping.DbModelToDomainUser(user)
-	}), nil
+	}), &metadata, nil
 }
 
 func (r *UserRepo) FindUsersTx(ctx context.Context) ([]*userDomain.User, error) {

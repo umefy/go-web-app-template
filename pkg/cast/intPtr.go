@@ -12,3 +12,11 @@ func IntToInt32Ptr(v int) *int32 {
 	v32 := int32(v)
 	return &v32
 }
+
+func Int64PtrToIntPtr(v *int64) *int {
+	if v == nil {
+		return nil
+	}
+	t := int(*v)
+	return &t
+}
