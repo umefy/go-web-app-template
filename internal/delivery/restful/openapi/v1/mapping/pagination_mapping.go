@@ -8,6 +8,10 @@ import (
 
 func PaginationMetadataToApiPaginationMetadata(metadata *pagination.PaginationMetadata) *api.PaginationMetadata {
 
+	if metadata == nil {
+		return nil
+	}
+
 	return &api.PaginationMetadata{
 		Offset:   metadata.Offset,
 		PageSize: metadata.PageSize,
