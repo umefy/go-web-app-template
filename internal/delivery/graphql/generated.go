@@ -93,7 +93,7 @@ type ComplexityRoot struct {
 		UpdatedAt func(childComplexity int) int
 	}
 
-	UsersWithPaginationMetadata struct {
+	UsersWithPagination struct {
 		PageInfo func(childComplexity int) int
 		Users    func(childComplexity int) int
 	}
@@ -103,7 +103,7 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.UserCreateInput) (*model.User, error)
 }
 type QueryResolver interface {
-	AllUsers(ctx context.Context, params *model.PaginationParams) (*model.UsersWithPaginationMetadata, error)
+	AllUsers(ctx context.Context, params *model.PaginationParams) (*model.UsersWithPagination, error)
 	User(ctx context.Context, id string) (*model.User, error)
 	Orders(ctx context.Context) ([]*model.Order, error)
 }
@@ -309,19 +309,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.User.UpdatedAt(childComplexity), true
 
-	case "UsersWithPaginationMetadata.pageInfo":
-		if e.complexity.UsersWithPaginationMetadata.PageInfo == nil {
+	case "UsersWithPagination.pageInfo":
+		if e.complexity.UsersWithPagination.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.UsersWithPaginationMetadata.PageInfo(childComplexity), true
+		return e.complexity.UsersWithPagination.PageInfo(childComplexity), true
 
-	case "UsersWithPaginationMetadata.users":
-		if e.complexity.UsersWithPaginationMetadata.Users == nil {
+	case "UsersWithPagination.users":
+		if e.complexity.UsersWithPagination.Users == nil {
 			break
 		}
 
-		return e.complexity.UsersWithPaginationMetadata.Users(childComplexity), true
+		return e.complexity.UsersWithPagination.Users(childComplexity), true
 
 	}
 	return 0, false
@@ -495,13 +495,13 @@ type Subscription {
   orders: [Order!]!
 }
 
-type UsersWithPaginationMetadata {
+type UsersWithPagination {
   users: [User!]!
   pageInfo: PaginationMetadata!
 }
 
 type Query {
-  allUsers(params: PaginationParams = { offset: 0, pageSize: 25, includeTotal: false }): UsersWithPaginationMetadata!
+  allUsers(params: PaginationParams = { offset: 0, pageSize: 25, includeTotal: false }): UsersWithPagination!
   user(id: ID!): User!
 }
 
@@ -1167,9 +1167,9 @@ func (ec *executionContext) _Query_allUsers(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.UsersWithPaginationMetadata)
+	res := resTmp.(*model.UsersWithPagination)
 	fc.Result = res
-	return ec.marshalNUsersWithPaginationMetadata2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPaginationMetadata(ctx, field.Selections, res)
+	return ec.marshalNUsersWithPagination2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPagination(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_allUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1181,11 +1181,11 @@ func (ec *executionContext) fieldContext_Query_allUsers(ctx context.Context, fie
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "users":
-				return ec.fieldContext_UsersWithPaginationMetadata_users(ctx, field)
+				return ec.fieldContext_UsersWithPagination_users(ctx, field)
 			case "pageInfo":
-				return ec.fieldContext_UsersWithPaginationMetadata_pageInfo(ctx, field)
+				return ec.fieldContext_UsersWithPagination_pageInfo(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type UsersWithPaginationMetadata", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UsersWithPagination", field.Name)
 		},
 	}
 	ctx = graphql.WithFieldContext(ctx, fc)
@@ -1790,8 +1790,8 @@ func (ec *executionContext) fieldContext_User_orders(_ context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _UsersWithPaginationMetadata_users(ctx context.Context, field graphql.CollectedField, obj *model.UsersWithPaginationMetadata) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UsersWithPaginationMetadata_users(ctx, field)
+func (ec *executionContext) _UsersWithPagination_users(ctx context.Context, field graphql.CollectedField, obj *model.UsersWithPagination) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UsersWithPagination_users(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1815,9 +1815,9 @@ func (ec *executionContext) _UsersWithPaginationMetadata_users(ctx context.Conte
 	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UsersWithPaginationMetadata_users(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UsersWithPagination_users(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "UsersWithPaginationMetadata",
+		Object:     "UsersWithPagination",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1842,8 +1842,8 @@ func (ec *executionContext) fieldContext_UsersWithPaginationMetadata_users(_ con
 	return fc, nil
 }
 
-func (ec *executionContext) _UsersWithPaginationMetadata_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.UsersWithPaginationMetadata) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UsersWithPaginationMetadata_pageInfo(ctx, field)
+func (ec *executionContext) _UsersWithPagination_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.UsersWithPagination) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UsersWithPagination_pageInfo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1867,9 +1867,9 @@ func (ec *executionContext) _UsersWithPaginationMetadata_pageInfo(ctx context.Co
 	return ec.marshalNPaginationMetadata2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐPaginationMetadata(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UsersWithPaginationMetadata_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UsersWithPagination_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "UsersWithPaginationMetadata",
+		Object:     "UsersWithPagination",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -4093,24 +4093,24 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-var usersWithPaginationMetadataImplementors = []string{"UsersWithPaginationMetadata"}
+var usersWithPaginationImplementors = []string{"UsersWithPagination"}
 
-func (ec *executionContext) _UsersWithPaginationMetadata(ctx context.Context, sel ast.SelectionSet, obj *model.UsersWithPaginationMetadata) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, usersWithPaginationMetadataImplementors)
+func (ec *executionContext) _UsersWithPagination(ctx context.Context, sel ast.SelectionSet, obj *model.UsersWithPagination) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, usersWithPaginationImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("UsersWithPaginationMetadata")
+			out.Values[i] = graphql.MarshalString("UsersWithPagination")
 		case "users":
-			out.Values[i] = ec._UsersWithPaginationMetadata_users(ctx, field, obj)
+			out.Values[i] = ec._UsersWithPagination_users(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "pageInfo":
-			out.Values[i] = ec._UsersWithPaginationMetadata_pageInfo(ctx, field, obj)
+			out.Values[i] = ec._UsersWithPagination_pageInfo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4681,18 +4681,18 @@ func (ec *executionContext) unmarshalNUserCreateInput2githubᚗcomᚋumefyᚋgo�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUsersWithPaginationMetadata2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPaginationMetadata(ctx context.Context, sel ast.SelectionSet, v model.UsersWithPaginationMetadata) graphql.Marshaler {
-	return ec._UsersWithPaginationMetadata(ctx, sel, &v)
+func (ec *executionContext) marshalNUsersWithPagination2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPagination(ctx context.Context, sel ast.SelectionSet, v model.UsersWithPagination) graphql.Marshaler {
+	return ec._UsersWithPagination(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUsersWithPaginationMetadata2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPaginationMetadata(ctx context.Context, sel ast.SelectionSet, v *model.UsersWithPaginationMetadata) graphql.Marshaler {
+func (ec *executionContext) marshalNUsersWithPagination2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPagination(ctx context.Context, sel ast.SelectionSet, v *model.UsersWithPagination) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._UsersWithPaginationMetadata(ctx, sel, v)
+	return ec._UsersWithPagination(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

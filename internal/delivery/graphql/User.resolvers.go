@@ -30,13 +30,13 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreat
 }
 
 // AllUsers is the resolver for the allUsers field.
-func (r *queryResolver) AllUsers(ctx context.Context, params *model.PaginationParams) (*model.UsersWithPaginationMetadata, error) {
+func (r *queryResolver) AllUsers(ctx context.Context, params *model.PaginationParams) (*model.UsersWithPagination, error) {
 	users, paginationMetadata, err := r.UserService.GetUsers(ctx, pagination.New(int(params.Offset), int(params.PageSize), params.IncludeTotal))
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.UsersWithPaginationMetadata{
+	return &model.UsersWithPagination{
 		Users:    sliceskit.Map(users, mapping.DomainUserToGraphqlUser),
 		PageInfo: mapping.PaginationMetadataToGraphqlPaginationMetadata(paginationMetadata),
 	}, nil

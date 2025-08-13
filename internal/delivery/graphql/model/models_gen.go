@@ -52,7 +52,7 @@ type UserCreateInput struct {
 	Age   int32  `json:"age"`
 }
 
-type UsersWithPaginationMetadata struct {
+type UsersWithPagination struct {
 	Users    []*User             `json:"users"`
 	PageInfo *PaginationMetadata `json:"pageInfo"`
 }
