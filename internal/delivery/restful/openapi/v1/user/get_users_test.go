@@ -29,7 +29,7 @@ func (s *GetUsersSuite) TestGetUsers() {
 		},
 	}
 
-	userService.EXPECT().GetUsers(context.Background(), pagination.NewPagination("0", "25", "false")).Return(users, nil, nil)
+	userService.EXPECT().GetUsers(context.Background(), pagination.NewFromQueryParams("0", "25", "false")).Return(users, nil, nil)
 	logger.EXPECT().DebugContext(context.Background(), "GetUsers")
 
 	h := NewHandler(userService, logger, nil)

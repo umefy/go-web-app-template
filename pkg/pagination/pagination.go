@@ -16,20 +16,11 @@ type Pagination struct {
 	IncludeTotal bool
 }
 
-func NewPagination(offset, pagesize, includeTotal string, options ...Option) Pagination {
-	offsetInt, err := strconv.Atoi(offset)
-	if err != nil {
-		offsetInt = DefaultOffset
-	}
-	pagesizeInt, err := strconv.Atoi(pagesize)
-	if err != nil {
-		pagesizeInt = DefaultPageSize
-	}
-
+func New(offset, pagesize int, includeTotal bool, options ...Option) Pagination {
 	var p = Pagination{
-		Offset:       offsetInt,
-		PageSize:     pagesizeInt,
-		IncludeTotal: includeTotal == "true",
+		Offset:       offset,
+		PageSize:     pagesize,
+		IncludeTotal: includeTotal,
 	}
 
 	for _, option := range options {
@@ -45,6 +36,19 @@ func NewPagination(offset, pagesize, includeTotal string, options ...Option) Pag
 	}
 
 	return p
+}
+
+func NewFromQueryParams(offset, pagesize, includeTotal string, options ...Option) Pagination {
+	offsetInt, err := strconv.Atoi(offset)
+	if err != nil {
+		offsetInt = DefaultOffset
+	}
+	pagesizeInt, err := strconv.Atoi(pagesize)
+	if err != nil {
+		pagesizeInt = DefaultPageSize
+	}
+
+	return New(offsetInt, pagesizeInt, includeTotal == "true", options...)
 }
 
 func WithDefaultOffset(offset int) Option {

@@ -7,8 +7,13 @@ type User {
   orders: [Order!]!
 }
 
-type Query {
+type UsersWithPaginationMetadata {
   users: [User!]!
+  pageInfo: PaginationMetadata!
+}
+
+type Query {
+  allUsers(params: PaginationParams = { offset: 0, pageSize: 25, includeTotal: false }): UsersWithPaginationMetadata!
   user(id: ID!): User!
 }
 

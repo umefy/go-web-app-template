@@ -61,10 +61,18 @@ type ComplexityRoot struct {
 		UserID      func(childComplexity int) int
 	}
 
+	PaginationMetadata struct {
+		Count    func(childComplexity int) int
+		HasMore  func(childComplexity int) int
+		Offset   func(childComplexity int) int
+		PageSize func(childComplexity int) int
+		Total    func(childComplexity int) int
+	}
+
 	Query struct {
-		Orders func(childComplexity int) int
-		User   func(childComplexity int, id string) int
-		Users  func(childComplexity int) int
+		AllUsers func(childComplexity int, params *model.PaginationParams) int
+		Orders   func(childComplexity int) int
+		User     func(childComplexity int, id string) int
 	}
 
 	Subscription struct {
@@ -84,13 +92,18 @@ type ComplexityRoot struct {
 		Orders    func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
 	}
+
+	UsersWithPaginationMetadata struct {
+		PageInfo func(childComplexity int) int
+		Users    func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.UserCreateInput) (*model.User, error)
 }
 type QueryResolver interface {
-	Users(ctx context.Context) ([]*model.User, error)
+	AllUsers(ctx context.Context, params *model.PaginationParams) (*model.UsersWithPaginationMetadata, error)
 	User(ctx context.Context, id string) (*model.User, error)
 	Orders(ctx context.Context) ([]*model.Order, error)
 }
@@ -167,6 +180,53 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Order.UserID(childComplexity), true
 
+	case "PaginationMetadata.count":
+		if e.complexity.PaginationMetadata.Count == nil {
+			break
+		}
+
+		return e.complexity.PaginationMetadata.Count(childComplexity), true
+
+	case "PaginationMetadata.hasMore":
+		if e.complexity.PaginationMetadata.HasMore == nil {
+			break
+		}
+
+		return e.complexity.PaginationMetadata.HasMore(childComplexity), true
+
+	case "PaginationMetadata.offset":
+		if e.complexity.PaginationMetadata.Offset == nil {
+			break
+		}
+
+		return e.complexity.PaginationMetadata.Offset(childComplexity), true
+
+	case "PaginationMetadata.pageSize":
+		if e.complexity.PaginationMetadata.PageSize == nil {
+			break
+		}
+
+		return e.complexity.PaginationMetadata.PageSize(childComplexity), true
+
+	case "PaginationMetadata.total":
+		if e.complexity.PaginationMetadata.Total == nil {
+			break
+		}
+
+		return e.complexity.PaginationMetadata.Total(childComplexity), true
+
+	case "Query.allUsers":
+		if e.complexity.Query.AllUsers == nil {
+			break
+		}
+
+		args, err := ec.field_Query_allUsers_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AllUsers(childComplexity, args["params"].(*model.PaginationParams)), true
+
 	case "Query.orders":
 		if e.complexity.Query.Orders == nil {
 			break
@@ -185,13 +245,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
-
-	case "Query.users":
-		if e.complexity.Query.Users == nil {
-			break
-		}
-
-		return e.complexity.Query.Users(childComplexity), true
 
 	case "Subscription.currentTime":
 		if e.complexity.Subscription.CurrentTime == nil {
@@ -256,6 +309,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.User.UpdatedAt(childComplexity), true
 
+	case "UsersWithPaginationMetadata.pageInfo":
+		if e.complexity.UsersWithPaginationMetadata.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.UsersWithPaginationMetadata.PageInfo(childComplexity), true
+
+	case "UsersWithPaginationMetadata.users":
+		if e.complexity.UsersWithPaginationMetadata.Users == nil {
+			break
+		}
+
+		return e.complexity.UsersWithPaginationMetadata.Users(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -264,6 +331,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputPaginationParams,
 		ec.unmarshalInputUserCreateInput,
 	)
 	first := true
@@ -393,6 +461,22 @@ extend type Query {
   orders: [Order!]!
 }
 `, BuiltIn: false},
+	{Name: "../../../graphql/Pagination.graphqls", Input: `scalar Int64
+
+input PaginationParams {
+  offset: Int!
+  pageSize: Int!
+  includeTotal: Boolean!
+}
+
+type PaginationMetadata {
+  offset: Int!
+  pageSize: Int!
+  count: Int!
+  hasMore: Boolean!
+  total: Int64
+}
+`, BuiltIn: false},
 	{Name: "../../../graphql/Time.graphqls", Input: `type Time {
   unixTime: Int!
   timestamp: String!
@@ -411,8 +495,13 @@ type Subscription {
   orders: [Order!]!
 }
 
-type Query {
+type UsersWithPaginationMetadata {
   users: [User!]!
+  pageInfo: PaginationMetadata!
+}
+
+type Query {
+  allUsers(params: PaginationParams = { offset: 0, pageSize: 25, includeTotal: false }): UsersWithPaginationMetadata!
   user(id: ID!): User!
 }
 
@@ -475,6 +564,29 @@ func (ec *executionContext) field_Query___type_argsName(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_allUsers_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Query_allUsers_argsParams(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["params"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_allUsers_argsParams(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*model.PaginationParams, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("params"))
+	if tmp, ok := rawArgs["params"]; ok {
+		return ec.unmarshalOPaginationParams2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐPaginationParams(ctx, tmp)
+	}
+
+	var zeroVal *model.PaginationParams
 	return zeroVal, nil
 }
 
@@ -848,15 +960,15 @@ func (ec *executionContext) fieldContext_Order_updatedAt(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_users(ctx, field)
+func (ec *executionContext) _PaginationMetadata_offset(ctx context.Context, field graphql.CollectedField, obj *model.PaginationMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginationMetadata_offset(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Users(rctx)
+		return obj.Offset, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -868,12 +980,199 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.User)
+	res := resTmp.(int32)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_users(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PaginationMetadata_offset(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginationMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PaginationMetadata_pageSize(ctx context.Context, field graphql.CollectedField, obj *model.PaginationMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginationMetadata_pageSize(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageSize, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PaginationMetadata_pageSize(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginationMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PaginationMetadata_count(ctx context.Context, field graphql.CollectedField, obj *model.PaginationMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginationMetadata_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PaginationMetadata_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginationMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PaginationMetadata_hasMore(ctx context.Context, field graphql.CollectedField, obj *model.PaginationMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginationMetadata_hasMore(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasMore, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PaginationMetadata_hasMore(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginationMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PaginationMetadata_total(ctx context.Context, field graphql.CollectedField, obj *model.PaginationMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PaginationMetadata_total(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Total, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt642ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PaginationMetadata_total(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PaginationMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int64 does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_allUsers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_allUsers(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AllUsers(rctx, fc.Args["params"].(*model.PaginationParams))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UsersWithPaginationMetadata)
+	fc.Result = res
+	return ec.marshalNUsersWithPaginationMetadata2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPaginationMetadata(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_allUsers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -881,21 +1180,18 @@ func (ec *executionContext) fieldContext_Query_users(_ context.Context, field gr
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "age":
-				return ec.fieldContext_User_age(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "orders":
-				return ec.fieldContext_User_orders(ctx, field)
+			case "users":
+				return ec.fieldContext_UsersWithPaginationMetadata_users(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_UsersWithPaginationMetadata_pageInfo(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UsersWithPaginationMetadata", field.Name)
 		},
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_allUsers_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -1489,6 +1785,108 @@ func (ec *executionContext) fieldContext_User_orders(_ context.Context, field gr
 				return ec.fieldContext_Order_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Order", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UsersWithPaginationMetadata_users(ctx context.Context, field graphql.CollectedField, obj *model.UsersWithPaginationMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UsersWithPaginationMetadata_users(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Users, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UsersWithPaginationMetadata_users(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UsersWithPaginationMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "age":
+				return ec.fieldContext_User_age(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			case "orders":
+				return ec.fieldContext_User_orders(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UsersWithPaginationMetadata_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.UsersWithPaginationMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UsersWithPaginationMetadata_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PaginationMetadata)
+	fc.Result = res
+	return ec.marshalNPaginationMetadata2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐPaginationMetadata(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UsersWithPaginationMetadata_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UsersWithPaginationMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "offset":
+				return ec.fieldContext_PaginationMetadata_offset(ctx, field)
+			case "pageSize":
+				return ec.fieldContext_PaginationMetadata_pageSize(ctx, field)
+			case "count":
+				return ec.fieldContext_PaginationMetadata_count(ctx, field)
+			case "hasMore":
+				return ec.fieldContext_PaginationMetadata_hasMore(ctx, field)
+			case "total":
+				return ec.fieldContext_PaginationMetadata_total(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PaginationMetadata", field.Name)
 		},
 	}
 	return fc, nil
@@ -3193,6 +3591,47 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputPaginationParams(ctx context.Context, obj any) (model.PaginationParams, error) {
+	var it model.PaginationParams
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"offset", "pageSize", "includeTotal"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "offset":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Offset = data
+		case "pageSize":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pageSize"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PageSize = data
+		case "includeTotal":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includeTotal"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IncludeTotal = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUserCreateInput(ctx context.Context, obj any) (model.UserCreateInput, error) {
 	var it model.UserCreateInput
 	asMap := map[string]any{}
@@ -3343,6 +3782,62 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
+var paginationMetadataImplementors = []string{"PaginationMetadata"}
+
+func (ec *executionContext) _PaginationMetadata(ctx context.Context, sel ast.SelectionSet, obj *model.PaginationMetadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, paginationMetadataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PaginationMetadata")
+		case "offset":
+			out.Values[i] = ec._PaginationMetadata_offset(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pageSize":
+			out.Values[i] = ec._PaginationMetadata_pageSize(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._PaginationMetadata_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasMore":
+			out.Values[i] = ec._PaginationMetadata_hasMore(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "total":
+			out.Values[i] = ec._PaginationMetadata_total(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3362,11 +3857,11 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "users":
+		case "allUsers":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				res = ec._Query_users(ctx, field)
+				res = ec._Query_allUsers(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3575,6 +4070,50 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var usersWithPaginationMetadataImplementors = []string{"UsersWithPaginationMetadata"}
+
+func (ec *executionContext) _UsersWithPaginationMetadata(ctx context.Context, sel ast.SelectionSet, obj *model.UsersWithPaginationMetadata) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, usersWithPaginationMetadataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UsersWithPaginationMetadata")
+		case "users":
+			out.Values[i] = ec._UsersWithPaginationMetadata_users(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._UsersWithPaginationMetadata_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4045,6 +4584,16 @@ func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑa
 	return ec._Order(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPaginationMetadata2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐPaginationMetadata(ctx context.Context, sel ast.SelectionSet, v *model.PaginationMetadata) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PaginationMetadata(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4130,6 +4679,20 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑap
 func (ec *executionContext) unmarshalNUserCreateInput2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUserCreateInput(ctx context.Context, v any) (model.UserCreateInput, error) {
 	res, err := ec.unmarshalInputUserCreateInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUsersWithPaginationMetadata2githubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPaginationMetadata(ctx context.Context, sel ast.SelectionSet, v model.UsersWithPaginationMetadata) graphql.Marshaler {
+	return ec._UsersWithPaginationMetadata(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUsersWithPaginationMetadata2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐUsersWithPaginationMetadata(ctx context.Context, sel ast.SelectionSet, v *model.UsersWithPaginationMetadata) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UsersWithPaginationMetadata(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4389,6 +4952,32 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOInt642ᚖint(ctx context.Context, v any) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt642ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOPaginationParams2ᚖgithubᚗcomᚋumefyᚋgoᚑwebᚑappᚑtemplateᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐPaginationParams(ctx context.Context, v any) (*model.PaginationParams, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputPaginationParams(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

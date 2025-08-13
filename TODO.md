@@ -6,7 +6,8 @@ This file tracks planned features and tasks for the Go Web App Template, organiz
 
 ### Core Features
 
-- [ ] **API Pagination**: Add pagination support to getAll users endpoint and other list endpoints
+- [x] **API Pagination**: Add pagination support to getAll users endpoint and other list endpoints
+- [x] **GraphQL Pagination**: Add pagination support to GraphQL getAll users endpoint
 - [ ] **Authentication & Authorization**: JWT, OAuth2, RBAC
 
 ### Infrastructure
