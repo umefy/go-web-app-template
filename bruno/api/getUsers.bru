@@ -5,7 +5,13 @@ meta {
 }
 
 get {
-  url: {{localhost}}:8082/api/{{version}}/users
+  url: {{localhost}}:8082/api/{{version}}/users?offset=2&pageSize=3&includeTotal=true
   body: none
   auth: none
+}
+
+params:query {
+  offset: 2
+  pageSize: 3
+  includeTotal: true
 }

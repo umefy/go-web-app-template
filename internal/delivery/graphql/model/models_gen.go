@@ -13,6 +13,20 @@ type Order struct {
 	UpdatedAt   string `json:"updatedAt"`
 }
 
+type PaginationMetadata struct {
+	Offset   int32 `json:"offset"`
+	PageSize int32 `json:"pageSize"`
+	Count    int32 `json:"count"`
+	HasMore  bool  `json:"hasMore"`
+	Total    *int  `json:"total,omitempty"`
+}
+
+type PaginationParams struct {
+	Offset       int32 `json:"offset"`
+	PageSize     int32 `json:"pageSize"`
+	IncludeTotal bool  `json:"includeTotal"`
+}
+
 type Query struct {
 }
 
@@ -36,4 +50,9 @@ type User struct {
 type UserCreateInput struct {
 	Email string `json:"email"`
 	Age   int32  `json:"age"`
+}
+
+type UsersWithPagination struct {
+	Users    []*User             `json:"users"`
+	PageInfo *PaginationMetadata `json:"pageInfo"`
 }

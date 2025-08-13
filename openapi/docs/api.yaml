@@ -42,15 +42,17 @@ paths:
         - users
       summary: Get all users
       description: Get all users
+      parameters:
+        - $ref: '#/components/parameters/OffsetParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/IncludeTotalParam'
       responses:
         '200':
           description: A list of users
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserGetAllResponse'
+                $ref: '#/components/schemas/UserGetAllResponse'
   /users/{id}:
     get:
       operationId: getUser
@@ -98,7 +100,52 @@ paths:
                 $ref: '#/components/schemas/UserUpdateResponse'
 
 components:
+  parameters:
+    OffsetParam:
+      in: query
+      name: offset
+      schema:
+        type: integer
+        example: 0
+    PageSizeParam:
+      in: query
+      name: pageSize
+      schema:
+        type: integer
+        example: 25
+    IncludeTotalParam:
+      in: query
+      name: includeTotal
+      schema:
+        type: boolean
+        example: true
   schemas:
+    PaginationMetadata:
+      type: object
+      properties:
+        offset:
+          type: integer
+          example: 0
+        pageSize:
+          type: integer
+          example: 25
+        count:
+          type: integer
+          example: 10
+          description: The number of items in the current page
+        hasMore:
+          type: boolean
+          example: true
+          description: Whether there are more items to fetch
+        total:
+          type: integer
+          example: 100
+          description: The total number of items
+      required:
+        - offset
+        - pageSize
+        - count
+        - hasMore
     UserCreate:
       type: object
       properties:
@@ -167,6 +214,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
+        pageInfo:
+            $ref: '#/components/schemas/PaginationMetadata'
     UserUpdateResponse:
       type: object
       properties:

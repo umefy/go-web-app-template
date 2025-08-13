@@ -1,0 +1,15 @@
+scalar Int64
+
+input PaginationParams {
+  offset: Int!
+  pageSize: Int!
+  includeTotal: Boolean!
+}
+
+type PaginationMetadata {
+  offset: Int!
+  pageSize: Int!
+  count: Int!
+  hasMore: Boolean!
+  total: Int64
+}

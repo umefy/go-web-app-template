@@ -11,6 +11,7 @@ import (
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/mapping"
 	"github.com/umefy/go-web-app-template/internal/delivery/graphql/model"
 	userSrv "github.com/umefy/go-web-app-template/internal/service/user"
+	"github.com/umefy/go-web-app-template/pkg/pagination"
 	"github.com/umefy/godash/sliceskit"
 	"go.opentelemetry.io/otel/attribute"
 )
@@ -28,14 +29,17 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.UserCreat
 	return mapping.DomainUserToGraphqlUser(user), nil
 }
 
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	users, err := r.UserService.GetUsers(ctx)
+// AllUsers is the resolver for the allUsers field.
+func (r *queryResolver) AllUsers(ctx context.Context, params *model.PaginationParams) (*model.UsersWithPagination, error) {
+	users, paginationMetadata, err := r.UserService.GetUsers(ctx, pagination.New(int(params.Offset), int(params.PageSize), params.IncludeTotal))
 	if err != nil {
 		return nil, err
 	}
 
-	return sliceskit.Map(users, mapping.DomainUserToGraphqlUser), nil
+	return &model.UsersWithPagination{
+		Users:    sliceskit.Map(users, mapping.DomainUserToGraphqlUser),
+		PageInfo: mapping.PaginationMetadataToGraphqlPaginationMetadata(paginationMetadata),
+	}, nil
 }
 
 // User is the resolver for the user field.

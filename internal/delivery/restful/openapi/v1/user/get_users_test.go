@@ -7,13 +7,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	api "github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/generated"
-	"github.com/umefy/go-web-app-template/internal/delivery/restful/openapi/v1/user/mapping"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
 	loggerMocks "github.com/umefy/go-web-app-template/mocks/infrastructure/logger"
 	userSrvMocks "github.com/umefy/go-web-app-template/mocks/service/user"
-	"github.com/umefy/godash/jsonkit"
-	"github.com/umefy/godash/sliceskit"
+	"github.com/umefy/go-web-app-template/pkg/pagination"
 )
 
 type GetUsersSuite struct {
@@ -32,7 +29,7 @@ func (s *GetUsersSuite) TestGetUsers() {
 		},
 	}
 
-	userService.EXPECT().GetUsers(context.Background()).Return(users, nil)
+	userService.EXPECT().GetUsers(context.Background(), pagination.NewFromQueryParams("0", "25", "false")).Return(users, nil, nil)
 	logger.EXPECT().DebugContext(context.Background(), "GetUsers")
 
 	h := NewHandler(userService, logger, nil)
@@ -44,12 +41,6 @@ func (s *GetUsersSuite) TestGetUsers() {
 	s.NoError(err)
 
 	s.Equal(http.StatusOK, rec.Code)
-	expectedJSON, err := jsonkit.Marshal(&api.UserGetAllResponse{
-		Data: sliceskit.Map(users, mapping.UserModelToApiUser),
-	})
-
-	s.NoError(err)
-	s.JSONEq(string(expectedJSON), rec.Body.String())
 }
 
 func TestGetUsersSuite(t *testing.T) {

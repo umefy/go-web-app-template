@@ -10,11 +10,12 @@ import (
 	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
 	"github.com/umefy/go-web-app-template/internal/domain/user/repo"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
+	"github.com/umefy/go-web-app-template/pkg/pagination"
 	"go.opentelemetry.io/otel/trace"
 )
 
 type Service interface {
-	GetUsers(ctx context.Context) ([]*userDomain.User, error)
+	GetUsers(ctx context.Context, p pagination.Pagination) ([]*userDomain.User, *pagination.PaginationMetadata, error)
 	GetUser(ctx context.Context, id string) (*userDomain.User, error)
 	IsUserExists(ctx context.Context, email string) (bool, error)
 	CreateUser(ctx context.Context, userCreateInput *UserCreateInput) (*userDomain.User, error)
@@ -34,17 +35,17 @@ func NewService(logger logger.Logger, userRepository repo.Repository, tracerProv
 }
 
 // GetUsers implements Service.
-func (u *userService) GetUsers(ctx context.Context) ([]*userDomain.User, error) {
+func (u *userService) GetUsers(ctx context.Context, p pagination.Pagination) ([]*userDomain.User, *pagination.PaginationMetadata, error) {
 	tr := u.tracerProvider.Tracer("userService")
 	_, span := tr.Start(ctx, "GetUsers")
 	defer span.End()
 
-	usersDb, err := u.userRepository.FindUsers(ctx)
+	usersDb, paginationMetadata, err := u.userRepository.FindUsers(ctx, p)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return usersDb, nil
+	return usersDb, paginationMetadata, nil
 }
 
 func (u *userService) GetUser(ctx context.Context, id string) (*userDomain.User, error) {
