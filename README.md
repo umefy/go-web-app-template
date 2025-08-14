@@ -271,7 +271,7 @@ go-web-app-template/
 - ✅ **Comprehensive Testing**: Mockery for mocking with comprehensive test coverage
 - ✅ **Health Checks**: Built-in health check endpoints with chi middleware
 - ✅ **Rate Limiting**: Request throttling with httprate (600 req/min global, 100 req/min per IP)
-- ✅ **Logging**: Structured logging with request ID tracking and context-aware logging
+- ✅ **Advanced Logging**: Structured logging with source file tracking, process ID, and configurable database logging
 - ✅ **Input Validation**: Comprehensive validation with custom validation rules
 - ✅ **Content Type Validation**: JSON content type enforcement
 - ✅ **Request Timeout**: 60-second request timeout
@@ -350,12 +350,77 @@ tracing:
   tracer_name: 'http.server'
   service_name: 'Server'
   service_version: '0.0.1'
+
+logging:
+  level: debug # Development logging level
+  add_source: true # Enable source file tracking
+  use_json: false # Plain text for development
+
+database:
+  logger:
+    level: info # Database logging level
+    show_sql_params: true # Show SQL parameters in dev
+    slow_threshold_in_seconds: 1 # Slow query detection
 ```
 
 - **HTTP Protocol**: Serves both OpenAPI (REST) and GraphQL APIs
 - **gRPC Protocol**: Separate gRPC services (when enabled)
 - **Tracing**: OpenTelemetry tracing with Jaeger backend (configurable)
-- **Configuration**: Easy to enable/disable protocols and tracing via YAML config
+- **Logging**: Configurable application and database logging with source tracking
+- **Configuration**: Easy to enable/disable protocols, tracing, and logging via YAML config
+
+### Advanced Logging Configuration
+
+The application includes comprehensive logging with multiple configuration options:
+
+#### Application Logging
+
+- **Log Levels**: Configurable levels (debug, info, warn, error)
+- **Output Format**: JSON or plain text formatting
+- **Source Tracking**: Optional file and line number logging for debugging
+- **Process ID**: Automatic PID inclusion in all log entries
+- **Output Writers**: Configurable output destinations (currently stdout)
+
+#### Database Logging
+
+- **SQL Logging**: Configurable GORM SQL query logging
+- **Slow Query Detection**: Configurable threshold for slow query identification
+- **Parameter Visibility**: Optional SQL parameter logging for debugging
+- **Colorful Output**: Enhanced readability in development environments
+
+#### Configuration Examples
+
+```yaml
+# Development logging (configs/app-dev.yaml)
+logging:
+  level: debug
+  writer: stdout
+  use_json: false
+  add_source: true
+  source_key: "source"
+
+database:
+  logger:
+    level: info
+    writer: stdout
+    show_sql_params: true
+    slow_threshold_in_seconds: 1
+
+# Production logging (configs/app-prod.yaml)
+logging:
+  level: info
+  writer: stdout
+  use_json: true
+  add_source: true
+  source_key: "source"
+
+database:
+  logger:
+    level: info
+    writer: stdout
+    show_sql_params: false
+    slow_threshold_in_seconds: 1
+```
 
 ### Observability with OpenTelemetry
 
@@ -577,3 +642,7 @@ This is a template project designed for rapid development of Go web applications
 - Implement optimistic locking for concurrent update safety
 - Use database seeding for consistent development environments
 - Test optimistic locking behavior with concurrent operations
+- Configure logging appropriately for each environment (debug in dev, info in prod)
+- Enable source tracking in development for better debugging
+- Use database logging to monitor query performance and identify slow queries
+- Configure SQL parameter visibility based on security requirements
