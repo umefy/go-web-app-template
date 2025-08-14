@@ -17,11 +17,19 @@ tracing:
   enabled: true
   jaeger_endpoint: "localhost:4318"
   service_name: "Server"
-  service_version: "0.0.1"
+  service_version: "" # inject git hash from .envrc
 
 logging:
   level: debug
+  writer: stdout
+  use_json: false
+  add_source: true
+  source_key: "source"
 
 database:
   url: "" # load from env
-  enable_log: true
+  logger:
+    level: info
+    writer: stdout
+    show_sql_params: true
+    slow_threshold_in_seconds: 1

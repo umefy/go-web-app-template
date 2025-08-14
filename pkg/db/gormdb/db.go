@@ -1,14 +1,11 @@
 package gormdb
 
 import (
-	"log"
-	"os"
 	"time"
 
 	"github.com/umefy/go-web-app-template/pkg/validation"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 type DB = gorm.DB
@@ -16,6 +13,7 @@ type DB = gorm.DB
 var ErrRecordNotFound = gorm.ErrRecordNotFound
 
 type DBConfig struct {
+	GormConfig      gorm.Config
 	DBString        string
 	EnableLog       bool
 	MaxIdleConns    int
@@ -35,20 +33,7 @@ func NewDB(config DBConfig) (*DB, error) {
 	}
 
 	var opts []gorm.Option
-	if config.EnableLog {
-		opts = append(opts, &gorm.Config{
-			Logger: logger.New(
-				log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-				logger.Config{
-					SlowThreshold:             time.Second, // Slow SQL threshold
-					LogLevel:                  logger.Info, // Log level
-					IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-					ParameterizedQueries:      true,        // Don't include params in the SQL log
-					Colorful:                  true,        // Disable color
-				},
-			),
-		})
-	}
+	opts = append(opts, &config.GormConfig)
 
 	db, err := gorm.Open(postgres.Open(config.DBString), opts...)
 	if err != nil {

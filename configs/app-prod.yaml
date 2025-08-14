@@ -15,13 +15,21 @@ grpc_server:
 
 tracing:
   enabled: false
-  jaeger_endpoint: ""
-  service_name: ""
-  service_version: ""
+  jaeger_endpoint: "localhost:4318"
+  service_name: "Server"
+  service_version: "" # inject git hash from .envrc
 
 logging:
   level: info
+  writer: stdout
+  use_json: true
+  add_source: true
+  source_key: "source"
 
 database:
   url: "" # load from env
-  enable_log: false
+  logger:
+    writer: stdout
+    level: info
+    show_sql_params: false
+    slow_threshold_in_seconds: 1
