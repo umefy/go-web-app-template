@@ -33,7 +33,7 @@ build:
 
 start:
 	@echo "starting running production build now..."
-	$(PRODUCTION_ENTRY) --env=prod $(ARGS)
+	source $(ENVRC_FILE) && $(PRODUCTION_ENTRY) --env=prod $(ARGS)
 
 mockery:
 	@echo "⏱️ generating mock now..."
