@@ -4,645 +4,109 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/umefy/go-web-app-template)](https://go.dev/)
 [![License](https://img.shields.io/github/license/umefy/go-web-app-template)](LICENSE)
 
-A production-ready Go web application template following clean architecture principles with HTTP/gRPC servers, database integration, OpenTelemetry tracing, optimistic locking, database seeding, and comprehensive tooling.
+A production-ready Go web application template with clean architecture, multi-protocol APIs, and comprehensive tooling.
 
-## 1. Quick Start
+## 🚀 Quick Start
 
 1. **Setup Environment**
 
-   - Run `./scripts/local_setup.sh` to setup the tools required by the project
-   - Update `.envrc` and `.envrc.test` based on your own needs (especially `DATABASE_URL`)
+   ```bash
+   ./scripts/local_setup.sh
+   ```
 
-2. **Start Infrastructure Services**
+   **Note**: Create a `.envrc` file based on `.envrc.example` to enable git hash injection for version tracking.
 
-   - Run `make docker_compose_up` to start PostgreSQL and Jaeger services
-   - PostgreSQL will be available at `localhost:5433`
-   - Jaeger UI will be available at `http://localhost:16686`
+2. **Start Services**
+
+   ```bash
+   make docker_compose_up
+   ```
 
 3. **Generate Code**
 
-   - Run `make generate` to generate all required files (OpenAPI models, GraphQL resolvers, proto code, GORM models, and mocks)
-   - Or run individual commands:
-     - `make regen_openapi` - Generate Go models from OpenAPI specification
-     - `make regen_graphql` - Generate GraphQL resolvers and models
-     - `make regen_proto` - Generate Go code from proto files
-     - `make regen_gorm` - Generate database models and queries
-     - `make generate` - Generate all required files including dependency injection
-     - `make mockery` - Generate testing mocks
+   ```bash
+   make generate
+   ```
 
-4. **Database Setup**
+4. **Run Migrations**
 
-   - Run `make migration_create migration_name=[MigrationName]` to create a new migration
-   - Write SQL in the generated migration file
-   - Run `make migration_up` to apply all migrations
+   ```bash
+   make migration_up
+   ```
 
-5. **Database Seeding (Optional)**
+5. **Start Development**
 
-   - Run `make seed_database` to populate the database with sample data
-   - This will reset the database, run migrations, and seed with 100 users and 1000 orders
-   - Useful for development and testing
+   ```bash
+   make dev
+   ```
 
-6. **Start Development**
-   - Run `make` or `make dev` to start the project in development mode 🚀
-   - This will automatically start Docker services, run migrations, and start the development server
-   - Access APIs:
-     - REST API: `http://localhost:8082/api/v1/`
-     - GraphQL: `http://localhost:8082/graphql/` (playground available in dev mode)
-     - Health check: `http://localhost:8082/health`
-   - View traces in Jaeger UI: `http://localhost:16686`
+**Access your app:**
 
-**Note**: For testing, run `make generate ENVRC_FILE=.envrc.test` to use test environment configuration.
+- REST API: `http://localhost:8082/api/v1/`
+- GraphQL: `http://localhost:8082/graphql/`
+- Health check: `http://localhost:8082/health`
+- Jaeger UI: `http://localhost:16686`
 
-## 2. Project Structure
+## ✨ Key Features
 
-This project follows **Clean Architecture** principles with a clear separation of concerns and uses **Uber FX** for dependency injection. Each major component has its own `fx.go` file that defines its dependencies and provides its services to the application.
+- **🏗️ Clean Architecture** with FX dependency injection
+- **🌐 Multi-Protocol APIs** - HTTP (REST + GraphQL) + gRPC
+- **🗄️ Database** - GORM + migrations + optimistic locking
+- **📊 Observability** - OpenTelemetry + structured logging
+- **🐳 Development** - Docker Compose + seeding + testing tools
+- **🔒 Security** - Input validation + rate limiting + CORS
+- **🧪 Testing** - Comprehensive testing + mocking + concurrent testing
 
-**FX Module Files:**
-
-- `internal/core/config/fx.go` - Configuration management
-- `internal/infrastructure/database/fx.go` - Database and repositories
-- `internal/infrastructure/logger/fx.go` - Logging infrastructure
-- `internal/infrastructure/tracing/fx.go` - OpenTelemetry tracing
-- `internal/infrastructure/server/fx.go` - Server infrastructure
-- `internal/infrastructure/server/http/fx.go` - HTTP server and REST/GraphQL routers
-- `internal/infrastructure/server/grpc/fx.go` - gRPC server and handlers
-- `internal/service/fx.go` - Business logic services
-- `internal/delivery/graphql/fx.go` - GraphQL resolvers and router
-- `internal/delivery/restful/openapi/v1/fx.go` - REST API handlers
-- `internal/delivery/grpc/fx.go` - gRPC handlers
-
-**Project Structure:**
+## 📁 Project Structure
 
 ```bash
-go-web-app-template/
-├── cmd/                           # Application entry points
-│   ├── server/                   # HTTP/gRPC server startup
-│   ├── seed/                     # Database seeding utilities
-│   │   └── database/             # Database seeding implementation
-│   │       ├── main.go           # Main seeding entry point
-│   │       ├── seed_users.go     # User seeding logic
-│   │       └── seed_orders.go    # Order seeding logic
-│   └── concurrent/               # Concurrent testing utilities
-│       └── concurrent_user_update.go # Optimistic locking test
-├── internal/                      # Private application code (Go-enforced privacy)
-│   ├── domain/                    # Pure business logic & interfaces (no external dependencies)
-│   │   ├── user/                 # User domain
-│   │   │   ├── repo/             # Repository interfaces
-│   │   │   ├── user.go           # Domain models with optimistic locking
-│   │   │   ├── user_with_order.go # Domain models with relationships
-│   │   │   └── error/            # Domain-specific errors including optimistic lock conflicts
-│   │   ├── order/                # Order domain
-│   │   │   ├── repo/             # Repository interfaces
-│   │   │   └── order.go          # Domain models
-│   │   └── error/                # Shared domain errors
-│   ├── service/                   # Business logic implementation
-│   │   ├── fx.go                 # Service FX module
-│   │   ├── user/                 # User business logic
-│   │   │   ├── service.go        # User service implementation with optimistic locking
-│   │   │   └── input.go          # Service input/output models
-│   │   ├── order/                # Order business logic
-│   │   │   ├── service.go        # Order service implementation
-│   │   └── greeter/              # Greeter business logic
-│   │       ├── service.go        # Greeter service implementation
-│   ├── delivery/                  # Transport layer (HTTP/gRPC/GraphQL)
-│   │   ├── restful/              # HTTP REST API
-│   │   │   ├── handler/          # Shared handler utilities
-│   │   │   │   ├── handler.go    # Handler interface
-│   │   │   │   ├── default_handler.go # Default handler with error handling
-│   │   │   │   └── middleware/   # HTTP middleware
-│   │   │   └── openapi/          # OpenAPI REST endpoints
-│   │   │       └── v1/           # API version 1
-│   │   │           ├── fx.go     # API V1 FX module
-│   │   │           ├── router.go # OpenAPI router
-│   │   │           └── user/     # User REST handlers
-│   │   │               ├── handler.go      # User handler interface
-│   │   │               ├── create_user.go  # Create user endpoint
-│   │   │               ├── get_user.go     # Get user endpoint
-│   │   │               ├── get_users.go    # Get users endpoint
-│   │   │               ├── update_user.go  # Update user endpoint with optimistic locking
-│   │   │               ├── router.go       # User routing
-│   │   │               └── mapping/        # Data mapping
-│   │   ├── graphql/              # GraphQL API
-│   │   │   ├── fx.go             # GraphQL FX module
-│   │   │   ├── generated.go      # gqlgen generated code
-│   │   │   ├── User.resolvers.go # User GraphQL resolvers
-│   │   │   ├── Order.resolvers.go # Order GraphQL resolvers
-│   │   │   ├── router.go         # GraphQL router with playground
-│   │   │   └── model/            # GraphQL models
-│   │   ├── grpc/                 # gRPC API
-│   │   │   ├── fx.go             # gRPC handler FX module
-│   │   │   ├── handler/          # gRPC handlers
-│   │   │   │   └── greeter/      # Greeter gRPC service
-│   │   │   └── server.go         # gRPC server
-│   │   └── errutil/              # Error handling utilities
-│   ├── infrastructure/            # External concerns & implementations
-│   │   ├── database/             # Database infrastructure
-│   │   │   ├── fx.go             # Database FX module
-│   │   │   ├── with_tx.go        # Transaction utilities
-│   │   │   ├── ctx/              # Database context utilities
-│   │   │   └── gorm/             # GORM database implementation
-│   │   │       ├── setup.go      # Database connection setup
-│   │   │       ├── with_tx.go    # GORM transaction utilities
-│   │   │       ├── generated/    # GORM generated models with optimistic locking
-│   │   │       └── repo/         # Repository implementations
-│   │   │           ├── user_repo.go    # User repository with optimistic locking
-│   │   │           ├── order_repo.go   # Order repository implementation
-│   │   │           └── mapping/        # Database mapping utilities
-│   │   ├── server/               # Server infrastructure
-│   │   │   ├── fx.go             # Server FX module
-│   │   │   ├── http/             # HTTP server setup
-│   │   │   │   ├── fx.go         # HTTP server FX module
-│   │   │   │   ├── router.go     # Main HTTP router
-│   │   │   │   ├── server.go     # HTTP server
-│   │   │   │   └── middleware/   # HTTP middleware
-│   │   │   └── grpc/             # gRPC server setup
-│   │   │       ├── fx.go         # gRPC server FX module
-│   │   │       ├── handler/      # gRPC handlers
-│   │   │       └── server.go     # gRPC server
-│   │   ├── logger/               # Logger setup
-│   │   │   └── fx.go             # Logger FX module
-│   │   └── tracing/              # OpenTelemetry tracing setup
-│   │       ├── opentelemetry/    # OpenTelemetry implementation
-│   │       │   └── setup.go      # Tracing setup and configuration
-│   │       └── fx.go             # Tracing FX module
-│   ├── core/                      # Core shared components
-│   │   └── config/               # Configuration management
-│   │       ├── fx.go             # Config FX module
-│   │       ├── config.go         # Main configuration struct
-│   │       ├── setup.go          # Configuration loading
-│   │       ├── app_config.go     # Application configuration
-│   │       ├── db_config.go      # Database configuration
-│   │       ├── http_server_config.go # HTTP server configuration
-│   │       ├── grpc_server_config.go # gRPC server configuration
-│   │       ├── logging_config.go # Logging configuration
-│   │       └── tracing_config.go # Tracing configuration
-│   └── cmd/                      # Application entry point
-│       └── server/               # Main server application
-│           └── main.go           # Server entry point with FX DI
-├── pkg/                           # Public reusable packages
-├── openapi/                       # OpenAPI specifications & generated code
-│   ├── docs/                     # OpenAPI specification files
-│   │   └── api.yaml              # Main API specification
-│   ├── generated/                # Generated Go code from OpenAPI
-│   │   └── go/openapi/           # Generated Go models and utilities
-│   └── openapi_generator_config.yml # OpenAPI generator configuration
-├── graphql/                       # GraphQL schema definitions
-│   ├── User.graphqls             # User GraphQL schema
-│   └── Order.graphqls            # Order GraphQL schema
-├── gqlgen.yml                    # gqlgen configuration
-├── configs/                       # Configuration files
-│   ├── app-dev.yaml              # Development configuration
-│   └── app-prod.yaml             # Production configuration
-├── migrations/                    # Database migrations with optimistic locking support
-├── proto/                         # Protocol buffer definitions
-├── gorm/                          # GORM generated code with optimistic locking
-├── scripts/                       # Build and deployment scripts
-├── bruno/                         # API testing
-├── docker-compose.yml             # Docker Compose for local development
-└── ... (other config files)
+cmd/
+└── server/         # Application entry point & FX composition
+
+internal/
+├── domain/          # Business logic & interfaces
+├── service/         # Business logic implementation
+├── delivery/        # HTTP/GraphQL/gRPC handlers
+├── infrastructure/  # Database, server, logging
+└── core/           # Configuration & shared code
 ```
 
-### Architecture Principles
+## 📚 Documentation
 
-- **Domain Layer**: Pure business logic with interfaces and models only
-- **Service Layer**: Business logic implementation using domain interfaces
-- **Delivery Layer**: Transport concerns (HTTP, GraphQL, gRPC)
-- **Infrastructure Layer**: External implementations (database, server, logger, tracing)
-- **Core Layer**: Shared core components (configuration)
-- **App Layer**: Dependency injection and composition
-- **Dependency Direction**: Domain ← Service ← Delivery ← Infrastructure (Domain doesn't know about external concerns)
+- **[🏗️ Architecture Guide](docs/ARCHITECTURE.md)** - Clean architecture & FX dependency injection
+- **[🛠️ Development Guide](docs/DEVELOPMENT.md)** - Workflow & API development
+- **[✨ Features Guide](docs/FEATURES.md)** - Detailed feature explanations
+- **[📖 API Reference](openapi/docs/api.yaml)** - OpenAPI specification
 
-### Key Architectural Decisions
-
-#### 1. Clean Architecture with Clear Layer Separation
-
-- **Decision**: Follow clean architecture with distinct layers for domain, service, delivery, and infrastructure
-- **Why**: Ensures testability, maintainability, and independence from external concerns
-- **Structure**: Domain (interfaces) → Service (business logic) → Delivery (transport) → Infrastructure (implementations)
-
-#### 2. Multi-Protocol API Support
-
-- **Decision**: HTTP (REST + GraphQL) and gRPC with configuration-driven selection
-- **Why**: Flexibility to serve different client types and deployment scenarios
-- **Implementation**: HTTP serves both OpenAPI and GraphQL, gRPC is separate protocol
-
-#### 3. Repository Pattern in Infrastructure
-
-- **Decision**: Repository interfaces in domain, implementations in infrastructure
-- **Why**: Maintains clean architecture while providing data access abstraction
-- **Benefit**: Easy to swap database implementations and test with mocks
-
-#### 4. Shared Handler Architecture
-
-- **Decision**: Common handler interface and default implementation for all HTTP handlers
-- **Why**: Consistent error handling and middleware application across all endpoints
-- **Benefit**: Reduces code duplication and ensures consistent behavior
-
-#### 5. Observability with OpenTelemetry
-
-- **Decision**: OpenTelemetry tracing with Jaeger backend for distributed tracing
-- **Why**: Provides visibility into request flows across services and infrastructure
-- **Benefit**: Better debugging, performance monitoring, and operational insights
-
-#### 6. Optimistic Locking for Data Consistency
-
-- **Decision**: Implement optimistic locking using GORM's optimistic lock plugin
-- **Why**: Prevents data corruption in concurrent update scenarios without performance penalties of pessimistic locking
-- **Implementation**: Version field in database tables, automatic version checking in updates
-- **Benefit**: Better performance, handles concurrent updates gracefully, prevents lost updates
-
-#### 7. Database Seeding for Development
-
-- **Decision**: Comprehensive database seeding system with realistic test data
-- **Why**: Provides consistent development environment and realistic data for testing
-- **Implementation**: Separate seeding command with configurable data generation
-- **Benefit**: Faster development setup, better testing scenarios, consistent demo data
-
-### Key Features
-
-- ✅ **Clean Architecture**: Clear separation of concerns with domain, service, delivery, and infrastructure layers
-- ✅ **Dependency Injection**: FX-based DI with proper module organization
-- ✅ **Transaction Support**: Full transaction handling in services and repositories
-- ✅ **Domain-Driven Design**: Organized by business domains with clear boundaries
-- ✅ **Multi-Protocol Support**: HTTP (REST + GraphQL) and gRPC with configuration-driven selection
-- ✅ **Database Integration**: GORM with migrations and generated queries
-- ✅ **API-First Development**: OpenAPI-driven development with Go model generation
-- ✅ **GraphQL Support**: gqlgen-based GraphQL server with type-safe resolvers and playground
-- ✅ **Comprehensive Testing**: Mockery for mocking with comprehensive test coverage
-- ✅ **Health Checks**: Built-in health check endpoints with chi middleware
-- ✅ **Rate Limiting**: Request throttling with httprate (600 req/min global, 100 req/min per IP)
-- ✅ **Advanced Logging**: Structured logging with source file tracking, process ID, and configurable database logging
-- ✅ **Input Validation**: Comprehensive validation with custom validation rules
-- ✅ **Content Type Validation**: JSON content type enforcement
-- ✅ **Request Timeout**: 60-second request timeout
-- ✅ **Error Recovery**: Panic recovery with logging and graceful error handling
-- ✅ **GitHub Actions**: CI/CD workflows for linting and testing
-- ✅ **Profiling**: Built-in debug profiler endpoint for performance analysis
-- ✅ **Docker Compose**: Local development environment with PostgreSQL and Jaeger
-- ✅ **OpenTelemetry Tracing**: Distributed tracing with Jaeger backend for observability
-- ✅ **Optimistic Locking**: Version-based optimistic locking for concurrent update safety
-- ✅ **Database Seeding**: Comprehensive seeding system with realistic test data generation
-- ✅ **Concurrent Testing**: Utilities for testing optimistic locking behavior
-
-### FX Dependency Injection Architecture
-
-The project uses [Uber FX](https://github.com/uber-go/fx) for dependency injection, providing a clean and modular approach to managing application dependencies.
-
-**Module Structure:**
-
-- **Config Module** (`internal/core/config/fx.go`): Configuration management
-- **Database Module** (`internal/infrastructure/database/fx.go`): Database connections and repositories
-- **Logger Module** (`internal/infrastructure/logger/fx.go`): Logging infrastructure
-- **Tracing Module** (`internal/infrastructure/tracing/fx.go`): OpenTelemetry tracing
-- **HTTP Server Module** (`internal/infrastructure/server/http/fx.go`): HTTP server and REST/GraphQL routers
-- **gRPC Server Module** (`internal/infrastructure/server/grpc/fx.go`): gRPC server and handlers
-- **Service Module** (`internal/service/fx.go`): Business logic services
-- **GraphQL Module** (`internal/delivery/graphql/fx.go`): GraphQL resolvers and router
-- **API V1 Module** (`internal/delivery/restful/openapi/v1/fx.go`): REST API handlers
-
-**Benefits:**
-
-- **Modular Design**: Each component is self-contained with its own dependencies
-- **Lazy Loading**: Dependencies are only created when needed
-- **Lifecycle Management**: Automatic startup and shutdown of services
-- **Error Handling**: Graceful error handling during dependency resolution
-- **Testing**: Easy to mock and test individual modules
-
-## 3. Development Workflow
-
-### Infrastructure Setup
-
-The project includes Docker Compose for local development:
+## 🛠️ Development Commands
 
 ```bash
-# Start infrastructure services
-make docker_compose_up
-
-# Stop infrastructure services
-make docker_compose_down
-
-# Start development with auto-infrastructure setup
-make dev  # This automatically starts Docker services and runs migrations
+make dev              # Start development server
+make generate         # Generate all code
+make test            # Run tests
+make seed_database   # Seed with sample data
+make migration_up    # Run database migrations
+make docker_compose_up   # Start infrastructure services
 ```
 
-**Services Available:**
+## 🔧 Configuration
 
-- **PostgreSQL**: `localhost:5433` (user: `test_user`, password: `test_password`, database: `goWebapp_test`)
-- **Jaeger**: `http://localhost:16686` (UI), `localhost:4317` (OTLP gRPC), `localhost:4318` (OTLP HTTP)
+Environment-specific configurations in `configs/`:
 
-### Protocol Selection
+- `app-dev.yaml` - Development settings
+- `app-prod.yaml` - Production settings
 
-The application supports multiple transport protocols with configuration-driven selection:
+**Git Hash Injection**: The application automatically injects git commit hashes into configuration values marked with `""` (empty string) for automatic version tracking.
 
-```yaml
-# configs/app-dev.yaml
-http_server:
-  enabled: true # Enable HTTP (REST + GraphQL)
-  port: 8082
+## 🐳 Infrastructure Services
 
-grpc_server:
-  enabled: false # Disable gRPC
-  port: 30082
+- **PostgreSQL**: `localhost:5433`
+- **Jaeger**: `http://localhost:16686`
 
-tracing:
-  enabled: true # Enable OpenTelemetry tracing
-  jaeger_endpoint: 'localhost:4318'
-  tracer_name: 'http.server'
-  service_name: 'Server'
-  service_version: '0.0.1'
+## 📄 License
 
-logging:
-  level: debug # Development logging level
-  add_source: true # Enable source file tracking
-  use_json: false # Plain text for development
+MIT License - see [LICENSE](LICENSE) file for details.
 
-database:
-  logger:
-    level: info # Database logging level
-    show_sql_params: true # Show SQL parameters in dev
-    slow_threshold_in_seconds: 1 # Slow query detection
-```
+---
 
-- **HTTP Protocol**: Serves both OpenAPI (REST) and GraphQL APIs
-- **gRPC Protocol**: Separate gRPC services (when enabled)
-- **Tracing**: OpenTelemetry tracing with Jaeger backend (configurable)
-- **Logging**: Configurable application and database logging with source tracking
-- **Configuration**: Easy to enable/disable protocols, tracing, and logging via YAML config
-
-### Advanced Logging Configuration
-
-The application includes comprehensive logging with multiple configuration options:
-
-#### Application Logging
-
-- **Log Levels**: Configurable levels (debug, info, warn, error)
-- **Output Format**: JSON or plain text formatting
-- **Source Tracking**: Optional file and line number logging for debugging
-- **Process ID**: Automatic PID inclusion in all log entries
-- **Output Writers**: Configurable output destinations (currently stdout)
-
-#### Database Logging
-
-- **SQL Logging**: Configurable GORM SQL query logging
-- **Slow Query Detection**: Configurable threshold for slow query identification
-- **Parameter Visibility**: Optional SQL parameter logging for debugging
-- **Colorful Output**: Enhanced readability in development environments
-
-#### Configuration Examples
-
-```yaml
-# Development logging (configs/app-dev.yaml)
-logging:
-  level: debug
-  writer: stdout
-  use_json: false
-  add_source: true
-  source_key: "source"
-
-database:
-  logger:
-    level: info
-    writer: stdout
-    show_sql_params: true
-    slow_threshold_in_seconds: 1
-
-# Production logging (configs/app-prod.yaml)
-logging:
-  level: info
-  writer: stdout
-  use_json: true
-  add_source: true
-  source_key: "source"
-
-database:
-  logger:
-    level: info
-    writer: stdout
-    show_sql_params: false
-    slow_threshold_in_seconds: 1
-```
-
-### Observability with OpenTelemetry
-
-The application includes comprehensive tracing support:
-
-- **Tracing**: OpenTelemetry integration with Jaeger backend
-- **Jaeger UI**: Access traces at `http://localhost:16686`
-- **Configuration**: Tracing can be enabled/disabled per environment
-- **Service Context**: Automatic service name, version, and tracer configuration
-
-### Optimistic Locking
-
-The application implements optimistic locking to handle concurrent updates safely:
-
-**How It Works:**
-
-1. **Version Field**: Each entity has a `version` field that increments on each update
-2. **Update Validation**: Updates check that the current version matches the expected version
-3. **Conflict Detection**: If versions don't match, the update fails with a conflict error
-4. **Automatic Handling**: GORM automatically increments the version field on successful updates
-
-**Database Schema:**
-
-```sql
--- Users table with optimistic locking
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    age INT NOT NULL,
-    version BIGINT NOT NULL DEFAULT 0,  -- Optimistic lock version
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Orders table with optimistic locking
-CREATE TABLE orders (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    amount_cents BIGINT NOT NULL,
-    version BIGINT NOT NULL DEFAULT 0,  -- Optimistic lock version
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-**Error Handling:**
-
-```go
-// User update conflict error
-var UserUpdateConflict = appError.NewError(
-    "userService_1003",
-    "user update conflict - version mismatch",
-    http.StatusConflict,
-)
-```
-
-**Testing Concurrent Updates:**
-
-```bash
-# Test optimistic locking with concurrent updates
-go run cmd/concurrent/concurrent_user_update.go
-```
-
-This will attempt to update the same user concurrently, demonstrating how optimistic locking prevents data corruption.
-
-### Database Seeding
-
-The application includes a comprehensive seeding system for development and testing:
-
-**Seeding Command:**
-
-```bash
-# Seed database with sample data
-make seed_database
-```
-
-**What Gets Seeded:**
-
-- **Users**: 100 users with realistic email addresses and ages
-- **Orders**: 1000 orders linked to random users with realistic amounts
-- **Data Generation**: Uses `gofakeit` for realistic test data
-
-**Seeding Process:**
-
-1. **Database Reset**: Clears existing data and runs migrations
-2. **User Creation**: Creates 100 users with fake data
-3. **Order Creation**: Creates 1000 orders linked to users
-4. **Batch Processing**: Uses efficient batch inserts for performance
-
-**Customization:**
-
-```go
-// Adjust seeding quantities
-const userCount = 100
-const orderCount = 1000
-
-// Customize data generation
-users[i] = &dbModel.User{
-    Email: null.ValueFrom(gofakeit.Email()),
-    Age:   null.ValueFrom(gofakeit.IntRange(0, 60)),
-}
-```
-
-**Benefits:**
-
-- **Consistent Environment**: Same data across all development instances
-- **Realistic Testing**: Test with realistic data volumes and relationships
-- **Quick Setup**: Fast development environment initialization
-- **Demo Ready**: Immediate demonstration of application capabilities
-
-### API Development (Multi-Protocol)
-
-#### OpenAPI (REST) Development
-
-- Update `./openapi/docs/api.yaml` with new API definitions
-- Run `make regen_openapi` to generate Go models
-- Implement handlers in `internal/delivery/restful/openapi/v1/[domain]/`
-
-#### GraphQL Development
-
-- Update GraphQL schema files in `graphql/` directory
-- Run `make regen_graphql` to generate resolvers and models
-- Implement resolvers in `internal/delivery/graphql/`
-- Access GraphQL playground at `/graphql/playground` in development
-
-#### gRPC Development
-
-- Update protocol buffer definitions in `proto/` directory
-- Run `make regen_proto` to generate Go code
-- Implement handlers in `internal/delivery/grpc/handler/`
-- Enable gRPC server in configuration when needed
-
-### Database Development
-
-- Create migration: `make migration_create migration_name=[MigrationName]`
-- Write SQL in the generated migration file
-- Run migration: `make migration_up`
-- Generate models: `make regen_gorm`
-
-### Adding New Domains
-
-1. **Create Domain Structure**: `internal/domain/[domain]/`
-
-   - Define domain models (e.g., `user.go`) with optimistic locking if needed
-   - Create repository interface in `repo/repo.go`
-   - Add domain-specific errors in `error/`
-
-2. **Implement Business Logic**: `internal/service/[domain]/`
-
-   - Create service interface and implementation
-   - Define input/output models
-
-3. **Add Transport Layer**:
-
-   - **REST**: Add handlers in `internal/delivery/restful/openapi/v1/[domain]/`
-   - **GraphQL**: Add resolvers in `internal/delivery/graphql/`
-   - **gRPC**: Add handlers in `internal/delivery/grpc/handler/` (if needed)
-
-4. **Implement Data Access**: `internal/infrastructure/database/gorm/repo/`
-
-   - Create repository implementation
-   - Add database mapping utilities
-   - Implement optimistic locking if needed
-
-5. **Update FX Configuration**: Add new services and repositories to appropriate FX modules
-
-6. **Add Seeding** (Optional): Add seeding logic in `cmd/seed/database/`
-
-## 4. Future Enhancements
-
-### Planned Features
-
-See [TODO.md](TODO.md) for a comprehensive list of planned features and enhancements.
-
-### Infrastructure Improvements
-
-See [TODO.md](TODO.md) for a comprehensive list of infrastructure improvements.
-
-- [ ] **Security**: Security headers, enhanced CORS configuration, security scanning
-- [ ] **Performance**: Connection pooling, caching strategies, performance testing
-
-### Development Experience
-
-See [TODO.md](TODO.md) for a comprehensive list of development experience improvements.
-
-### Optimistic Locking & Database Seeding Enhancements
-
-See [TODO.md](TODO.md) for a comprehensive list of optimistic locking and database seeding enhancements.
-
-## 5. License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### What MIT License Means for You
-
-- ✅ **Use freely**: Use this template for any purpose (personal, commercial, etc.)
-- ✅ **Modify freely**: Customize and adapt the code to your needs
-- ✅ **Distribute freely**: Share your modified versions
-- ✅ **Minimal requirements**: Just include the original license and copyright notice
-- ✅ **No warranty**: The software is provided "as is" without warranties
-
-## 6. Contributing
-
-This is a template project designed for rapid development of Go web applications. Feel free to fork and customize for your specific needs.
-
-### Best Practices
-
-- Follow clean architecture principles with clear layer separation
-- Write tests for all business logic in the service layer
-- Use FX dependency injection for all dependencies
-- Keep domain logic pure and infrastructure-agnostic
-- Document APIs with OpenAPI specifications
-- Use transactions for data consistency
-- Implement proper error handling and logging
-- Use the shared handler architecture for consistent HTTP handling
-- Organize code by business domains rather than technical concerns
-- Leverage OpenTelemetry tracing for observability and debugging
-- Use Docker Compose for consistent local development environment
-- Implement optimistic locking for concurrent update safety
-- Use database seeding for consistent development environments
-- Test optimistic locking behavior with concurrent operations
-- Configure logging appropriately for each environment (debug in dev, info in prod)
-- Enable source tracking in development for better debugging
-- Use database logging to monitor query performance and identify slow queries
-- Configure SQL parameter visibility based on security requirements
+**Need help?** Check the [documentation](docs/) or [open an issue](https://github.com/umefy/go-web-app-template/issues).
