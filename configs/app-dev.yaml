@@ -1,5 +1,5 @@
 env: dev
-version: "" # inject git hash from .envrc
+version: "dev" # override by git hash from .envrc
 http_server:
   server_name: "httpServer"
   enabled: true
@@ -17,7 +17,7 @@ tracing:
   enabled: true
   jaeger_endpoint: "localhost:4318"
   service_name: "Server"
-  service_version: "" # inject git hash from .envrc
+  service_version: "dev" # override by git hash from .envrc
 
 logging:
   level: debug
@@ -27,7 +27,7 @@ logging:
   source_key: "source"
 
 database:
-  url: "" # load from env
+  url: "postgres://test_user:test_password@localhost:5433/goWebapp_test" # override by env
   logger:
     level: info
     writer: stdout

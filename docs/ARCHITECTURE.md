@@ -72,7 +72,7 @@ Each layer provides its own FX module:
 
 ## 📁 Project Structure
 
-```
+```bash
 go-web-app-template/
 ├── cmd/                           # Application entry points
 │   ├── server/                   # HTTP/gRPC server startup
