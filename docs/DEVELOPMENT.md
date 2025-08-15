@@ -31,7 +31,7 @@ The application supports multiple transport protocols with configuration-driven 
 ```yaml
 # configs/app-dev.yaml
 env: dev
-version: '' # inject git hash from .envrc
+version: 'dev' # override by git hash from .envrc
 http_server:
   enabled: true # Enable HTTP (REST + GraphQL)
   port: 8082
@@ -44,7 +44,7 @@ tracing:
   enabled: true # Enable OpenTelemetry tracing
   jaeger_endpoint: 'localhost:4318'
   service_name: 'Server'
-  service_version: '' # inject git hash from .envrc
+  service_version: 'dev' # override by git hash from .envrc
 
 logging:
   level: debug # Development logging level
@@ -72,9 +72,9 @@ The application automatically injects git commit hashes into configuration value
 
 ```yaml
 # configs/app-dev.yaml
-version: '' # inject git hash from .envrc
+version: 'dev' # override by git hash from .envrc
 tracing:
-  service_version: '' # inject git hash from .envrc
+  service_version: 'dev' # override by git hash from .envrc
 ```
 
 **Environment Variable Setup:**

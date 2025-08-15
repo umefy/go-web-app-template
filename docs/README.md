@@ -118,7 +118,3 @@ If you can't find what you're looking for:
 3. **Review related sections** in the documentation
 4. **Open an issue** on GitHub for missing documentation
 5. **Check the code** - the source code is often the best documentation
-
----
-
-**Happy coding! 🚀**

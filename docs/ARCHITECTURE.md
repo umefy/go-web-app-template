@@ -17,7 +17,7 @@ This project follows **Clean Architecture** principles with a clear separation o
 
 ### Dependency Direction
 
-```
+```bash
 Domain ← Service ← Delivery ← Infrastructure
 ```
 
