@@ -15,8 +15,6 @@ type Options struct {
 	ConfigPath string
 }
 
-const configDirRelativePath = "../../../configs"
-
 var _ validation.Validate = (*Options)(nil)
 
 func (o *Options) Validate() error {
