@@ -17,7 +17,7 @@ This project follows **Clean Architecture** principles with a clear separation o
 
 ### Dependency Direction
 
-```
+```bash
 Domain ← Service ← Delivery ← Infrastructure
 ```
 
@@ -72,7 +72,7 @@ Each layer provides its own FX module:
 
 ## 📁 Project Structure
 
-```
+```bash
 go-web-app-template/
 ├── cmd/                           # Application entry points
 │   ├── server/                   # HTTP/gRPC server startup

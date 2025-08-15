@@ -3,9 +3,9 @@ package config
 import (
 	"fmt"
 	"path/filepath"
-	"runtime"
 	"strings"
 
+	yamlConfigs "github.com/umefy/go-web-app-template/configs"
 	"github.com/umefy/go-web-app-template/pkg/config"
 	"github.com/umefy/go-web-app-template/pkg/validation"
 )
@@ -14,8 +14,6 @@ type Options struct {
 	Env        string
 	ConfigPath string
 }
-
-const configDirRelativePath = "../../../configs"
 
 var _ validation.Validate = (*Options)(nil)
 
@@ -42,7 +40,7 @@ func NewConfig(args Options) (Config, error) {
 	}
 
 	var appConfig AppConfig
-	err = config.Unmarshal(opt, &appConfig)
+	err = config.Unmarshal(&appConfig, opt)
 
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal config error: %w", err)
@@ -56,14 +54,13 @@ func NewConfig(args Options) (Config, error) {
 }
 
 func getConfigOptByEnv(env string) config.ConfigOption {
-	_, path, _, _ := runtime.Caller(1)
-	configDir := filepath.Join(filepath.Dir(path), configDirRelativePath)
+	configFS := yamlConfigs.FS
 
 	return config.ConfigOption{
-		ConfigType:  "yaml",
-		ConfigName:  fmt.Sprintf("app-%s", env),
-		ConfigPaths: []string{configDir},
-		EnvPrefix:   "",
+		ConfigType: "yaml",
+		ConfigName: fmt.Sprintf("app-%s.yaml", env),
+		ConfigFS:   &configFS,
+		EnvPrefix:  "",
 	}
 }
 
