@@ -60,6 +60,7 @@ func (u *userService) GetUser(ctx context.Context, id string) (*userDomain.User,
 		u.logger.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
 		return nil, err
 	}
+
 	return user, nil
 }
 
