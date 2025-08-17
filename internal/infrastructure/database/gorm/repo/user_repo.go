@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"time"
 
 	orderDomain "github.com/umefy/go-web-app-template/internal/domain/order"
 	userDomain "github.com/umefy/go-web-app-template/internal/domain/user"
@@ -17,8 +16,6 @@ import (
 	"github.com/umefy/go-web-app-template/pkg/null"
 	"github.com/umefy/go-web-app-template/pkg/pagination"
 	"github.com/umefy/godash/sliceskit"
-	"gorm.io/datatypes"
-	"gorm.io/gen/field"
 
 	userError "github.com/umefy/go-web-app-template/internal/domain/user/error"
 	db "github.com/umefy/go-web-app-template/pkg/db/gormdb"
@@ -172,70 +169,28 @@ func (r *UserRepo) IsUserEmailExists(ctx context.Context, email string) (bool, e
 }
 
 func (r *UserRepo) FindUserWithOrders(ctx context.Context, id int) (*userDomain.UserWithOrder, error) {
-
-	type Order struct {
-		OrderID     int       `json:"order_id"`
-		AmountCents int64     `json:"amount_cents"`
-		CreatedAt   time.Time `json:"created_at"`
-		UpdatedAt   time.Time `json:"updated_at"`
-	}
-
-	type UserOrderRow struct {
-		ID        int
-		Email     string
-		Age       int
-		CreatedAt time.Time
-		UpdatedAt time.Time
-		Orders    datatypes.JSONType[[]Order]
-	}
-
-	userQuery := r.dbQuery.User
-	orderQuery := r.dbQuery.Order.As("o")
-
-	orderAgg := field.NewUnsafeFieldRaw(
-		`
-			COALESCE(
-					jsonb_agg(
-						jsonb_build_object(
-							'order_id', o.id,
-							'amount_cents', o.amount_cents,
-							'created_at', o.created_at,
-							'updated_at', o.updated_at
-						)
-						order by o.created_at
-					)
-					,
-					'[]'::jsonb
-			)
-		`,
-	).As("orders")
-
-	var userOrderRow UserOrderRow
-	err := userQuery.WithContext(ctx).Select(userQuery.ID, userQuery.Email, userQuery.Age, userQuery.CreatedAt, userQuery.UpdatedAt, orderAgg).Join(orderQuery, userQuery.ID.EqCol(orderQuery.UserID)).Where(userQuery.ID.Eq(id)).Group(userQuery.ID).Scan(&userOrderRow)
+	orderQuery := r.dbQuery.Order
+	u, err := r.FindUser(ctx, id)
 
 	if err != nil {
-		r.Logger.ErrorContext(ctx, "UserRepository.FindUserWithOrders", slog.String("error", err.Error()))
 		return nil, err
 	}
 
-	if userOrderRow.ID == 0 {
-		return nil, userError.UserNotFound
+	orders, err := orderQuery.WithContext(ctx).Where(orderQuery.UserID.In(u.ID)).Find()
+
+	if err != nil {
+		return nil, err
 	}
 
 	user := &userDomain.UserWithOrder{
-		User: userDomain.User{
-			ID:        userOrderRow.ID,
-			Email:     userOrderRow.Email,
-			Age:       userOrderRow.Age,
-			CreatedAt: userOrderRow.CreatedAt,
-			UpdatedAt: userOrderRow.UpdatedAt,
-		},
-		Orders: sliceskit.Map(userOrderRow.Orders.Data(), func(order Order) orderDomain.Order {
+		User: *u,
+		Orders: sliceskit.Map(orders, func(order *dbModel.Order) orderDomain.Order {
 			return orderDomain.Order{
-				ID:          order.OrderID,
-				AmountCents: order.AmountCents,
+				ID:          order.ID,
+				AmountCents: order.AmountCents.ValueOrZero(),
 				CreatedAt:   order.CreatedAt,
 				UpdatedAt:   order.UpdatedAt,
+				UserID:      order.UserID,
 			}
 		}),
 	}
