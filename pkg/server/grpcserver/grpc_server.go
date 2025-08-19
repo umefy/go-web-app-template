@@ -7,6 +7,7 @@ import (
 	"net"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/umefy/godash/logger"
 	"golang.org/x/sync/errgroup"
@@ -37,7 +38,7 @@ func New(listener net.Listener, server *grpc.Server, logger *logger.Logger) *Grp
 	return s
 }
 
-func (s *GrpcServer) Start() {
+func (s *GrpcServer) StartWithGracefulShutdown() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
 
@@ -65,4 +66,24 @@ func (s *GrpcServer) Start() {
 	}
 
 	s.logger.Info("GRPC server shutdown complete")
+}
+
+func (s *GrpcServer) Start() error {
+	s.logger.Info("Starting GRPC server", slog.String("address", s.listener.Addr().String()))
+
+	if err := s.server.Serve(s.listener); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *GrpcServer) Shutdown(ctx context.Context, timeout time.Duration) error {
+	s.logger.Info("Graceful shutting down the GRPC server...", slog.String("timeout", timeout.String()))
+
+	_, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	s.server.GracefulStop()
+	return nil
 }

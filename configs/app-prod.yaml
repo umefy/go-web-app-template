@@ -4,6 +4,7 @@ http_server:
   server_name: "httpServer"
   enabled: true
   port: 8083
+  shutdown_timeout_in_seconds: 10
   health_check_endpoint: "/health-check"
   profiler_endpoint: "/debug"
   allowed_origins:

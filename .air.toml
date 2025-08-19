@@ -6,7 +6,7 @@ tmp_dir = "tmp"
 args_bin = []
 bin = "./tmp/main"
 cmd = "make build ARGS='-race -o ./tmp/main'"
-delay = 1000
+delay = 0
 exclude_dir = ["assets", "tmp", "vendor", "testdata", "cmd"]
 exclude_file = []
 exclude_regex = ["_test.go"]
@@ -23,7 +23,7 @@ poll_interval = 0
 post_cmd = []
 pre_cmd = []
 rerun = false
-rerun_delay = 500
+rerun_delay = 0
 send_interrupt = true
 stop_on_error = false
 
