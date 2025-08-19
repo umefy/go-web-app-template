@@ -37,7 +37,8 @@ func New(server *http.Server, logger *logger.Logger) *Server {
 	return s
 }
 
-func (s *Server) Start(shutdownTimeout time.Duration) {
+// start with graceful shutdown. Can be used for non lifecycle maintained app. (most of the app without fx)
+func (s *Server) StartWithGracefulShutdown(shutdownTimeout time.Duration) {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
 
@@ -72,4 +73,30 @@ func (s *Server) Start(shutdownTimeout time.Duration) {
 		s.logger.Error("Server error", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+}
+
+// normal start without graceful shutdown. Can be used with Fx who control the lifecycle outside.
+func (s *Server) Start() error {
+	s.logger.Info("Starting HTTP server", slog.String("address", s.server.Addr))
+
+	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		s.logger.Error("HTTP server error", slog.String("error", err.Error()))
+		return err
+	}
+	return nil
+}
+
+// normal shutdown. Used with Fx who controls the lifecycle outside.
+func (s *Server) Shutdown(ctx context.Context, timeout time.Duration) error {
+	s.logger.Info("Graceful shutting down the HTTP server...", slog.String("timeout", timeout.String()))
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	if err := s.server.Shutdown(ctx); err != nil {
+		s.logger.Error("Error shutting down HTTP server", slog.String("error", err.Error()))
+		return err
+	}
+	s.logger.Info("HTTP server gracefully stopped")
+	return nil
 }

@@ -5,12 +5,13 @@ import (
 )
 
 type HttpServerConfig struct {
-	Enabled             bool
-	Port                int
-	ServerName          string   `mapstructure:"server_name"`
-	AllowedOrigins      []string `mapstructure:"allowed_origins"`
-	HealthCheckEndpoint string   `mapstructure:"health_check_endpoint"`
-	ProfilerEndpoint    string   `mapstructure:"profiler_endpoint"`
+	Enabled                  bool
+	Port                     int
+	ServerName               string   `mapstructure:"server_name"`
+	AllowedOrigins           []string `mapstructure:"allowed_origins"`
+	HealthCheckEndpoint      string   `mapstructure:"health_check_endpoint"`
+	ProfilerEndpoint         string   `mapstructure:"profiler_endpoint"`
+	ShutdownTimeoutInSeconds int      `mapstructure:"shutdown_timeout_in_seconds"`
 }
 
 var _ validation.Validate = (*HttpServerConfig)(nil)
@@ -24,5 +25,6 @@ func (s HttpServerConfig) Validate() error {
 		validation.Field(&s.AllowedOrigins, validation.When(s.Enabled, validation.Required)),
 		validation.Field(&s.HealthCheckEndpoint, validation.When(s.Enabled, validation.Required)),
 		validation.Field(&s.ProfilerEndpoint, validation.When(s.Enabled, validation.Required)),
+		validation.Field(&s.ShutdownTimeoutInSeconds, validation.When(s.Enabled, validation.Required)),
 	)
 }

@@ -3,6 +3,7 @@ version: "dev" # override by git hash from .envrc
 http_server:
   server_name: "httpServer"
   enabled: true
+  shutdown_timeout_in_seconds: 10
   port: 8082
   health_check_endpoint: "/health-check"
   profiler_endpoint: "/debug"
