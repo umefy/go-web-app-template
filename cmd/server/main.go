@@ -93,9 +93,7 @@ func startHttpServer(httpServer *httpserver.Server, cfg config.Config) error {
 		return nil
 	}
 
-	httpServer.Start()
-
-	return nil
+	return httpServer.Start()
 }
 
 func stopHttpServer(ctx context.Context, httpServer *httpserver.Server, cfg config.Config) error {
@@ -105,9 +103,7 @@ func stopHttpServer(ctx context.Context, httpServer *httpserver.Server, cfg conf
 		return nil
 	}
 
-	httpServer.Shutdown(ctx, time.Duration(httpCfg.ShutdownTimeoutInSeconds)*time.Second)
-
-	return nil
+	return httpServer.Shutdown(ctx, time.Duration(httpCfg.ShutdownTimeoutInSeconds)*time.Second)
 }
 
 func startGrpcServer(server *grpcserver.GrpcServer, cfg config.Config) error {
@@ -118,9 +114,7 @@ func startGrpcServer(server *grpcserver.GrpcServer, cfg config.Config) error {
 		return nil
 	}
 
-	server.Start()
-
-	return nil
+	return server.Start()
 }
 
 func stopGrpcServer(ctx context.Context, server *grpcserver.GrpcServer, cfg config.Config) error {
@@ -130,7 +124,5 @@ func stopGrpcServer(ctx context.Context, server *grpcserver.GrpcServer, cfg conf
 		return nil
 	}
 
-	server.Shutdown(ctx, time.Duration(grpcCfg.ShutdownTimeoutInSeconds)*time.Second)
-
-	return nil
+	return server.Shutdown(ctx, time.Duration(grpcCfg.ShutdownTimeoutInSeconds)*time.Second)
 }
