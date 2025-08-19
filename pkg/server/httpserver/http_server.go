@@ -90,7 +90,7 @@ func (s *Server) Start() error {
 func (s *Server) Shutdown(ctx context.Context, timeout time.Duration) error {
 	s.logger.Info("Graceful shutting down the HTTP server...", slog.String("timeout", timeout.String()))
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	if err := s.server.Shutdown(ctx); err != nil {
