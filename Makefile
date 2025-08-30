@@ -16,11 +16,11 @@ print:
 
 .PHONY: docker_compose_up
 docker_compose_up:
-	docker compose up -d
+	docker-compose up -d
 
 .PHONY: docker_compose_down
 docker_compose_down:
-	docker compose down
+	docker-compose down
 
 .PHONY: dev
 dev:

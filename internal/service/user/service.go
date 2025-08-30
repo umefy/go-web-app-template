@@ -58,6 +58,7 @@ func (u *userService) GetUser(ctx context.Context, id string) (*userDomain.User,
 	user, err := u.userRepository.FindUser(ctx, userID)
 	if err != nil {
 		u.logger.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
+		u.logger.ErrorContext(ctx, "UserService.GetUser", slog.String("error", err.Error()))
 		return nil, err
 	}
 
