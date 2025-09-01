@@ -6,13 +6,7 @@ import (
 	"net/http"
 
 	"github.com/umefy/go-web-app-template/internal/core/config"
-	orderRepo "github.com/umefy/go-web-app-template/internal/domain/order/repo"
-	userRepo "github.com/umefy/go-web-app-template/internal/domain/user/repo"
-	"github.com/umefy/go-web-app-template/internal/infrastructure/database"
 	"github.com/umefy/go-web-app-template/internal/infrastructure/logger"
-	greeterSvc "github.com/umefy/go-web-app-template/internal/service/greeter"
-	orderSvc "github.com/umefy/go-web-app-template/internal/service/order"
-	userSvc "github.com/umefy/go-web-app-template/internal/service/user"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router"
 	"github.com/umefy/go-web-app-template/pkg/server/httpserver/router/middleware"
@@ -23,20 +17,12 @@ import (
 type ServerParams struct {
 	fx.In
 
-	Ctx             context.Context // context used for initial different infra
-	Arguments       config.Options
-	Config          config.Config
-	Logger          logger.Logger
-	UserService     userSvc.Service
-	UserRepository  userRepo.Repository
-	OrderService    orderSvc.Service
-	OrderRepository orderRepo.Repository
-	GreeterService  greeterSvc.Service
-	DbQuery         *database.Query
-	TracerProvider  trace.TracerProvider
-	ConfigOptions   config.Options
-	GraphqlRouter   http.Handler `name:"graphqlRouter"`
-	ApiV1Router     http.Handler `name:"apiV1Router"`
+	Ctx            context.Context // context used for initial different infra
+	Config         config.Config
+	Logger         logger.Logger
+	TracerProvider trace.TracerProvider
+	GraphqlRouter  http.Handler `name:"graphqlRouter"`
+	ApiV1Router    http.Handler `name:"apiV1Router"`
 }
 
 func NewServer(params ServerParams) (*httpserver.Server, error) {

@@ -16,15 +16,15 @@ print:
 
 .PHONY: docker_compose_up
 docker_compose_up:
-	docker-compose up -d
+	docker-compose up -d $(ARGS)
 
 .PHONY: docker_compose_down
 docker_compose_down:
 	docker-compose down
 
 .PHONY: dev
-dev:
-	@make docker_compose_up
+dev: 
+	@make docker_compose_up ARGS="--wait postgres"
 	@make migration_up
 	@trap 'make docker_compose_down' INT TERM; \
 	air; 
